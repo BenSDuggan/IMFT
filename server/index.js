@@ -9,7 +9,7 @@ const fs = require('fs');
 
 var {devFlightData} = require('./dev-flight-data.js');
 
-let flights = {};
+let flights = [];
 
 app.use(express.static('.'))
 /*
@@ -32,29 +32,35 @@ server.listen(4000, () => {
 
 
 let newFlightData = (nfd) => {
-    // Prepare flights
-    for(let f in flights) {
-      flights[f].updated = false;
-      flights[f].stl = flights[f].last;
+  // Prepare flights and make dict
+  let dict = {}
+  for(let i=0; i<flights.length; i++) {
+    flights[i].updated = false;
+    flights[i].stl = flights[i].last;
+
+    dict[flights[i]["icao24"]] = i;
+  }
+
+  // Update existing flights
+  const updateTime = nfd.time;
+  for(let i=0; i<nfd.states.length; i++) {
+    const icao24 = nfd.states[i].icao24;
+
+    if(!(icao24 in dict)) {
+      flights.push({});
+      dict[icao24] = flights.length - 1;
     }
 
-    // Update existing flights
-    const updateTime = nfd.time;
-    for(let i=0; i<nfd.states.length; i++) {
-      const icao24 = nfd.states[i].icao24;
+    flights[dict[icao24]].last = nfd.states[i];
+    flights[dict[icao24]].latest = nfd.states[i];
+    flights[dict[icao24]].lastUpdated = updateTime;
+    flights[dict[icao24]].updated = true;
+    flights[dict[icao24]].ica024 = icao24;
+  }
+  
+  io.emit('nfd', flights);
 
-      if(!(icao24 in flights))
-        flights[icao24] = {};
-
-      flights[icao24].last = nfd.states[i];
-      flights[icao24].latest = nfd.states[i];
-      flights[icao24].lastUpdated = updateTime;
-      flights[icao24].updated = true;
-    }
-    
-    io.emit('nfd', flights);
-
-    console.log("Flights length: " + Object.keys(flights).length)
+  console.log("Flights length: " + Object.keys(flights).length)
 }
 
 
