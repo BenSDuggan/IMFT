@@ -11,6 +11,15 @@
                margin:0px;
             }
 
+            table, td, th {
+               border: 1px solid;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
             #side-bar {
                 width: 500px;
                 height: 100%;
@@ -27,7 +36,7 @@
             display: none;
             }
 
-            .myDivIcon {
+            .mapIcon {
                 text-align: center;
                 /* Horizontally center the text (icon) */
                 line-height: 20px;
@@ -43,7 +52,39 @@
     <body>
         <div id="main">
             <div id="side-bar">
-                hi
+                <div id="all-flights">
+                    <table>
+                        <tr>
+                            <td>
+                                <div>
+                                    <span>Nick name</span>
+                                    <span>(N...)</span> 
+                                </div>
+                                <div>
+                                    <span>Heading</span>
+                                    <span>Altitude</span>
+                                </div>
+                                <div>
+                                    <span>H Speed</span>
+                                    <span>V Speed</span>
+                                </div>
+                                <div>
+                                    <span>Latitude</span>
+                                    <span>Longitude</span>
+                                    <span>Time</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span>Nick name</span>
+                                <span>(Nick name)</span> <br />
+                                <span>Heading</span>
+                                <span>Altitude</span> <br />
+                                <span>Latitude</span>
+                                <span>Longitude</span> <br/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
             <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>
@@ -58,6 +99,16 @@
             /***   Start: Helper functions   ***/
             let feetToMeters = (feet) => { return 0.3048 * feet }
             let metersToFeet = (meters) => { return 3.28 * meters }
+
+            let flightIcon = (heading) => {
+                // fa-helicopter
+                const airCraftIcon = L.divIcon({
+                    html: '<i class="fa-solid fa-plane fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading + 'deg; color:034f84;"></i>',
+                    iconSize: [20, 20],
+                    className: 'mapIcon'
+                });
+                return airCraftIcon
+            }
 
             /***   Start: Helper functions   ***/
 
@@ -80,7 +131,7 @@
             const hospitalIcon = L.divIcon({
                 html: '<i class="fa-solid fa-hospital fa-2x" style="color:f7786b;"></i>',
                 iconSize: [20, 20],
-                className: 'myDivIcon'
+                className: 'mapIcon'
             });
 
             /***   End: Map   ***/
@@ -106,15 +157,25 @@
                         mapFlights[f].setLatLng([flights[f].latest.latitude, flights[f].latest.longitude]); 
                     }
                     else {
-                        mapFlights[f] = L.marker([flights[f].latest.latitude, flights[f].latest.longitude]).addTo(map)
+                        mapFlights[f] = L.marker([flights[f].latest.latitude, flights[f].latest.longitude], 
+                        {icon: flightIcon(
+                            (flights[f]["last"]["true_track"] + 270) % 360)
+                        }).addTo(map)
                     }
                 }
+            }
+
+            let updateFlightSidebar = (flights) => {
+                let f = flights[Object.keys(flights)[0]];
+
+
             }
 
             let updatedFlights = (newFlights) => {
                 flights = newFlights;
 
                 reDrawAirCraft();
+                updateFlightSidebar(newFlights);
             }
 
             /***   Start: Sockets   ***/

@@ -1,0 +1,36 @@
+html, body {
+  margin:0px;
+}
+
+table, td, th {
+  border: 1px solid;
+}
+
+table {
+   width: 100%;
+   border-collapse: collapse;
+}
+
+
+#sidebar {
+   width: 500px;
+   height: 100vh;
+   display: inline-block;
+}
+
+#map {
+  width: calc(100% - 500px);
+  height: 100vh;
+  display: inline-block;
+}
+
+.leaflet-popup-close-button {
+display: none;
+}
+
+.mapIcon {
+  text-align: center;
+  /* Horizontally center the text (icon) */
+  line-height: 20px;
+  /* Vertically center the text (icon) */
+}

@@ -9,7 +9,7 @@ filename = "test-data.json"
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
 
 test_data = {
-    "name":"Wednesday September 7, 2022 OpenSkys Data 50 Flights",
+    "name":"Saturday September 10, 2022 OpenSkys Data 50 Flights",
     "bbox": bbox,
     "start-time": int(time.time()),
     "end-time": None,
@@ -37,8 +37,9 @@ try:
         print("%d / %d: %d" % (count, test_data["num-flights"], states.time))
         time.sleep(test_data["interval"])
     
-except:
+except Exception as e:
     print("Failed")
+    print(e)
 
 test_data["end-time"] = int(time.time())
 

@@ -7,6 +7,8 @@ const io = new Server(server);
 const spawn = require("child_process").spawn;
 const fs = require('fs');
 
+var {devFlightData} = require('./dev-flight-data.js');
+
 let flights = {};
 
 app.use(express.static('.'))
@@ -24,15 +26,12 @@ io.on('connection', (socket) => {
 });
 
 
-server.listen(3000, () => {
-  console.log('listening on *:3000');
+server.listen(4000, () => {
+  console.log('listening on *:4000');
 });
 
 
-let newData = () => {
-    let rawdata = fs.readFileSync('curr-flights.json');
-    let nfd = JSON.parse(rawdata);
-
+let newFlightData = (nfd) => {
     // Prepare flights
     for(let f in flights) {
       flights[f].updated = false;
@@ -58,10 +57,18 @@ let newData = () => {
     console.log("Flights length: " + Object.keys(flights).length)
 }
 
+
 /*
 setInterval(() => {
     const child = spawn('python',["get-data.py"]);
-    child.addListener('close', (e) => {newData()});
+    child.addListener('close', (e) => {
+      let rawdata = fs.readFileSync('curr-flights.json');
+      let nfd = JSON.parse(rawdata);
+
+      newFlightData(nfd)
+    });
     child.addListener('error', (e) => console.error(e));
     }, 10000)
 */
+
+devFlightData("test-data-50.json", newFlightData)
