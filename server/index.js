@@ -55,7 +55,7 @@ let newFlightData = (nfd) => {
     flights[dict[icao24]].latest = nfd.states[i];
     flights[dict[icao24]].lastUpdated = updateTime;
     flights[dict[icao24]].updated = true;
-    flights[dict[icao24]].ica024 = icao24;
+    flights[dict[icao24]].icao24 = icao24;
   }
   
   io.emit('nfd', flights);

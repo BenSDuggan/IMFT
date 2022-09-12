@@ -27,7 +27,7 @@ function App() {
 
   return(
     <div className='main-container'>
-      <Sidebar ></Sidebar>
+      <Sidebar flights={flights}></Sidebar>
       <Map hospitals={hospitals} flights={flights}></Map>
     </div>
   )
