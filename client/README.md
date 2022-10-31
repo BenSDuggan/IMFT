@@ -4,10 +4,9 @@
 
 ### Install
 
-1. `npm install react-leaflet leaflet`
-2. `npm add leaflet`
-3. `npm add react-leaflet`
-4. Add leaflet style to `index.html`
+Relies on `leaflet`, `react-leaflet`, `socket.io`, `uuid`
+
+1. `npm install --save typescript react react-dom`
 
 ### Notes
 
