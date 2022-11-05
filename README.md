@@ -1,4 +1,4 @@
-# Flight alert
+# Indiana Medical Flight Tracking (IMFT)
 
 Project to track medical helicopters in Indiana
 
@@ -19,7 +19,7 @@ print(s)
 
 ### Quota
 
-* Annonomous 100
+* Antonymous 100
 * Signed in 1000
 * Can get your data from your sensor unlimited
 
@@ -47,21 +47,7 @@ Used by server and client to store the locations of aircraft.
 ]
 ```
 
-### Hospitals data structure
 
-```
-{
-    <name>: {
-        "display-name": "", // Name to use when addressing the hospital
-        "lat": "", // Hospital latitude
-        "long": "", // Hospital longitude
-        "zone1": { // Closest zone with highest confidence of arrival
-            "radius": 0, // Radius of zone from lat/long
-            "ceiling": 0, // Height limit for zone
-        },
-    }
-}
-```
 
 ## What is a flight
 

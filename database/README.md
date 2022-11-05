@@ -24,5 +24,18 @@ Server install instructions can be found [here](https://www.mongodb.com/docs/man
 
 ## Create DB structure using mongosh
 
-### Hospital
+### Hospitals data structure
+
+```
+[
+    "id": "", // ID name of the hospital *unique*
+    "display-name": "", // Name to use when addressing the hospital
+    "lat": "", // Hospital latitude
+    "long": "", // Hospital longitude
+    "zone1": { // Closest zone with highest confidence of arrival
+        "radius": 0, // Radius of zone from lat/long
+        "ceiling": 0, // Height limit for zone
+    }
+]
+```
 

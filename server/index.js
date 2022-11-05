@@ -15,6 +15,7 @@ database.connect().then((result1) => {
   return database.get_hospitals()
 }).then((result2) => {
   console.log("Got Hospitals")
+  console.log(result2)
 })
 
 
