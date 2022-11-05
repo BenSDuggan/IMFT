@@ -3,8 +3,6 @@ const fs = require('fs');
 
 var {devFlightData} = require('./test-data/dev-flight-data.js');
 var {newFlightData} = require('./src/flight-tracker.js');
-
-//var {faa} = require('./src/aircraft-info.js');
 var {database} = require('./src/database.js')
 var { } = require('./src/sockets.js')
 var {express, app, http, server, io} = require('./src/web.js')
