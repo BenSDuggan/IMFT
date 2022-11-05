@@ -6,24 +6,29 @@ import Map from './components/Map';
 
 import './App.css';
 
-
-const socket = io();
-
 function App() {
 
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
 
   useEffect(() => {
-    fetch("hospitals.json")
-      .then((response) => response.json())
-      .then((data) => setHospitals(data))
-      .catch((error) => console.error(error));
-  
-      socket.on('nfd', (data) => {
-        setFlights(data);
-      });
-  });
+    const socket = io();
+
+    // Getters
+    socket.emit("get_hospitals", {});
+    
+
+    // Responders
+    socket.on('hospitals', (data) => {
+      setHospitals(data)
+    })
+      
+    socket.on('nfd', (data) => {
+      setFlights(data);
+    });
+
+    return () => socket.disconnect();
+  }, []);
 
   return(
     <div className='main-container'>
