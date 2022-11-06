@@ -2,35 +2,30 @@
  * 
  */
 
-const fs = require('fs');
-const { request } = require('express');
 var {database} = require('./database.js')
 var {express, app, http, server, io} = require('./web.js')
 
+// Constants
+const los_time = 5; // How many minutes before a signal is considered lost
 
 let flights = []; // Aircraft getting tracked
 let icao24_not_helicopters = [];
 
-// Check to see if any aircraft have landed
-let onGround = (flights) => {
+// Given a flight, check if it's `airborn`, `grounded`, or `los`
+let flight_status = (flight) => {
+  // Check for LOS
+  if(Math.round(new Date().getTime() / 1000) - flight.lastUpdated > los_time) return "los"
+
+  // Check if flight is in the air
+
   
-  // Check hospitals
-  for(let f in flights) {
-    f.airGroundJustChanged = false;
-  }
+}
 
-  // Check other locations
-  for(let f in flights) {
-    f.airGroundJustChanged = false;
+// Update the tracking information
+let update_tracking = (flights) => {
+  // Determine if aircraft is in the air or on the ground
 
-    if(f.last && f.last.on_ground) {
-      f.airGroundJustChanged = true;
-      f.onGround = true;
-      console.log("On ground: " + f.last.callsign)
-    }
-  }
-
-  return flights;
+  // 
 }
 
 // Process new flight data
@@ -88,7 +83,7 @@ let newFlightData = async (nfd) => {
     flights[dict[icao24]].icao24 = icao24;
   }
 
-  //flights = onGround(flights);
+  //flights = update_tracking(flights);
   
   io.emit('nfd', flights);
 

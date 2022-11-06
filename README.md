@@ -46,55 +46,25 @@ Used by server and client to store the locations of aircraft.
 ]
 ```
 
-
-
 ## What is a flight
 
 ### Challenges
 
-* People can come into the airspace (from outside Indiana) and already be in flight
+* Aircraft can come into the airspace (from outside Indiana) and already be in flight
 * Not all planes will be received during every update interval
 * Assume speed and altitude data is correct
 
-### Criteria
+### Flight Tracking Criteria
 
-* Take off:
-    * Case 1: Known status was on ground
-    * Previous known altitude < 50 ft
-    * If no previous known altitude then altitude 
-
-    * Case 1: Was on ground, now not
-        * Previously listed as `on ground`
-        * Now not listed as `on-ground`
-    * Case 2: Flight data shows on ground, but looks like its not now
-        * Wasn't in air for a while
-        * Altitude > 50 ft
-    * Case 3: 
-        * Previously in air
-        * Lost contact with aircraft
-        * Altitude < 250 ft now
-* In air:
-    * Speed > 10 m/s
-    * Altitude > 750 ft
-* Landed:
-    * Case 1: Confirmed on ground
-        * Previously in air
-        * Now listed as `on-ground`
-    * Case 2: Flight data shows on ground
-        * Previously in air
-        * Speed = 0 m/s
-        * Altitude < 250 ft
-    * Case 3: Lost contact, but likely on ground
-        * Previously in air
-        * Lost contact with aircraft
-        * Altitude < 250 ft now
-    
-## Notes
-
-* Units are in ft unless specified
+* LOS (loss of signal): No updated data in 5 minutes
+* Airborn (easier to tell than on ground) if any of the criteria are met
+    * Vertical speed > 1 m/s
+    * Horizontal speed > 1 m/s
+    * Altitude > 250
+    * 
+* Grounded:
+    * `on-ground` is true
+    * Criteria to be airborn are not met
 
 
-## Database
-
-* Flight information: <https://registry.faa.gov/database/ReleasableAircraft.zip>
 
