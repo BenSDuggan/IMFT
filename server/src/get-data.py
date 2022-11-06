@@ -9,7 +9,6 @@ filename = "curr-flights.json"
 
 api = OpenSkyApi()
 states = api.get_states(bbox=bbox)
-print(states)
 
 print("%r: N=%r" % (states.time, len(states.states)))
 flights = {"time":states.time, "states":[]}

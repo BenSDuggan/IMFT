@@ -15,6 +15,8 @@ let Database = class {
         // Create a new MongoClient
         this.client = new MongoClient(uri);
         this.connection = null;
+
+        this.hospitals = [];
     }
 
     // Connect to the db
@@ -33,17 +35,38 @@ let Database = class {
     * Returns: Array with JSON elements containing the hospital system
     */
     async get_hospitals() {
-        let hospitals = [];
+        this.hospitals = [];
 
         // Insert hospitals
         const cursor = await this.client.db(databaseName).collection("hospitals").find();
 
         await cursor.forEach((h) => {
             delete h["_id"];
-            hospitals.push(h);
+            this.hospitals.push(h);
         });
 
-        return hospitals;
+        return this.hospitals;
+    }
+
+    /* Get all the hospitals in the system
+    *
+    * term (JSON): What values should be used to search for. (eg {"N-NUMBER":"N191LL"} or {"MODE S CODE HEX":"A16CE7"})
+    *
+    * Returns: JSON object with the first matched term
+    * 
+    * Example: `database.get_faa_registration({"MODE S CODE HEX":"A16CE7"}).then((results) => console.log(results))`
+    */
+    async get_faa_registration(term) {
+        let answer = null;
+
+        const cursor = await this.client.db(databaseName).collection("faa").find(term);
+        //console.log(cursor)
+        await cursor.forEach((r) => {
+            if(answer != null) console.log("Multiple entries matched")
+            else answer = r;
+        });
+
+        return answer;
     }
 }
 

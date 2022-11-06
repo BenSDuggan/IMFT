@@ -24,6 +24,7 @@ function App() {
     })
       
     socket.on('nfd', (data) => {
+      console.log(data)
       setFlights(data);
     });
 

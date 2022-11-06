@@ -95,6 +95,11 @@ let openFAAHelicopter = () => {
           for(k in Object.keys(row)) {
             key = Object.keys(row)[k]
             l = key.replace(/[\u{0080}-\u{FFFF}]/gu, "");
+
+            if(l == "") {
+              next
+            }
+            
             r[l] = row[key];
           }
 

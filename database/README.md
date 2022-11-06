@@ -45,7 +45,7 @@ Where the hospitals are located and bounding boxes for them.
 
 ### FAA Helicopter Registration
 
-FAA aircraft registration, but only rotor craft. Taken from <https://registry.faa.gov/database/ReleasableAircraft.zip>.
+FAA aircraft registration, but only rotor craft. Taken from <https://registry.faa.gov/database/ReleasableAircraft.zip> and <https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download>.
 
 ```
 [
