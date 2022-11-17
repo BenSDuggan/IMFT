@@ -1,0 +1,29 @@
+[
+    {
+      "id": "methodist",
+      "display_name": "IUH Methodist",
+      "latitude": 39.78941,
+      "longitude": -86.16233,
+      "zones":[
+        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 }
+      ]
+    },
+    {
+      "id": "eskenazi",
+      "display_name": "Eskenazi",
+      "latitude": 39.77785,
+      "longitude": -86.18479,
+      "zones":[
+        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 }
+      ]
+    },
+    {
+      "id": "riley",
+      "display_name": "IUH Riley",
+      "latitude": 39.77792,
+      "longitude": -86.18018,
+      "zones":[
+        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 }
+      ]
+    }
+  ]

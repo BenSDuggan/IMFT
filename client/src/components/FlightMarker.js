@@ -6,11 +6,15 @@ function FlightsMarker(props) {
     const flightIcon = (heading) => {
         // fa-helicopter
         const airCraftIcon = new L.divIcon({
-            html: '<i class="fa-solid fa-plane fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading + 'deg; color:#034f84;"></i>',
+            html: '<i class="fa-solid fa-helicopter-symbol fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading + 'deg; color:#034f84;"></i>',
             iconSize: [20, 20],
             className: 'mapIcon'
         });
-        return airCraftIcon
+        const airCraftIcon2 = new L.icon({
+            iconUrl: 'helicopter.svg',
+            iconSize: [35],
+        });
+        return airCraftIcon2
     }
 
     return(

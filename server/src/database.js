@@ -72,5 +72,11 @@ let Database = class {
 
 const database = new Database()
 
+database.connect().then((result) => {
+    console.log("Connected to the database")
+    return database.get_hospitals()
+  }).then((result) => {
+    console.log("Got Hospitals: " + result.length)
+  })
 
 module.exports = { database };

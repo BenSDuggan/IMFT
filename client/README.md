@@ -11,3 +11,8 @@ Relies on `leaflet`, `react-leaflet`, `socket.io`, `uuid`
 ### Notes
 
 * Must include style, but can't include script in `index.html`
+
+## Icons
+
+* Font Awesome
+* [SVGRepo](https://www.svgrepo.com/svg/150477/helicopter-bottom-view-silhouette)

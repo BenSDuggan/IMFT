@@ -7,13 +7,6 @@ var {database} = require('./src/database.js')
 var { } = require('./src/sockets.js')
 
 
-database.connect().then((result1) => {
-  console.log("Connected to the database")
-  return database.get_hospitals()
-}).then((result) => {
-  console.log("Got Hospitals: " + result.length)
-})
-
 /*
 setInterval(() => {
   const child = spawn('python',["src/get-data.py"]);
@@ -27,5 +20,5 @@ setInterval(() => {
 }, 10 * 1000)
 */
 
-//devFlightData("test-data/test-data-50.json", newFlightData);
+devFlightData("test-data/test-data-200.json", newFlightData);
 

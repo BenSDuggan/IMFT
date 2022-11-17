@@ -17,6 +17,10 @@ s = api.get_states()
 print(s)
 ```
 
+### Documentation
+
+<https://openskynetwork.github.io/opensky-api/rest.html>
+
 ### Quota
 
 * Antonymous 100
@@ -38,10 +42,12 @@ Used by server and client to store the locations of aircraft.
         "stl":{}, // Data from the second to last interval (copied from last when the next update interval occurs)
         "latest":{}, // Latest data received, not necessarily up to date
         "lastUpdated": -1, // Time that the last flight data was received
-        "onGround": false, // Is aircraft on the ground
-        "inAir": false, // Is the aircraft in the air
-        "airGroundJustChanged": false, // Did air or ground just change?
-        "labeledLocation": null // Name of where the aircraft actually is
+        "tracking": { // Tracking information
+            "flight_status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+            "flight_status_updated_time": -1 // When the flight status was last updated
+            "flight_status_counter": -1 // How many intervals the flight status has been the same
+            "flight_status_change_counter": -1, // How many times the flight status has flipped
+        }
     }
 ]
 ```

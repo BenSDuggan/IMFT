@@ -5,7 +5,7 @@ from opensky_api import OpenSkyApi
 
 config_file = "~/.config/opensky.json"
 filename = "test-data.json"
-num_flights = 200
+num_flights = 1000
 
 username, password = None, None
 # Load config
@@ -17,7 +17,7 @@ with open(os.path.expanduser(config_file), "r") as file:
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
 
 test_data = {
-    "name":"Sunday September 18, 2022 OpenSkys Data 200 Flights",
+    "name":"Sunday November 15, 2022 OpenSkys Data 1000 Flights",
     "bbox": bbox,
     "start-time": int(time.time()),
     "end-time": None,
@@ -34,7 +34,7 @@ try:
     while count < num_flights:
         states = api.get_states(bbox=bbox)
 
-        flights = {"time":states.time, "states":[]}
+        flights = {"time":states.time, "states":[]} 
 
         for s in states.states:
             flights["states"].append(s.__dict__)
