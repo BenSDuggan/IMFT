@@ -10,6 +10,7 @@ function App() {
 
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
+  const [metadata, setMetadata] = useState({});
 
   useEffect(() => {
     const socket = io();
@@ -24,8 +25,12 @@ function App() {
     })
       
     socket.on('nfd', (data) => {
+      setFlights(data.flights);
+    });
+
+    socket.on('hf_metadata', (data) => {
+      setMetadata(data);
       console.log(data)
-      setFlights(data);
     });
 
     return () => socket.disconnect();
@@ -33,7 +38,7 @@ function App() {
 
   return(
     <div className='main-container'>
-      <Sidebar flights={flights}></Sidebar>
+      <Sidebar flights={flights} metadata={metadata}></Sidebar>
       <Map hospitals={hospitals} flights={flights}></Map>
     </div>
   )

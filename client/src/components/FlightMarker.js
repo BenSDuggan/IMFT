@@ -14,7 +14,7 @@ function FlightsMarker(props) {
             iconUrl: 'helicopter.svg',
             iconSize: [35],
         });
-        return airCraftIcon2
+        return airCraftIcon
     }
 
     return(

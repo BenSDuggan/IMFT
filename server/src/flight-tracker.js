@@ -10,8 +10,9 @@ const los_time = 5; // How many minutes before a signal is considered lost
 const hospital_radius = 1000; // How many feet a flight has to be to be "arrived"
 const hospital_ceiling = 500; // How many feet a flight has to be to be "arrived"
 
-let flights = []; // Aircraft getting tracked
-let icao24_not_helicopters = [];
+let flights = {}; // Aircraft getting tracked
+let icao24_not_helicopters = {};
+let count = 1;
 
 const flight_structure = {
   "faa":{},
@@ -101,10 +102,8 @@ let update_tracking = (flights) => {
 // Update the flights dict
 let update_flights = async(nfd) => {
   // Prepare flights and make dict
-  let dict = {} // Dictionary with ICAO24:index
-  for(let i=0; i<flights.length; i++) {
-    flights[i].stl = flights[i].last;
-    dict[flights[i]["icao24"]] = i;
+  for(let f in flights) {
+    flights[f].stl = flights[f].last;
   }
 
   // Get new flights whose registration we need to retrieve
@@ -113,7 +112,7 @@ let update_flights = async(nfd) => {
   let registration_results = [];
   for(let i=0; i<nfd.states.length; i++) {
     const icao24 = nfd.states[i].icao24;
-    if(!(icao24 in dict) && !(icao24 in icao24_not_helicopters)) {
+    if(!(icao24 in flights) && !(icao24 in icao24_not_helicopters)) {
       let request = {"MODE S CODE HEX":icao24.toUpperCase()};
       registration_requests[icao24] = registration_promise.length;
       registration_promise.push(database.get_faa_registration(request))
@@ -139,20 +138,19 @@ let update_flights = async(nfd) => {
     const icao24 = nfd.states[i].icao24;
 
     // See if aircraft has been tracked recently
-    if(!(icao24 in dict)) {
+    if(!(icao24 in flights)) {
       // Check if aircraft is not a helicopter, skip
       if(registration_results[registration_requests[icao24]] == null) continue
 
       // Add new flight and make sure it has the right structure
-      dict[icao24] = flights.length;
-      flights.push(flight_structure);
-      flights[dict[icao24]].faa = registration_results[registration_requests[icao24]];
+      flights[icao24] = {...flight_structure};
+      flights[icao24].faa = registration_results[registration_requests[icao24]];
     }
 
-    flights[dict[icao24]].last = nfd.states[i];
-    flights[dict[icao24]].latest = nfd.states[i];
-    flights[dict[icao24]].lastUpdated = updateTime;
-    flights[dict[icao24]].icao24 = icao24;
+    flights[icao24].last = nfd.states[i];
+    flights[icao24].latest = nfd.states[i];
+    flights[icao24].lastUpdated = updateTime;
+    flights[icao24].icao24 = icao24;
   }
 }
 
@@ -161,12 +159,20 @@ let update_flights = async(nfd) => {
 let newFlightData = async (nfd) => {
   await update_flights(nfd);
 
-  io.emit('nfd', flights);
+  let sendit = []
+  for(let f in flights) {
+    sendit.push(flights[f])
+  }
 
-  update_tracking(flights);
+  let metadata = {"time":nfd.time, "count":count++}
+  io.emit('nfd', {"flights":sendit, "metadata": metadata});
+
+  //update_tracking(flights);
 
   console.log("# of flights tracking: " + Object.keys(flights).length)
 }
+
+
 
 
 module.exports = { newFlightData };
