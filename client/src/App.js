@@ -6,39 +6,50 @@ import Map from './components/Map';
 
 import './App.css';
 
+
+
 function App() {
 
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
   const [metadata, setMetadata] = useState({});
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socket = io();
+    const s = io();
+    setSocket(s);
 
     // Getters
-    socket.emit("get_hospitals", {});
-    
+    s.emit("get_hospitals", {});
 
     // Responders
-    socket.on('hospitals', (data) => {
+    s.on('hospitals', (data) => {
+      console.log(data)
       setHospitals(data)
     })
       
-    socket.on('nfd', (data) => {
+    s.on('nfd', (data) => {
       setFlights(data.flights);
     });
 
-    socket.on('hf_metadata', (data) => {
+    s.on('hf_metadata', (data) => {
       setMetadata(data);
       console.log(data)
     });
 
-    return () => socket.disconnect();
+    return () => s.disconnect();
   }, []);
+
+  let handelClick = (d) => {
+    console.log(d)
+    socket.emit('hf_action', d)
+    socket.emit("get_hospitals", {});
+  }
+  
 
   return(
     <div className='main-container'>
-      <Sidebar flights={flights} metadata={metadata}></Sidebar>
+      <Sidebar flights={flights} metadata={metadata} handelClick={handelClick}></Sidebar>
       <Map hospitals={hospitals} flights={flights}></Map>
     </div>
   )

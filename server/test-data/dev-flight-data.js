@@ -75,9 +75,16 @@ let HistoricFlights = class {
 
     start() {
         this.interval_handler = setInterval(() => {
-            console.log(this.current_frame)
-            this.flight_processor(this.data[Object.keys(this.data)[this.current_frame++]])
-            io.emit('hf_metadata', this.get_metadata());
+            if(this.current_frame >= this.max_frame) {
+                console.log("Out of flight data")
+                this.stop();
+                return 
+            }
+
+            this.flight_processor(this.data[Object.keys(this.data)[this.current_frame]])
+            
+            this.emit_metadata();
+            this.current_frame += 1;
         }, this.interval * 1000 / this.speed);
     }
 
@@ -103,6 +110,10 @@ let HistoricFlights = class {
 
     get_metadata() {
         return {"current_frame":this.current_frame, "max_frame":this.max_frame, "speed":this.speed, "interval":this.interval, "name":this.name, "time":this.get_time()}
+    }
+
+    emit_metadata() {
+        io.emit('hf_metadata', this.get_metadata());
     }
 }
 
