@@ -25,6 +25,6 @@ setInterval(() => {
 
 historic_flights.load("test-data/test-data-999.json");
 setTimeout(() => {
-  historic_flights.interval = 0.5
+  historic_flights.speed = 2
   historic_flights.start()
 }, 1000)

@@ -40,6 +40,7 @@ let devFlightData = (file, dataProcessor, speed_multiplier) => {
 // Simulate flights using real data
 let HistoricFlights = class {
     constructor(flight_processor) {
+        this.active = false;
         this.current_frame = -1;
         this.max_frame = -1;
 
@@ -51,6 +52,7 @@ let HistoricFlights = class {
 
     // Load data
     load(file_name) {
+        this.active = true;
         fs.readFile(file_name, 'utf8', (err, rawdata) => {
             if (err) {
               console.error(err);
@@ -107,11 +109,14 @@ let HistoricFlights = class {
     }
 
     get_time() {
-        return this.data[Object.keys(this.data)[this.current_frame]].time
+        if(this.active)
+            return this.data[Object.keys(this.data)[this.current_frame]].time
+        else
+            return null
     }
 
     get_metadata() {
-        return {"current_frame":this.current_frame, "max_frame":this.max_frame, "speed":this.speed, "interval":this.interval, "name":this.name, "time":this.get_time()}
+        return {"current_frame":this.current_frame, "max_frame":this.max_frame, "speed":this.speed, "interval":this.interval, "name":this.name, "time":this.get_time(), "active":this.active}
     }
 
     emit_metadata() {

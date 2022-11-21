@@ -14,12 +14,23 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('get_hf_metadata', (msg) => {
+        historic_flights.emit_metadata()
+    });
+
     socket.on('hf_action', (msg) => {
-        if(msg === "start") {
+        console.log(msg)
+        if(msg.action === "start") {
             historic_flights.start();
         }
-        else if(msg === "stop") {
+        else if(msg.action === "stop") {
             historic_flights.stop();
+        }
+        else if(msg.action === "speed") {
+            historic_flights.set_speed(Number(msg.value));
+        }
+        else if(msg.action === "frame") {
+            historic_flights.set_frame(Number(msg.value));
         }
         else {
             console.error("Received invalid message");
