@@ -4,6 +4,7 @@ const fs = require('fs');
 var {devFlightData, historic_flights} = require('./test-data/dev-flight-data.js');
 var {newFlightData} = require('./src/flight-tracker.js');
 var {database} = require('./src/database.js')
+var { } = require('./src/sockets.js')
 
 
 /*
@@ -20,6 +21,7 @@ setInterval(() => {
 */
 
 //devFlightData("test-data/test-data-999.json", newFlightData, 60);
+
 
 historic_flights.load("test-data/test-data-999.json");
 setTimeout(() => {

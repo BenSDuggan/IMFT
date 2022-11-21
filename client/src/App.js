@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from "react";
-import io from 'socket.io-client';
+import React, { useState, useEffect, useContext } from "react";
 
 import Sidebar from './components/Sidebar';
 import Map from './components/Map';
+//import SocketContext from "./context/socket";
+
+import io from 'socket.io-client';
 
 import './App.css';
-
-
 
 function App() {
 
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
-  const [metadata, setMetadata] = useState({});
+  const [metadata, setMetadata] = useState({});  
   const [socket, setSocket] = useState(null);
 
+  //const s = useContext(SocketContext);
+  
+  
   useEffect(() => {
     const s = io();
     setSocket(s);
+
+    s.on("connect", () => {
+      console.log("connected")
+    });
 
     // Getters
     s.emit("get_hospitals", {});
@@ -34,25 +41,20 @@ function App() {
 
     s.on('hf_metadata', (data) => {
       setMetadata(data);
-      console.log(data)
     });
 
     return () => s.disconnect();
-  }, []);
+  }, [setSocket]);
 
-  let handelClick = (d) => {
-    console.log(d)
-    socket.emit('hf_action', d)
-    socket.emit("get_hospitals", {});
-  }
-  
-
-  return(
-    <div className='main-container'>
-      <Sidebar flights={flights} metadata={metadata} handelClick={handelClick}></Sidebar>
-      <Map hospitals={hospitals} flights={flights}></Map>
-    </div>
+  return( 
+    
+      <div className='main-container'>
+        <Sidebar flights={flights} metadata={metadata} socket={socket} ></Sidebar>
+        <Map hospitals={hospitals} flights={flights}></Map>
+      </div>
+    
   )
 }
 
 export default App;
+//<SocketContext.Provider value={socket} >

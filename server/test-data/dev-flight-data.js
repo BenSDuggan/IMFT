@@ -74,6 +74,7 @@ let HistoricFlights = class {
     }
 
     start() {
+        console.log("HF: Start");
         this.interval_handler = setInterval(() => {
             if(this.current_frame >= this.max_frame) {
                 console.log("Out of flight data")
@@ -89,6 +90,7 @@ let HistoricFlights = class {
     }
 
     stop() {
+        console.log("HF: Stop");
         clearInterval(this.interval_handler);
     }
 
