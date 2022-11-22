@@ -38,6 +38,7 @@ function App() {
       
     s.on('nfd', (data) => {
       setFlights(data.flights);
+      console.log(data)
     });
 
     s.on('hf_metadata', (data) => {

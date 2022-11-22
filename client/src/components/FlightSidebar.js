@@ -5,6 +5,7 @@ function FlightSidebar(props) {
         const d = new Date(time);
         return d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
     }
+
     let meter_to_feet = (meter) => meter * 3.28084;
     let feet_to_meter = (feet) => feet * 0.3048;
  
@@ -18,12 +19,16 @@ function FlightSidebar(props) {
                             <div>
                                 <span>{f.latest.icao24} </span>
                                 <span>({f.latest.callsign})</span> 
+                                <i className="fa-solid fa-tower-broadcast"></i>
+                                <span> {f.latest.squawk} </span>
+                            </div>
+                            <div>
+                                <span>{f.faa.NAME}</span>
                             </div>
                             <div>
                                 <i className="fa-regular fa-clock"></i>
-                                <span>{timeString(f.latest.time_position)}</span>
-                                <i className="fa-solid fa-tower-broadcast"></i>
-                                <span> {f.latest.squawk} </span>
+                                <span>{timeString(f.latest.time_position)} </span>
+                                <span>Tics: {f.tics} </span>
                             </div>
                             <div>
                                 <i className="fa-regular fa-compass"></i>
@@ -45,6 +50,16 @@ function FlightSidebar(props) {
                                 <i className="fa-solid fa-location-crosshairs"></i>
                                 <span>{f.latest.latitude}, </span>
                                 <span>{f.latest.longitude}</span>
+                            </div>
+                            <div>
+                                <span>{f.tracking.current.status} </span>
+                                <i className="fa-solid fa-hospital"></i>
+                                <span>{f.tracking.current.location != null ? f.tracking.current.location.hospital.display_name : ""}</span>
+                            </div>
+                            <div>
+                                <span>Dist: {f.tracking.current.location != null ? Math.round(f.tracking.current.location.distance) : ""} </span>
+                                <span>Zone: {f.tracking.current.location != null ? f.tracking.current.location.zone : ""} </span>
+                                <span>Tics: {f.tracking.current.location != null ? f.tracking.current.tics : ""}</span>
                             </div>
                         </td>
                     </tr>

@@ -21,6 +21,7 @@ Server install instructions can be found [here](https://www.mongodb.com/docs/man
     * Create/enter database: `use <name>`
     * Implicitly write/create collection: `db.user.insert({name: "Ada Lovelace", age: 205})`
     * Explicitly create collection: `` <https://www.mongodb.com/docs/manual/reference/method/db.createCollection/>
+    * Drop collection: `db.<collection to drop>.drop()`. Will return `true` if deleted
 
 ## Create DB structure using mongosh
 

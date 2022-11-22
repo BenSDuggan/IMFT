@@ -7,7 +7,7 @@ var {database} = require('./src/database.js')
 var { } = require('./src/sockets.js')
 
 
-/*
+
 setInterval(() => {
   const child = spawn('python',["src/get-data.py"]);
   child.addListener('close', (e) => {
@@ -18,13 +18,12 @@ setInterval(() => {
   });
   child.addListener('error', (e) => console.error(e));
 }, 10 * 1000)
-*/
-
-//devFlightData("test-data/test-data-999.json", newFlightData, 60);
 
 
+/*
 historic_flights.load("test-data/test-data-999.json");
 setTimeout(() => {
   historic_flights.speed = 2
   historic_flights.start()
 }, 1000)
+*/

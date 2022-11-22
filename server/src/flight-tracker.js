@@ -1,31 +1,43 @@
 /* Given flight data, do the flight tracking
  * 
+ * Data path: Get new data (`newFlightData`) -> update flight position tracking (`newFlightData`) -> update tracking information (`update_tracking`) ->  -> send data
  */
 
 var {database} = require('./database.js')
 var {express, app, http, server, io} = require('./web.js')
 
 // Constants
-const los_time = 5; // How many minutes before a signal is considered lost
-const hospital_radius = 1000; // How many feet a flight has to be to be "arrived"
-const hospital_ceiling = 500; // How many feet a flight has to be to be "arrived"
+const los_time = 2 * 60; // How many seconds before a signal is considered lost
+const los_tic = 5; // How many tics before a signal is considered lost
+const in_sea_level = 750; // Indiana Sea Level (assume constant since this state is flat)
 
 let flights = {}; // Aircraft getting tracked
 let icao24_not_helicopters = {};
 let count = 1;
 
 const flight_structure = {
-  "faa":{},
-  "last":{},
-  "latest":{},
-  "lastUpdated":-1,
-  "icao24":-1,
-  "tracking":{
-    "flight_status":null,
-    "flight_status_updated_time":null,
-    "flight_status_counter":0,
-    "flight_status_change_counter":0
-  }
+  "icao24": "", // The icao24
+  "faa":{}, // FAA registration data
+  "last":{}, // Data from the last update interval
+  "stl":{}, // Data from the second to last interval (copied from last when the next update interval occurs)
+  "latest":{}, // Latest data received, not necessarily up to date
+  "time": -1, // Time that the last flight data was received
+  "tics": 0, // How many tics has it been without data
+  "tracking": { // Tracking information
+    "current": { // The current tracking
+        "status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+        "time": -1, // When the flight status was last updated
+        "tics": 0, // How many intervals the flight status has been the same
+        "counter": 0, // How many times the flight status has flipped
+        "location": null // Location
+    },
+    "next": { // Tracking next status change
+        "status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+        "time": -1, // When the flight status was last updated
+        "tics": 0, // How many intervals the flight status has been the same
+        "counter": 0, // How many times the next status has flipped
+    }
+}
 }
 
 
@@ -49,14 +61,15 @@ let haversine = (lat1, lon1, lat2, lon2) => {
 
 
 // Given a flight, check if it's `airborn`, `grounded`, or `los`
-let flight_status = (flight) => {
+let flight_status = (flight, time) => {
   // Check for LOS
-  //if(Math.round(new Date().getTime() / 1000) - flight.lastUpdated > los_time) return "los"
+  if(flight.tics >= los_tic || time - flight.time > los_time)
+    return "los"
 
   // Check if flight is in the air
   if(flight.latest.vertical_rate > 1 || 
      flight.latest.velocity > 1 || 
-     flight.latest.baro_altitude > feet_to_meter(250+700))
+     flight.latest.baro_altitude > feet_to_meter(250+in_sea_level))
       return "airborn" // Assume in the air
   
   return "grounded" // Assume on the ground
@@ -64,36 +77,63 @@ let flight_status = (flight) => {
 
 // Given a flight, check to see if a flight is at a hospital and return the hospital id or null
 let at_hospital = (flight) => {
-  for(let h=0; h<database.hospitals.length; h++) {
-      //if(flight.latest.baro_altitude+700 < database.hospitals[h].zones[z].ceiling) 
-      let dist = haversine(flight.latest.latitude, flight.latest.longitude, database.hospitals[h].latitude, database.hospitals[h].longitude);
-      if(dist < hospital_radius) {
+  let results = [];
 
+  for(let h=0; h<database.hospitals.length; h++) {
+    let hospital = database.hospitals[h];
+
+    let dist = haversine(flight.latest.latitude, flight.latest.longitude, hospital.latitude, hospital.longitude);
+
+    for(let z=0; z<hospital.zones.length; z++) {
+      if(dist < hospital.zones[z].radius) { // Ceiling not implemented
+        results.push({"id":hospital.id, "zone":hospital.zones[z].id, "distance":dist, "hospital":hospital});
+        break
       }
+    }
   }
+
+  return results.sort((a, b) => {return a.distance - b.distance})
 }
 
 // Update the tracking information
-let update_tracking = (flights) => {
-  let t = Math.round(new Date().getTime() / 1000);
-
+let update_tracking = (flights, time) => {
+  console.log("1")
   // Determine if aircraft is in the air or on the ground
-  for(let i=0; i<flights.length; i++) {
-    let new_status = flight_status(flights[i]);
-    at_hospital(flights[i])
+  for(let f in flights) {
+    console.log("2: " + f);
+    // Check strict flight status rules
+    let new_status = flight_status(flights[f], time);
 
-    if(flights[i].tracking["flight_status"] != new_status) {
-      // Flight status has changed
-      flights[i].tracking["flight_status_change_counter"]++
-      flights[i].tracking["flight_status_counter"] = 0;
+    // Check if flight is at a hospital
+    let hospital_results = at_hospital(flights[f]);
+    console.log(hospital_results)
+
+    if(new_status == "airborn" && hospital_results.length > 0) {
+      new_status = "grounded";
+    }
+    console.log(new_status);
+
+    // Update tracking information
+    if(flights[f].tracking.current.status == new_status) {
+      flights[f].tracking.current.time = time;
+      flights[f].tracking.current.tics++;
     }
     else {
-      // Flight status is the same
-      flights[i].tracking["flight_status_counter"]++
+      // Flight status changed
+      flights[f].tracking.current.status = new_status;
+      flights[f].tracking.current.time = time;
+      flights[f].tracking.current.tics++;
+      flights[f].tracking.current.counter++;
+      
+      if(hospital_results.length > 0) {
+        flights[f].tracking.current.location = hospital_results[0]
+      }
+      else {
+        flights[f].tracking.current.location = null;
+      }
     }
 
-    flights[i].tracking["flight_status"] = new_status;
-    flights[i].tracking["flight_status_updated_time"] = t;
+    // TODO: New status -> notification / save data
   }
 
   return flights
@@ -104,6 +144,7 @@ let update_flights = async(nfd) => {
   // Prepare flights and make dict
   for(let f in flights) {
     flights[f].stl = flights[f].last;
+    flights[f].tics++;
   }
 
   // Get new flights whose registration we need to retrieve
@@ -133,7 +174,6 @@ let update_flights = async(nfd) => {
   })
   
   // Update flight information
-  const updateTime = nfd.time;
   for(let i=0; i<nfd.states.length; i++) {
     const icao24 = nfd.states[i].icao24;
 
@@ -143,14 +183,15 @@ let update_flights = async(nfd) => {
       if(registration_results[registration_requests[icao24]] == null) continue
 
       // Add new flight and make sure it has the right structure
-      flights[icao24] = {...flight_structure};
+      flights[icao24] = JSON.parse(JSON.stringify(flight_structure));
+      flights[icao24].icao24 = icao24;
       flights[icao24].faa = registration_results[registration_requests[icao24]];
     }
 
     flights[icao24].last = nfd.states[i];
     flights[icao24].latest = nfd.states[i];
-    flights[icao24].lastUpdated = updateTime;
-    flights[icao24].icao24 = icao24;
+    flights[icao24].time = nfd.time;
+    flights[icao24].tics = 0;
   }
 }
 
@@ -165,9 +206,9 @@ let newFlightData = async (nfd) => {
   }
 
   let metadata = {"time":nfd.time, "count":count++}
-  io.emit('nfd', {"flights":sendit, "metadata": metadata});
+  io.emit('nfd', {"flights":sendit});
 
-  //update_tracking(flights);
+  update_tracking(flights, nfd.time);
 
   console.log("# of flights tracking: " + Object.keys(flights).length)
 }

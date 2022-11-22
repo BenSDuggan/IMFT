@@ -23,10 +23,15 @@ print(s)
 
 ### Quota
 
-* Antonymous 100
-* Signed in 1000
-* Can get your data from your sensor unlimited
-
+* OpenSkies:
+    * Antonymous 100 / day
+    * Signed in 1000 / day
+    * Can get your data from your sensor unlimited
+* ADS-B Exchange $10 / mo
+    * 10,000
+    * Best coverage in Indianapolis
+* Flight Aware 
+    * $20 / mo
 
 ## Data structures
 
@@ -37,16 +42,27 @@ Used by server and client to store the locations of aircraft.
 ```
 [
     {
-        "icao24": "" // The icao24
+        "icao24": "", // The icao24
+        "faa":{}, // FAA registration data
         "last":{}, // Data from the last update interval
         "stl":{}, // Data from the second to last interval (copied from last when the next update interval occurs)
         "latest":{}, // Latest data received, not necessarily up to date
-        "lastUpdated": -1, // Time that the last flight data was received
+        "time": -1, // Time that the last flight data was received
+        "tics": 0, // How many tics has it been without data
         "tracking": { // Tracking information
-            "flight_status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
-            "flight_status_updated_time": -1 // When the flight status was last updated
-            "flight_status_counter": -1 // How many intervals the flight status has been the same
-            "flight_status_change_counter": -1, // How many times the flight status has flipped
+            "current": { // The current tracking
+                "status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+                "time": -1, // When the flight status was last updated
+                "tics": 0, // How many intervals the flight status has been the same
+                "counter": 0, // How many times the flight status has flipped
+                "location": "" // Location
+            },
+            "next": { // Tracking next status change
+                "status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+                "time": -1, // When the flight status was last updated
+                "tics": 0, // How many intervals the flight status has been the same
+                "counter": 0, // How many times the next status has flipped
+            }
         }
     }
 ]
@@ -59,18 +75,20 @@ Used by server and client to store the locations of aircraft.
 * Aircraft can come into the airspace (from outside Indiana) and already be in flight
 * Not all planes will be received during every update interval
 * Assume speed and altitude data is correct
+* Helicopters can hover, so if vertical speed and horizontal speed are 0, you don't know if it's hovering or not
 
 ### Flight Tracking Criteria
 
-* LOS (loss of signal): No updated data in 5 minutes
 * Airborn (easier to tell than on ground) if any of the criteria are met
     * Vertical speed > 1 m/s
     * Horizontal speed > 1 m/s
-    * Altitude > 250
-    * 
+    * True altitude > 250
 * Grounded:
     * `on-ground` is true
-    * Criteria to be airborn are not met
+    * Aircraft is within Zone 1 of a hospital: ~ 1000 ft radius and 500 ft vertical ceiling
+        * *Some exceptions like Eski and Riley*
+    * ***Assume that helicopters won't hover***
+* LOS (loss of signal): No updated data for 2 minutes or 5 intervals, which ever is less
+    * If LOS, see if aircraft is within zone 2 of hospital. If more than one result, pick the hospital with the shortest distance
 
-
-
+* Status will not change unless 2 consecutive new status have been observed

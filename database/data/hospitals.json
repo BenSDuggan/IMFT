@@ -5,7 +5,8 @@
       "latitude": 39.78941,
       "longitude": -86.16233,
       "zones":[
-        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 }
+        {"id":"zone1", "method":"radial", "radius": 1000, "ceiling": 500 },
+        {"id":"zone2", "method":"radial", "radius": 3000, "ceiling": 700 }
       ]
     },
     {
@@ -14,7 +15,8 @@
       "latitude": 39.77785,
       "longitude": -86.18479,
       "zones":[
-        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 }
+        {"id":"zone1", "method":"radial", "radius": 1000, "ceiling": 500 },
+        {"id":"zone2", "method":"radial", "radius": 2000, "ceiling": 700 }
       ]
     },
     {
@@ -23,7 +25,18 @@
       "latitude": 39.77792,
       "longitude": -86.18018,
       "zones":[
-        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 }
+        {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 },
+        {"id":"zone2", "method":"radial", "radius": 2000, "ceiling": 700 }
+      ]
+    },
+    {
+      "id": "indianapolis_heliport",
+      "display_name": "Indianapolis Heliport / IUH University",
+      "latitude": 39.76593, 
+      "longitude": -86.14873,
+      "zones":[
+        {"id":"zone1", "method":"radial", "radius": 1000, "ceiling": 500 },
+        {"id":"zone2", "method":"radial", "radius":4000, "ceiling": 700 }
       ]
     }
   ]
