@@ -6,36 +6,11 @@ const fs = require('fs');
 
 var {express, app, http, server, io} = require('../src/web.js')
 var {newFlightData} = require('../src/flight-tracker.js');
+let {logger} = require('../src/logger.js')
 
 let flightIndex = 0;
 let flightData = {};
 
-let devFlightData = (file, dataProcessor, speed_multiplier) => {
-    // Read data
-    fs.readFile(file, 'utf8', (err, rawdata) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        flightIndex = 150;
-
-        flightData = JSON.parse(rawdata);
-
-        console.log("Using test data: " + flightData["name"])
-
-        dataProcessor(flightData["flights"][Object.keys(flightData["flights"])[flightIndex++]]);
-
-        // Schedule data sending
-        setInterval(() => {
-            if(flightIndex >= flightData["num-flights"]) {
-                console.log("No more data")
-                return;
-            }
-
-            dataProcessor(flightData["flights"][Object.keys(flightData["flights"])[flightIndex++]]);
-        }, flightData["interval"] * 1000 / speed_multiplier)
-    });
-}
 
 // Simulate flights using real data
 let HistoricFlights = class {
@@ -55,7 +30,7 @@ let HistoricFlights = class {
         this.active = true;
         fs.readFile(file_name, 'utf8', (err, rawdata) => {
             if (err) {
-              console.error(err);
+              logger.error(err);
               return;
             }
     
@@ -69,17 +44,17 @@ let HistoricFlights = class {
 
             this.data = flightData.flights;
     
-            console.log("Using test data: " + this.name)
+            logger.info("Using test data: " + this.name)
 
             this.current_frame = 0;
         });
     }
 
     start() {
-        console.log("HF: Start");
+        logger.verbose("HF: Start");
         this.interval_handler = setInterval(() => {
             if(this.current_frame >= this.max_frame) {
-                console.log("Out of flight data")
+                logger.verbose("Out of flight data")
                 this.stop();
                 return 
             }
@@ -92,7 +67,7 @@ let HistoricFlights = class {
     }
 
     stop() {
-        console.log("HF: Stop");
+        logger.verbose("HF: Stop");
         clearInterval(this.interval_handler);
     }
 
@@ -126,4 +101,4 @@ let HistoricFlights = class {
 
 const historic_flights = new HistoricFlights(newFlightData)
 
-module.exports = { devFlightData, historic_flights };
+module.exports = { historic_flights };

@@ -3,7 +3,11 @@
  * Data path: Get new data (`newFlightData`) -> update flight position tracking (`newFlightData`) -> update tracking information (`update_tracking`) ->  -> send data
  */
 
-var {database} = require('./database.js')
+// only marked LOS when all aircraft/last aircraft is LOS
+// tracking information is not updating
+
+var {database} = require('./database.js');
+let {logger} = require('./logger.js')
 var {express, app, http, server, io} = require('./web.js')
 
 // Constants
@@ -55,13 +59,9 @@ let haversine = (lat1, lon1, lat2, lon2) => {
 // Measure the distance between 2 points. Should be ~100yrds=300ft
 //console.log(haversine(39.18048154123995, -86.52535587827155, 39.18130600162018, -86.5253532904204))
 
-// Steps
-// new flight data -> update flight list -> update tracking (Get status -> at hospital -> is this new?)
-
-
 
 // Given a flight, check if it's `airborn`, `grounded`, or `los`
-let flight_status = (flight, time) => {
+let flight_status = (flight, time, hospital_results) => {
   // Check for LOS
   if(flight.tics >= los_tic || time - flight.time > los_time)
     return "los"
@@ -69,8 +69,16 @@ let flight_status = (flight, time) => {
   // Check if flight is in the air
   if(flight.latest.vertical_rate > 1 || 
      flight.latest.velocity > 1 || 
-     flight.latest.baro_altitude > feet_to_meter(250+in_sea_level))
+     flight.latest.baro_altitude > feet_to_meter(250+in_sea_level)) {
+    
+      // Within hospital zone 1? Then say grounded
+      for(let h in hospital_results) {
+        if(hospital_results[h].zone == "zone1")
+          return "grounded" // Assume on the ground
+      }
+
       return "airborn" // Assume in the air
+  }
   
   return "grounded" // Assume on the ground
 }
@@ -95,45 +103,50 @@ let at_hospital = (flight) => {
   return results.sort((a, b) => {return a.distance - b.distance})
 }
 
+// Process the flight that just landed
+let flight_landed = (flight) => {
+  let tweet = "N"+flight.faa["N-NUMBER"]+"("+flight.icao24+", "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name;
+  logger.info("Would tweet: " + tweet)
+}
+
 // Update the tracking information
 let update_tracking = (flights, time) => {
-  console.log("1")
   // Determine if aircraft is in the air or on the ground
   for(let f in flights) {
     console.log("2: " + f);
-    // Check strict flight status rules
-    let new_status = flight_status(flights[f], time);
 
     // Check if flight is at a hospital
     let hospital_results = at_hospital(flights[f]);
     console.log(hospital_results)
 
-    if(new_status == "airborn" && hospital_results.length > 0) {
-      new_status = "grounded";
-    }
+    // Check strict flight status rules
+    let new_status = flight_status(flights[f], time, hospital_results)
+
     console.log(new_status);
 
     // Update tracking information
     if(flights[f].tracking.current.status == new_status) {
-      flights[f].tracking.current.time = time;
       flights[f].tracking.current.tics++;
     }
     else {
       // Flight status changed
       flights[f].tracking.current.status = new_status;
-      flights[f].tracking.current.time = time;
-      flights[f].tracking.current.tics++;
+      flights[f].tracking.current.tics = 1;
       flights[f].tracking.current.counter++;
       
-      if(hospital_results.length > 0) {
-        flights[f].tracking.current.location = hospital_results[0]
-      }
-      else {
-        flights[f].tracking.current.location = null;
-      }
+      // TODO: New status -> notification / save data
+      if(new_status == "grounded")
+        flight_landed(flights[f])
     }
 
-    // TODO: New status -> notification / save data
+    // Update common variables
+    flights[f].tracking.current.time = time;
+    if(hospital_results.length > 0) {
+      flights[f].tracking.current.location = hospital_results[0]
+    }
+    else {
+      flights[f].tracking.current.location = null;
+    }
   }
 
   return flights
@@ -206,9 +219,8 @@ let newFlightData = async (nfd) => {
   }
 
   let metadata = {"time":nfd.time, "count":count++}
-  io.emit('nfd', {"flights":sendit});
-
   update_tracking(flights, nfd.time);
+  io.emit('nfd', {"flights":sendit});
 
   console.log("# of flights tracking: " + Object.keys(flights).length)
 }

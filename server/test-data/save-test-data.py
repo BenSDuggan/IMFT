@@ -5,7 +5,7 @@ from opensky_api import OpenSkyApi
 
 config_file = "~/.config/opensky.json"
 filename = "test-data.json"
-num_flights = 1000
+num_flights = 200
 
 username, password = None, None
 # Load config
@@ -17,7 +17,7 @@ with open(os.path.expanduser(config_file), "r") as file:
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
 
 test_data = {
-    "name":"Sunday November 15, 2022 OpenSkys Data 1000 Flights",
+    "name":"Thursday December 1, 2022 OpenSkys Data 500 Flights",
     "bbox": bbox,
     "start-time": int(time.time()),
     "end-time": None,

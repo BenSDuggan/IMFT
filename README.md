@@ -79,6 +79,11 @@ Used by server and client to store the locations of aircraft.
 
 ### Flight Tracking Criteria
 
+
+#### Ground status:
+
+Determine if an aircraft is on the ground or airborne
+
 * Airborn (easier to tell than on ground) if any of the criteria are met
     * Vertical speed > 1 m/s
     * Horizontal speed > 1 m/s

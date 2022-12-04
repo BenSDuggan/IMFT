@@ -1,6 +1,7 @@
 # Project files
 opensky-api
 test-file.json
+*.log
 
 # Node
 node_modules
