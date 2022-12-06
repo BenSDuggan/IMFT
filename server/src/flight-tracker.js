@@ -105,7 +105,8 @@ let at_hospital = (flight) => {
 
 // Process the flight that just landed
 let flight_landed = (flight) => {
-  let tweet = "N"+flight.faa["N-NUMBER"]+"("+flight.icao24+", "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name;
+  let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
+              "("+flight.latest.latitude+", "+flight.latest.longitude+")";
   logger.info("Would tweet: " + tweet)
 }
 
@@ -114,6 +115,7 @@ let update_tracking = (flights, time) => {
   // Determine if aircraft is in the air or on the ground
   for(let f in flights) {
     console.log("2: " + f);
+    let status_changed = false;
 
     // Check if flight is at a hospital
     let hospital_results = at_hospital(flights[f]);
@@ -134,9 +136,7 @@ let update_tracking = (flights, time) => {
       flights[f].tracking.current.tics = 1;
       flights[f].tracking.current.counter++;
       
-      // TODO: New status -> notification / save data
-      if(new_status == "grounded")
-        flight_landed(flights[f])
+      status_changed = true;
     }
 
     // Update common variables
@@ -147,6 +147,10 @@ let update_tracking = (flights, time) => {
     else {
       flights[f].tracking.current.location = null;
     }
+
+    // TODO: New status -> notification / save data
+    if(status_changed && new_status == "grounded")
+      flight_landed(flights[f])
   }
 
   return flights

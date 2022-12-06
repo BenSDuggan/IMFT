@@ -6,6 +6,8 @@ var {newFlightData} = require('./src/flight-tracker.js');
 var {database} = require('./src/database.js')
 var { } = require('./src/sockets.js')
 let { logger } = require('./src/logger.js')
+let { } = require('./src/twitter.js')
+
 
 logger.info("Production server started")
 
@@ -15,6 +17,7 @@ process.on('SIGINT', function() {
 
   process.exit();
 });
+
 
 
 let get_data = () => {
@@ -28,16 +31,21 @@ let get_data = () => {
   child.addListener('error', (e) => console.error(e));
 }
 
-get_data()
-setInterval(() => {
+let live = () => {
   get_data()
-}, 30 * 1000)
+  setInterval(() => {
+    get_data()
+  }, 30 * 1000)
+}
 
-/*
+let historic = () => {
+  historic_flights.load("test-data/test-data-50_2.json");
+  setTimeout(() => {
+    historic_flights.speed = 2
+    historic_flights.start()
+  }, 1000)
+}
 
-historic_flights.load("test-data/test-data-50_2.json");
-setTimeout(() => {
-  historic_flights.speed = 2
-  historic_flights.start()
-}, 1000)
-*/
+//live();
+//historic();
+
