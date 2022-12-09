@@ -6,7 +6,8 @@ var {newFlightData} = require('./src/flight-tracker.js');
 var {database} = require('./src/database.js')
 var { } = require('./src/sockets.js')
 let { logger } = require('./src/logger.js')
-let { } = require('./src/twitter.js')
+let { } = require('./src/twitter.js');
+const config = require('./src/config.js')
 
 
 logger.info("Production server started")
@@ -48,4 +49,3 @@ let historic = () => {
 
 //live();
 //historic();
-

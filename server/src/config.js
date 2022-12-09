@@ -21,4 +21,7 @@ let save_config = () => {
 
 load_config();
 
-module.exports = { config, load_config, save_config }
+//module.exports = { config }
+exports.config = config;
+exports.load_config = load_config;
+exports.save_config = save_config;
