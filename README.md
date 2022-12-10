@@ -1,6 +1,6 @@
 # Indiana Medical Flight Tracking (IMFT)
 
-Project to track medical helicopters in Indiana
+Project to track medical helicopters in Indiana. Tweeting locations at <https://twitter.com/IN_MFT>.
 
 
 ## OpenSky Method

@@ -3,7 +3,7 @@ const { TwitterApi } = require('twitter-api-v2');
 
 const {logger} = require('./logger.js')
 const config = require('./config.js')
-
+const {epoch_s} = require('./core.js')
 
 // ToDo:
 // Save creds to file
@@ -11,31 +11,54 @@ const config = require('./config.js')
 // Get new access token when needed
 
 
-CALLBACK_URL = "http://127.0.0.1:4000/callback"
-SCOPE = ['tweet.read', 'tweet.write', 'users.read', 'offline.access']
+
+
+const CALLBACK_URL = "http://127.0.0.1:4000/callback"
+const SCOPE = ['tweet.read', 'tweet.write', 'users.read', 'offline.access']
+const TWEET_LOCKOUT_INTERVAL = 300;
 
 let Twitter = class {
-    constructor(client_id, client_secret) {
-        this.client_id = client_id;
-        this.client_secret = client_secret;
+    constructor(options) {
+        this.client_id = options.client_id ?? null;
+        this.client_id = options.config.twitter.client_id ?? this.client_id;
+        this.client_secret = options.client_secret ?? null;
+        this.client_secret = options.config.twitter.client_secret ?? this.client_secret;
+
         this.api = new TwitterApi({ clientId: this.client_id, clientSecret: this.client_secret }); // Main API
         this.client = null; // Client used to send tweets
+        this.tweet_time_lockout = 0;
 
-        this.refresh_token = null;
-        this.expires_at = null;
+        this.refresh_token = options.config.twitter.refresh_token ?? null;
+        this.expires_at = 0;
 
         this.code_verifier = null;
         this.state = null;
+
+        this.connect();
     }
 
     // Connect to the twitter API using the refresh token if one exists
     async connect() {
-        const { client, accessToken, refreshToken, expiresIn } = await this.api.refreshOAuth2Token(this.refresh_token);
-        
-        this.client = client;
-        this.refresh_token = refreshToken;
-        this.expires_at = expiresIn + Math.floor(Date.now()/1000);
-        this.update_config();
+        if( epoch_s() >= this.expires_at) {
+            if(this.refresh_token !== null) {
+                logger.info("Twitter: Credentials expired. Attempting to refresh with OAuth refresh token...");
+                this.api.refreshOAuth2Token(this.refresh_token)
+                .then( ({ client, accessToken, refreshToken, expiresIn }) => {
+                    this.client = client;
+                    this.refresh_token = refreshToken;
+                    this.expires_at = expiresIn + epoch_s();
+                    this.update_config();
+
+                    this.print_username();
+                })
+                .catch((reason) => {
+                    logger.warn("Twitter: Could not refresh Twitter credentials")
+                })
+            }
+            else {
+                logger.info("Twitter: No user connected. Log in using the server page.")
+            }
+        }
     }
 
     // Generate twitter auth link
@@ -51,7 +74,7 @@ let Twitter = class {
     }
 
     // Authenticate twitter user given callback information
-    twitter_auth_callback(state, code) {
+    async twitter_auth_callback(state, code) {
         if (!this.code_verifier || !this.state || !state || !code) {
             logger.warn("You denied the app or your session expired!")
             return {"success":false, "message":"You denied the app or your session expired!"}
@@ -65,20 +88,45 @@ let Twitter = class {
         .then(async ({ client, accessToken, refreshToken, expiresIn }) => {
             this.client = client
             this.refresh_token = refreshToken;
-            this.expires_at = expiresIn + Math.floor(Date.now()/1000);;
+            this.expires_at = expiresIn + epoch_s();
 
-            this.get_username();
+            this.print_username();
             
             this.update_config();
+            return true;
         })
-        .catch(() => logger.warn('Invalid verifier or access tokens!'));
+        .catch(() => {
+            logger.warn('Invalid verifier or access tokens!')
+            return false;
+        });
     }
 
     // Get the username of the currently logged in user
-    get_username() {
-        this.client.v2.me().then((results) => {
+    print_username() {
+        this.client.v2.me()
+        .then((results) => {
             logger.info("Twitter: Current user is @"+results.data.username)        
         })
+        .catch((reason) => {
+            logger.warn("Twitter: Could not get current username. Creds not working")
+        })
+    }
+
+    // Send a tweet
+    async tweet(message) {
+        if(epoch_s() >= this.tweet_time_lockout) {
+            this.client.v2.tweet(message)
+            .then((results) => {
+                logger.info('Twitter: Tweeted: "' + results.data.text + '"');
+                this.tweet_time_lockout = epoch_s() + TWEET_LOCKOUT_INTERVAL;
+            })
+            .catch((reason) => {
+                logger.warn('Twitter: Tweet: Attempted to tweet "' + message + '" but got error: ' + reason)
+            })
+        }
+        else {
+            logger.warn('Twitter: Tweet: Attempted to tweet "' + message + '" but lockout dose not expire for ' + (this.tweet_time_lockout-epoch_s()).toString());
+        }
     }
 
     // Update the config file with the tokens
@@ -89,6 +137,6 @@ let Twitter = class {
     }
 }
 
-const twitter = new Twitter(config.config.twitter.client_id, config.config.twitter.client_secret)
+const twitter = new Twitter({config:config.config})
 
 module.exports = { twitter };

@@ -7,6 +7,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const logger = require('./logger.js');
 const io = new Server(server);
 
 const { twitter } = require('./twitter.js')
@@ -23,8 +24,15 @@ app.get('/callback', (req, res) => {
   const { state, code } = req.query;
 
   twitter.twitter_auth_callback(state, code)
+  .then((success) => {
+    if(success) {
+      res.status(200).send('<h1>Success!</h1><a href="127.0.0.1:4000/twitter>Log in again</a>');
+    }
+    else {
+      res.status(200).send('<h1>Failed.</h1><a href="127.0.0.1:4000/twitter>Log in again</a>');
+    }
+  })
 });
-
 
 io.on('connection', (socket) => {
   
