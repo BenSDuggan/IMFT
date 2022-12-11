@@ -6,6 +6,7 @@
 // only marked LOS when all aircraft/last aircraft is LOS
 // tracking information is not updating
 
+const { epoch_s } = require('./core.js');
 var {database} = require('./database.js');
 let {logger} = require('./logger.js')
 let {twitter} = require('./twitter.js')
@@ -107,25 +108,21 @@ let at_hospital = (flight) => {
 // Process the flight that just landed
 let flight_landed = (flight) => {
   let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
-              "("+flight.latest.latitude+", "+flight.latest.longitude+")";
-  twitter.tweet(tweet);
+              "("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(epoch_s()*1000).toLocaleString();
+    twitter.tweet(tweet);
 }
 
 // Update the tracking information
 let update_tracking = (flights, time) => {
   // Determine if aircraft is in the air or on the ground
   for(let f in flights) {
-    console.log("2: " + f);
     let status_changed = false;
 
     // Check if flight is at a hospital
     let hospital_results = at_hospital(flights[f]);
-    console.log(hospital_results)
 
     // Check strict flight status rules
     let new_status = flight_status(flights[f], time, hospital_results)
-
-    console.log(new_status);
 
     // Update tracking information
     if(flights[f].tracking.current.status == new_status) {
@@ -133,6 +130,8 @@ let update_tracking = (flights, time) => {
     }
     else {
       // Flight status changed
+      logger.verbose("Tracker: New status for " + flights[f].icao24 + " (" + flights[f].faa["N-NUMBER"] + ") from " + flights[f].tracking.current.status + " to " + new_status);
+
       flights[f].tracking.current.status = new_status;
       flights[f].tracking.current.tics = 1;
       flights[f].tracking.current.counter++;
@@ -159,6 +158,10 @@ let update_tracking = (flights, time) => {
 
 // Update the flights dict
 let update_flights = async(nfd) => {
+  if(!("states" in nfd)) {
+    return 
+  }
+
   // Prepare flights and make dict
   for(let f in flights) {
     flights[f].stl = flights[f].last;
@@ -227,7 +230,7 @@ let newFlightData = async (nfd) => {
   update_tracking(flights, nfd.time);
   io.emit('nfd', {"flights":sendit});
 
-  console.log("# of flights tracking: " + Object.keys(flights).length)
+  logger.verbose(epoch_s + ": Tracking " + Object.keys(flights).length + " flights")
 }
 
 

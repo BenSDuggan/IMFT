@@ -6,7 +6,7 @@ from opensky_api import OpenSkyApi
 # bbox = (min latitude, max latitude, min longitude, max longitude)
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
 filename = "curr-flights.json"
-config_file = "~/.config/opensky.json"
+config_file = "~/.config/imft/opensky.json"
 
 username, password = None, None
 # Load config

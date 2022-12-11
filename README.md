@@ -2,14 +2,26 @@
 
 Project to track medical helicopters in Indiana. Tweeting locations at <https://twitter.com/IN_MFT>.
 
+## Install
 
-## OpenSky Method
+1. `sudo apt install python3-pip zip`
+2. Install node
+    1. `curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - `
+    2. `sudo apt-get install -y nodejs`
+3. Install MongoDB
+    1. `wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc |  gpg --dearmor | sudo tee /usr/share/keyrings/mongodb.gpg > /dev/null`
+    2. `echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list`
+    3. `sudo apt update`
+    4. `sudo apt install mongodb-org`
+    5. `sudo systemctl start mongod`
+    6. `sudo systemctl enable mongod`
+4. Install OpenSky
+    1. `git clone https://github.com/openskynetwork/opensky-api`
+    2. `pip install -e opensky-api/python`
 
-### Install
 
-1. `git clone https://github.com/openskynetwork/opensky-api`
-2. `pip install -e opensky-api/python`
-3. Test the code using:
+## OpenSkies
+
 ```
 from opensky_api import OpenSkyApi
 api = OpenSkyApi()

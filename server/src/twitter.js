@@ -5,13 +5,6 @@ const {logger} = require('./logger.js')
 const config = require('./config.js')
 const {epoch_s} = require('./core.js')
 
-// ToDo:
-// Save creds to file
-// Authenticate from creds in file
-// Get new access token when needed
-
-
-
 
 const CALLBACK_URL = "http://127.0.0.1:4000/callback"
 const SCOPE = ['tweet.read', 'tweet.write', 'users.read', 'offline.access']

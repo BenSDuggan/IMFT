@@ -97,7 +97,7 @@ let openFAAHelicopter = () => {
             l = key.replace(/[\u{0080}-\u{FFFF}]/gu, "");
 
             if(l == "") {
-              next
+              continue
             }
             
             r[l] = row[key];

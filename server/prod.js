@@ -22,7 +22,7 @@ process.on('SIGINT', function() {
 
 
 let get_data = () => {
-  const child = spawn('python',["src/get-data.py"]);
+  const child = spawn('python3',["src/get-data.py"]);
   child.addListener('close', (e) => {
     let rawdata = fs.readFileSync('curr-flights.json');
     let nfd = JSON.parse(rawdata);
