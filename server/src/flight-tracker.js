@@ -8,6 +8,7 @@
 
 var {database} = require('./database.js');
 let {logger} = require('./logger.js')
+let {twitter} = require('./twitter.js')
 var {express, app, http, server, io} = require('./web.js')
 
 // Constants
@@ -107,7 +108,7 @@ let at_hospital = (flight) => {
 let flight_landed = (flight) => {
   let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
               "("+flight.latest.latitude+", "+flight.latest.longitude+")";
-  logger.info("Would tweet: " + tweet)
+  twitter.tweet(tweet);
 }
 
 // Update the tracking information
