@@ -107,7 +107,7 @@ let at_hospital = (flight) => {
 
 // Process the flight that just landed
 let flight_landed = (flight) => {
-  if(flight.tracking.current.location.hospital.tweet ?? false) {
+  if("hospital" in flight.tracking.current.location && "tweet" in flight.tracking.current.location.hospital) {
     let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
     "("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(epoch_s()*1000).toLocaleString();
     twitter.tweet(tweet);

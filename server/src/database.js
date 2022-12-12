@@ -5,6 +5,8 @@
 
 const { MongoClient } = require("mongodb");
 
+const { logger } = require('./logger.js')
+
 const databaseName = "flight-test"
 
 const uri = "mongodb://localhost:27017/?maxPoolSize=20&w=majority";
@@ -73,10 +75,10 @@ let Database = class {
 const database = new Database()
 
 database.connect().then((result) => {
-    console.log("Connected to the database")
+    logger.info("Connected to the database")
     return database.get_hospitals()
   }).then((result) => {
-    console.log("Got Hospitals: " + result.length)
+    logger.verbose("Got Hospitals: " + result.length)
   })
 
 module.exports = { database };

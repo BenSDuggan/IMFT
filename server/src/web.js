@@ -10,6 +10,7 @@ const { Server } = require("socket.io");
 const logger = require('./logger.js');
 const io = new Server(server);
 
+const { logger } = require('./logger.js')
 const { twitter } = require('./twitter.js')
 
 //app.use(express.static('.'))
@@ -43,7 +44,7 @@ io.on('connection', (socket) => {
 
 
 server.listen(4000, () => {
-  console.log('listening on *:4000');
+  logger.info('listening on *:4000');
 });
 
 

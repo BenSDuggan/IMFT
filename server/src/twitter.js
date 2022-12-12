@@ -20,6 +20,7 @@ let Twitter = class {
         this.api = new TwitterApi({ clientId: this.client_id, clientSecret: this.client_secret }); // Main API
         this.client = null; // Client used to send tweets
         this.tweet_time_lockout = 0;
+        this.read_only = false;
 
         this.refresh_token = options.config.twitter.refresh_token ?? null;
         this.expires_at = 0;
@@ -96,7 +97,7 @@ let Twitter = class {
 
     // Get the username of the currently logged in user
     async print_username() {
-        await this.twitter.connect();
+        await this.connect();
 
         this.client.v2.me()
         .then((results) => {
@@ -109,8 +110,13 @@ let Twitter = class {
 
     // Send a tweet
     async tweet(message) {
+        if(this.read_only) {
+            logger.info('Twitter: Read only. Would have tweeted: "' + results.data.text + '"');
+            return;
+        }
+
         if(epoch_s() >= this.tweet_time_lockout) {
-            await this.twitter.connect();
+            await this.connect();
 
             this.client.v2.tweet(message)
             .then((results) => {
