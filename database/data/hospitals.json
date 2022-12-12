@@ -7,7 +7,8 @@
       "zones":[
         {"id":"zone1", "method":"radial", "radius": 1000, "ceiling": 500 },
         {"id":"zone2", "method":"radial", "radius": 3000, "ceiling": 700 }
-      ]
+      ],
+      "tweet":true
     },
     {
       "id": "eskenazi",
@@ -17,7 +18,8 @@
       "zones":[
         {"id":"zone1", "method":"radial", "radius": 1000, "ceiling": 500 },
         {"id":"zone2", "method":"radial", "radius": 2000, "ceiling": 700 }
-      ]
+      ],
+      "tweet":true
     },
     {
       "id": "riley",
@@ -27,7 +29,8 @@
       "zones":[
         {"id":"zone1", "method":"radial", "radius": 500, "ceiling": 500 },
         {"id":"zone2", "method":"radial", "radius": 2000, "ceiling": 700 }
-      ]
+      ],
+      "tweet":true
     },
     {
       "id": "indianapolis_heliport",
@@ -36,7 +39,8 @@
       "longitude": -86.14873,
       "zones":[
         {"id":"zone1", "method":"radial", "radius": 1000, "ceiling": 500 },
-        {"id":"zone2", "method":"radial", "radius":4000, "ceiling": 700 }
-      ]
+        {"id":"zone2", "method":"radial", "radius": 4000, "ceiling": 700 }
+      ],
+      "tweet":false
     }
   ]

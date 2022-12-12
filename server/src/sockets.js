@@ -5,9 +5,19 @@
 var {express, app, http, server, io} = require('./web.js')
 var {database} = require('./database.js')
 var {devFlightData, historic_flights} = require('../test-data/dev-flight-data.js');
+var {flights} = require('./flight-tracker.js');
 
 
 io.on('connection', (socket) => {
+    socket.on('get_flights', (msg) => {
+        let sendit = []
+        for(let f in flights) {
+            sendit.push(flights[f])
+        }
+
+        socket.emit('nfd', {"flights":sendit});
+    });
+
     socket.on('get_hospitals', (msg) => {
         database.get_hospitals().then((hospitals) => {
             socket.emit('hospitals', hospitals);

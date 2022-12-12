@@ -107,9 +107,11 @@ let at_hospital = (flight) => {
 
 // Process the flight that just landed
 let flight_landed = (flight) => {
-  let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
-              "("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(epoch_s()*1000).toLocaleString();
+  if(flight.tracking.current.location.hospital.tweet ?? false) {
+    let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
+    "("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(epoch_s()*1000).toLocaleString();
     twitter.tweet(tweet);
+  }
 }
 
 // Update the tracking information
@@ -136,7 +138,7 @@ let update_tracking = (flights, time) => {
       flights[f].tracking.current.tics = 1;
       flights[f].tracking.current.counter++;
       
-      status_changed = true;
+      if(flights[f].tracking.current.status !== "") status_changed = true;
     }
 
     // Update common variables
@@ -230,10 +232,10 @@ let newFlightData = async (nfd) => {
   update_tracking(flights, nfd.time);
   io.emit('nfd', {"flights":sendit});
 
-  logger.verbose(epoch_s + ": Tracking " + Object.keys(flights).length + " flights")
+  logger.verbose(epoch_s() + ": Tracking " + Object.keys(flights).length + " flights")
 }
 
 
 
 
-module.exports = { newFlightData };
+module.exports = { newFlightData, flights };

@@ -28,6 +28,7 @@ function App() {
 
     // Getters
     s.emit("get_hospitals", {});
+    s.emit("get_flights", {});
     s.emit("get_hf_metadata", {});
 
     // Responders
