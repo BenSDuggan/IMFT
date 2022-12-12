@@ -95,7 +95,9 @@ let Twitter = class {
     }
 
     // Get the username of the currently logged in user
-    print_username() {
+    async print_username() {
+        await this.twitter.connect();
+
         this.client.v2.me()
         .then((results) => {
             logger.info("Twitter: Current user is @"+results.data.username)        
@@ -108,6 +110,8 @@ let Twitter = class {
     // Send a tweet
     async tweet(message) {
         if(epoch_s() >= this.tweet_time_lockout) {
+            await this.twitter.connect();
+
             this.client.v2.tweet(message)
             .then((results) => {
                 logger.info('Twitter: Tweeted: "' + results.data.text + '"');
