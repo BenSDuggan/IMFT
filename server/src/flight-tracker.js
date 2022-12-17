@@ -10,10 +10,9 @@ const { epoch_s } = require('./core.js');
 var {database} = require('./database.js');
 let {logger} = require('./logger.js')
 let {twitter} = require('./twitter.js')
-var {express, app, http, server, io} = require('./web.js')
 
 // Constants
-const los_time = 2 * 60; // How many seconds before a signal is considered lost
+const los_time = 3 * 60; // How many seconds before a signal is considered lost
 const los_tic = 5; // How many tics before a signal is considered lost
 const in_sea_level = 750; // Indiana Sea Level (assume constant since this state is flat)
 
@@ -107,9 +106,14 @@ let at_hospital = (flight) => {
 
 // Process the flight that just landed
 let flight_landed = (flight) => {
-  if("hospital" in flight.tracking.current.location && "tweet" in flight.tracking.current.location.hospital) {
+  if(flight.tracking.current.location == null) {
+    return false;
+  }
+
+  if(flight.tracking.current.location.hasOwnProperty("hospital") &&
+     (flight.tracking.current.location.hospital.tweet ?? false)) {
     let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
-    "("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(epoch_s()*1000).toLocaleString();
+    " ("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(epoch_s()*1000).toLocaleString();
     twitter.tweet(tweet);
   }
 }
