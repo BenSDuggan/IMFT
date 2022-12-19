@@ -10,6 +10,7 @@ const { epoch_s } = require('./core.js');
 var {database} = require('./database.js');
 let {logger} = require('./logger.js')
 let {twitter} = require('./twitter.js')
+const {io} = require('./web.js');
 
 // Constants
 const los_time = 3 * 60; // How many seconds before a signal is considered lost
