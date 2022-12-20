@@ -28,22 +28,22 @@ let Twitter = class {
         this.code_verifier = null;
         this.state = null;
 
-        this.connect();
+        //this.connect();
+        this.print_username();
     }
 
     // Connect to the twitter API using the refresh token if one exists
     async connect() {
-        if( epoch_s() >= this.expires_at) {
+        if( epoch_s() >= this.expires_at || true) {
             if(this.refresh_token !== null) {
                 logger.info("Twitter: Credentials expired. Attempting to refresh with OAuth refresh token...");
-                this.api.refreshOAuth2Token(this.refresh_token)
+                
+                return this.api.refreshOAuth2Token(this.refresh_token)
                 .then( ({ client, accessToken, refreshToken, expiresIn }) => {
                     this.client = client;
                     this.refresh_token = refreshToken;
                     this.expires_at = expiresIn + epoch_s();
                     this.update_config();
-
-                    this.print_username();
                 })
                 .catch((reason) => {
                     logger.warn("Twitter: Could not refresh Twitter credentials")
@@ -78,7 +78,7 @@ let Twitter = class {
             return {"success":false, "message":'Stored tokens didnt match!'}
         }
 
-        this.api.loginWithOAuth2({ code, codeVerifier:this.code_verifier, redirectUri: CALLBACK_URL })
+        return this.api.loginWithOAuth2({ code, codeVerifier:this.code_verifier, redirectUri: CALLBACK_URL })
         .then(async ({ client, accessToken, refreshToken, expiresIn }) => {
             this.client = client
             this.refresh_token = refreshToken;
@@ -87,17 +87,17 @@ let Twitter = class {
             this.print_username();
             
             this.update_config();
-            return true;
+            return {"success":true, "message":'Logged in!'};
         })
         .catch(() => {
             logger.warn('Invalid verifier or access tokens!')
-            return false;
+            return {"success":false, "message":'Invalid verifier or access tokens!'};
         });
     }
 
     // Get the username of the currently logged in user
     async print_username() {
-        await this.connect();
+        await this.connect()
 
         this.client.v2.me()
         .then((results) => {
