@@ -1,18 +1,32 @@
 import { MapContainer, TileLayer, LayersControl, LayerGroup } from 'react-leaflet'
+import { useMapEvents } from 'react-leaflet/hooks'
+
 import HospitalMarker  from './HospitalMarker'
 import FlightsMarker  from './FlightMarker'
 
 const bbox = [[37, -88.028], [41.762, -84.809]];
 
+function DeselectFlight(props) {
+    const map = useMapEvents({
+      click: () => {
+        props.setSelectedSidebar('flights')
+      }
+    })
+    return null
+  }
 
 function Map(props) {
     
     return(
-        <MapContainer id="map" bounds={bbox} scrollWheelZoom={true}>
+        <MapContainer id="map" 
+                      bounds={bbox} 
+                      scrollWheelZoom={true}>
             <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
+
+            <DeselectFlight setSelectedSidebar={props.setSelectedSidebar} />
 
             <LayersControl position="topright">
                 <LayersControl.Overlay checked name="Hospitals">
@@ -26,7 +40,10 @@ function Map(props) {
                 <LayersControl.Overlay checked name="Flights">
                     <LayerGroup>
                         {props.flights.map(f => 
-                            <FlightsMarker key={"map-flights-" + f.icao24}  flight={f}></FlightsMarker>
+                            <FlightsMarker key={"map-flights-" + f.icao24}
+                                            flight={f} 
+                                            selectedSidebar={props.selectedSidebar} 
+                                            setSelectedSidebar={props.setSelectedSidebar}></FlightsMarker>
                         )};
                     </LayerGroup>
                 </LayersControl.Overlay>

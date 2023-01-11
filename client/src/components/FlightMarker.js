@@ -8,16 +8,12 @@ function FlightsMarker(props) {
         let color = "#034f84";
 
         if(flight.tracking.current.status ?? false) {
-            if (flight.tracking.current.status === "grounded") {
-                color = "#5be7a9";
-            }
-            else if (flight.tracking.current.status === "airborn") {
-                color = "#ff6464";
-            }
-            else if (flight.tracking.current.status === "los") {
-                color = "#666666";
-            }
+            if (flight.tracking.current.status === "grounded") { color = "#5be7a9"; }
+            else if (flight.tracking.current.status === "airborn") { color = "#ff6464"; }
+            else if (flight.tracking.current.status === "los") { color = "#666666"; }
         }
+        if(props.selectedSidebar.id == flight.icao24) { color = "#B10DC9"; }
+
 
         // fa-helicopter
         // fa-helicopter-symbol
@@ -35,10 +31,12 @@ function FlightsMarker(props) {
 
     return(
         <Marker position={[props.flight.latest.latitude, props.flight.latest.longitude]} 
-                icon={flightIcon(props.flight)}>
-            <Popup>
-                <span>{props.flight.icao24} ({props.flight.latest.callsign})</span>
-            </Popup>
+                icon={flightIcon(props.flight)}
+                eventHandlers={{
+                    click: () => {
+                      props.setSelectedSidebar(props.flight.icao24)
+                    },
+                  }}>
         </Marker>
     )
 }

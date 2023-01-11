@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-function FlightTile(props) {
+function FlightSelected(props) {
     const timeString = (time) => {
         const d = new Date(time*1000);
         return d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
@@ -12,7 +12,7 @@ function FlightTile(props) {
     const f = props.flight;
  
     return (
-        <td className="flight-tile-row" key={f.icao24} onClick={() => props.selectFlight(f.icao24)}>
+        <div key={f.icao24}>
             <div>
                 <span>{"N"+f.faa["N-NUMBER"]} </span>
                 <span>({f.latest.icao24})</span> 
@@ -69,7 +69,7 @@ function FlightTile(props) {
                 <span>Tics: {f.tracking.current.location != null ? f.tracking.current.tics : ""}</span>
                 <span>Reason: {f.tracking.current.location != null ? f.tracking.current.reason : ""}</span>
             </div>
-        </td>)
+        </div>)
 }
 
-export default FlightTile;
+export default FlightSelected;

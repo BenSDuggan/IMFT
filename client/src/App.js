@@ -14,9 +14,14 @@ function App() {
   const [flights, setFlights] = useState([]);
   const [metadata, setMetadata] = useState({});  
   const [socket, setSocket] = useState(null);
+  const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":null});
 
-  //const s = useContext(SocketContext);
-  
+  let selectSidebar = (d) => {
+      if(d == 'flights' || d == 'hospitals')
+          setSelectedSidebar({"tab":d, "id":null});
+      else
+          setSelectedSidebar({"tab":"selected-flight", "id":d});
+  }
   
   useEffect(() => {
     const s = io();
@@ -52,8 +57,8 @@ function App() {
   return( 
     
       <div className='main-container'>
-        <Sidebar flights={flights} metadata={metadata} socket={socket} ></Sidebar>
-        <Map hospitals={hospitals} flights={flights}></Map>
+        <Sidebar flights={flights} metadata={metadata} socket={socket} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Sidebar>
+        <Map hospitals={hospitals} flights={flights} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Map>
       </div>
     
   )

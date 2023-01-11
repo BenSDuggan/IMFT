@@ -2,14 +2,6 @@ html, body {
   margin:0px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-td:first-child {
-  border-right: 2px solid #333;
-}
 
 .sidebar-nav {
   background-color: #ccc;
@@ -26,7 +18,28 @@ td:first-child {
 	outline: inherit;
 }
 
-.flightTile {
+.flight-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.flight-table-row {
+  border-bottom: 2px solid #333;
+}
+
+.flight-table-row:last-child {
+  border-bottom: 0px;
+}
+
+.flight-tile-row:first-child {
+  border-right: 2px solid #333;
+}
+
+.flight-tile-row:last-child {
+  border-right: 0px;
+}
+
+.flight-tile-row {
   width: 50%;
 }
 

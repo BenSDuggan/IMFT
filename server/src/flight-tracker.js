@@ -236,7 +236,6 @@ let update_trips = (flight, old_status, new_status) => {
   }
   // takeoff or picking up from previous trip or entered airspace from somewhere else = new or continue trip: los -> airborn
   else if(old_status == "los" && new_status == "airborn") {
-    console.log("yo")
     // If trip exists -> don't do anything
     // If trip doesn't exist -> make one
     if(!trips.hasOwnProperty(flight.icao24)) {
@@ -244,7 +243,6 @@ let update_trips = (flight, old_status, new_status) => {
       trips[flight.icao24].status = new_status;
       trips[flight.icao24].departure = create_trip_location(flight);
     }
-    console.log(trips)
   }
   // lost signal in flight = do what??: airborn -> los
   else if(old_status == "airborn" && new_status == "los") {
