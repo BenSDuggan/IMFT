@@ -35,6 +35,7 @@ function MetaData(props) {
             <input type="number" id="metadata_select-frame" />
             <button onClick={() => handelClick({"action":"frame", "value":document.getElementById('metadata_select-frame').value})}>Select Frame</button>
             <br />
+            <br />
         </div>
         )
 }
