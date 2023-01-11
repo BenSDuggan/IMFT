@@ -115,21 +115,21 @@ let Twitter = class {
             return;
         }
 
-        if(epoch_s() >= this.tweet_time_lockout) {
-            await this.connect();
-
-            this.client.v2.tweet(message)
-            .then((results) => {
-                logger.info('Twitter: Tweeted: "' + results.data.text + '"');
-                this.tweet_time_lockout = epoch_s() + TWEET_LOCKOUT_INTERVAL;
-            })
-            .catch((reason) => {
-                logger.warn('Twitter: Tweet: Attempted to tweet "' + message + '" but got error: ' + reason)
-            })
-        }
-        else {
+        if(epoch_s() < this.tweet_time_lockout) {
             logger.warn('Twitter: Tweet: Attempted to tweet "' + message + '" but lockout dose not expire for ' + (this.tweet_time_lockout-epoch_s()).toString());
+            return;
         }
+        
+        await this.connect();
+
+        this.client.v2.tweet(message)
+        .then((results) => {
+            logger.info('Twitter: Tweeted: "' + results.data.text + '"');
+            this.tweet_time_lockout = epoch_s() + TWEET_LOCKOUT_INTERVAL;
+        })
+        .catch((reason) => {
+            logger.warn('Twitter: Tweet: Attempted to tweet "' + message + '" but got error: ' + reason)
+        })
     }
 
     // Update the config file with the tokens

@@ -6,6 +6,8 @@
 // only marked LOS when all aircraft/last aircraft is LOS
 // tracking information is not updating
 
+const { v4: uuidv4 } = require('uuid');
+
 const { epoch_s } = require('./core.js');
 var {database} = require('./database.js');
 let {logger} = require('./logger.js')
@@ -17,9 +19,19 @@ const los_time = 3 * 60; // How many seconds before a signal is considered lost
 const los_tic = 5; // How many tics before a signal is considered lost
 const in_sea_level = 750; // Indiana Sea Level (assume constant since this state is flat)
 
-let flights = {}; // Aircraft getting tracked
-let icao24_not_helicopters = {};
-let count = 1;
+const whitelist = [];
+const blacklist = [];
+
+// Data
+let flights = { // Aircraft getting tracked
+  
+}; 
+let tracking_icao24 = { // Which ICAO24 are tracked or untracked
+  "tracked_helicopters": new Set(),
+  "untracked_helicopters": new Set(),
+  "untracked_aircraft": new Set()
+}
+let trips = {} // Current trips
 
 const flight_structure = {
   "icao24": "", // The icao24
@@ -31,21 +43,71 @@ const flight_structure = {
   "tics": 0, // How many tics has it been without data
   "tracking": { // Tracking information
     "current": { // The current tracking
-        "status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+        "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
+        "reason": "", // Reason status was changed
         "time": -1, // When the flight status was last updated
         "tics": 0, // How many intervals the flight status has been the same
         "counter": 0, // How many times the flight status has flipped
         "location": null // Location
     },
     "next": { // Tracking next status change
-        "status": "", // Is the aircraft: `airborn`, `grounded`, or `los`
+        "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
+        "reason": "", // Reason status was changed
         "time": -1, // When the flight status was last updated
         "tics": 0, // How many intervals the flight status has been the same
         "counter": 0, // How many times the next status has flipped
-    }
+    },
+    "previous": { // Tracking next status change
+      "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
+      "reason": "", // Reason status was changed
+      "time": -1, // When the flight status was last updated
+      "tics": 0, // How many intervals the flight status has been the same
+      "counter": 0, // How many times the next status has flipped
+  }
+  }
 }
-}
+const trip_structure = {
+  "tid":-1, // Trip ID
+  "aid":-1, // Aircraft ID
+  "status":"", // `grounded` `airborn` `los`
+  "departure": { // Departure information
+      "lid": "", // Location ID if one exists
+      "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
+      "display_name": "", // Name to display
+      "time": 0, // Time the status was changed
+      "lat": 0, // Lat where location was decided
+      "lon": 0, // Lon where location was decided
+      "distance": 0, // Distance to true location coordinates when status was changed
+      "reason": "" // Reason status was changed to this
+  },
+  "arrival": { // Arrival information in 
+      "lid": "", // Location ID if one exists
+      "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
+      "display_name": "", // Name to display
+      "time": 0, // Time the status was changed
+      "lat": 0, // Lat where location was decided
+      "lon": 0, // Lon where location was decided
+      "distance": 0, // Distance to true location coordinates when status was changed
+      "reason": "" // Reason status was changed to this
+  },
+  "stats": {
+      "time": 0, // Trip travel time in minutes
+      "distance": 0, // Trip travel distance in miles
+  },
+  "path": [ // Aircraft travel path
 
+  ]
+}
+const trip_location_structure = {
+  "lid": null, // Location ID if one exists
+  "type": "unknown", // Was the location determined using `hospital`, `faaID`, or `geo`
+  "display_name": "", // Name to display
+  "time": null, // Time the status was changed
+  "lat": null, // Lat where location was decided
+  "lon": null, // Lon where location was decided
+  "distance": null, // Distance to true location coordinates when status was changed
+  "reason": null // Reason status was changed to this
+}
 
 let meter_to_feet = (meter) => meter * 3.28084;
 let feet_to_meter = (feet) => feet * 0.3048;
@@ -66,7 +128,7 @@ let haversine = (lat1, lon1, lat2, lon2) => {
 let flight_status = (flight, time, hospital_results) => {
   // Check for LOS
   if(flight.tics >= los_tic || time - flight.time > los_time)
-    return "los"
+    return {"status":"los", "reason": flight.tics >= los_tic ? "tics ":" " + time - flight.time > los_time ? "time":""}
 
   // Check if flight is in the air
   if(flight.latest.vertical_rate > 1 || 
@@ -76,13 +138,13 @@ let flight_status = (flight, time, hospital_results) => {
       // Within hospital zone 1? Then say grounded
       for(let h in hospital_results) {
         if(hospital_results[h].zone == "zone1")
-          return "grounded" // Assume on the ground
+          return {"status":"grounded", "reason":"Within hospital zone 1"} // Assume on the ground
       }
 
-      return "airborn" // Assume in the air
+      return {"status":"airborn", "reason":"Airborn conditions met; not near hospital"} // Assume in the air
   }
   
-  return "grounded" // Assume on the ground
+  return {"status":"grounded", "reason":"Airborn conditions not met"} // Assume on the ground
 }
 
 // Given a flight, check to see if a flight is at a hospital and return the hospital id or null
@@ -96,13 +158,27 @@ let at_hospital = (flight) => {
 
     for(let z=0; z<hospital.zones.length; z++) {
       if(dist < hospital.zones[z].radius) { // Ceiling not implemented
-        results.push({"id":hospital.id, "zone":hospital.zones[z].id, "distance":dist, "hospital":hospital});
+        let location = {
+          "id":hospital.id,
+          "type":"hospital",
+          "display_name":hospital.display_name, 
+          "distance":dist,
+          "zone":hospital.zones[z].id
+        }
+
+        results.push(location);
         break
       }
     }
   }
 
   return results.sort((a, b) => {return a.distance - b.distance})
+}
+
+// Get the closest location to the flight
+// Want: id, display_name, distance, zone, type
+let closest_location = (flights) => {
+  return at_hospital(flights);
 }
 
 // Process the flight that just landed
@@ -119,44 +195,115 @@ let flight_landed = (flight) => {
   }
 }
 
+// Create the arrival or departure information
+let create_trip_location = (flight) => {
+  let trip = JSON.parse(JSON.stringify(trip_location_structure));
+
+  if(flight.tracking.current.location != null) {
+    trip.lid = flight.tracking.current.location.id;
+    trip.type = flight.tracking.current.location.type;
+    trip.display_name = flight.tracking.current.location.display_name;
+    trip.distance = flight.tracking.current.location.distance;
+    trip.reason = flight.tracking.current.location.reason;
+  }
+
+  trip.time = flight.tracking.current.time;
+  trip.lat = flight.latest.latitude;
+  trip.lon = flight.latest.longitude;
+
+  return trip;
+}
+
+// Update the trips
+let update_trips = (flight, old_status, new_status) => {
+  if(old_status == new_status) {
+    logger.warn("Tracker: old and new status are the same. This shouldn't have been passed to the trip.")
+    return;
+  }
+
+  // takeoff = new trip: grounded -> airborn
+  if(old_status == "grounded" && new_status == "airborn") {
+    trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
+    trips[flight.icao24].status = new_status;
+    trips[flight.icao24].departure = create_trip_location(flight);
+  }
+  // landed = trip end: airborn -> grounded
+  else if(old_status == "airborn" && new_status == "grounded") {
+    trips[flight.icao24].status = new_status;
+    trips[flight.icao24].arrival = create_trip_location(flight);
+
+    // TODO: Save trip to DP and clear from trips
+  }
+  // takeoff or picking up from previous trip or entered airspace from somewhere else = new or continue trip: los -> airborn
+  else if(old_status == "los" && new_status == "airborn") {
+    console.log("yo")
+    // If trip exists -> don't do anything
+    // If trip doesn't exist -> make one
+    if(!trips.hasOwnProperty(flight.icao24)) {
+      trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
+      trips[flight.icao24].status = new_status;
+      trips[flight.icao24].departure = create_trip_location(flight);
+    }
+    console.log(trips)
+  }
+  // lost signal in flight = do what??: airborn -> los
+  else if(old_status == "airborn" && new_status == "los") {
+    trips[flight.icao24].status = new_status;
+  }
+  // visible on ground = do nothing: los -> grounded
+  else if(old_status == "los" && new_status == "grounded") {
+    
+  }
+  // los on ground = do nothing: grounded -> los
+  else if(old_status == "grounded" && new_status == "los") {
+    
+  } 
+  else {
+    logger.warn("Tracker: old status ("+old_status+") or new status ("+new_status+") are not valid.")
+  }
+}
+
 // Update the tracking information
 let update_tracking = (flights, time) => {
   // Determine if aircraft is in the air or on the ground
   for(let f in flights) {
     let status_changed = false;
 
-    // Check if flight is at a hospital
-    let hospital_results = at_hospital(flights[f]);
+    // Get closest location
+    let location = closest_location(flights[f]);
 
     // Check strict flight status rules
-    let new_status = flight_status(flights[f], time, hospital_results)
+    let {status, reason} = flight_status(flights[f], time, location);
 
     // Update tracking information
-    if(flights[f].tracking.current.status == new_status) {
-      flights[f].tracking.current.tics++;
-    }
-    else {
+    if(flights[f].tracking.current.status != status) {
       // Flight status changed
-      logger.verbose("Tracker: New status for " + flights[f].icao24 + " (" + flights[f].faa["N-NUMBER"] + ") from " + flights[f].tracking.current.status + " to " + new_status);
+      logger.verbose("Tracker: New status for " + flights[f].icao24 + " (" + flights[f].faa["N-NUMBER"] + ") from " + flights[f].tracking.current.status + " to " + status);
+      flights[f].tracking.previous = JSON.parse(JSON.stringify(flights[f].tracking.current));
 
-      flights[f].tracking.current.status = new_status;
+      flights[f].tracking.current.status = status;
+      flights[f].tracking.current.reason = reason;
       flights[f].tracking.current.tics = 1;
-      flights[f].tracking.current.counter++;
       
-      if(flights[f].tracking.current.status !== "") status_changed = true;
+      status_changed = true;
     }
 
     // Update common variables
     flights[f].tracking.current.time = time;
-    if(hospital_results.length > 0) {
-      flights[f].tracking.current.location = hospital_results[0]
+    flights[f].tracking.current.tics++;
+    if(location.length > 0) {
+      flights[f].tracking.current.location = location[0]
     }
     else {
       flights[f].tracking.current.location = null;
     }
 
     // TODO: New status -> notification / save data
-    if(status_changed && new_status == "grounded")
+    if(status_changed) {
+      update_trips(flights[f], flights[f].tracking.previous.status, flights[f].tracking.current.status)
+    }
+
+    if(status_changed && status == "grounded")
       flight_landed(flights[f])
   }
 
@@ -181,7 +328,10 @@ let update_flights = async(nfd) => {
   let registration_results = [];
   for(let i=0; i<nfd.states.length; i++) {
     const icao24 = nfd.states[i].icao24;
-    if(!(icao24 in flights) && !(icao24 in icao24_not_helicopters)) {
+    if( !(icao24 in flights) && 
+        !(tracking_icao24.untracked_aircraft.has(icao24)) && 
+        !(tracking_icao24.untracked_helicopters.has(icao24)) && 
+        !(tracking_icao24.tracked_helicopters.has(icao24))) {
       let request = {"MODE S CODE HEX":icao24.toUpperCase()};
       registration_requests[icao24] = registration_promise.length;
       registration_promise.push(database.get_faa_registration(request))
@@ -192,7 +342,7 @@ let update_flights = async(nfd) => {
   await Promise.all(registration_promise).then((results) => {
     for(let i=0; i<results.length; i++) {
       if(results[i] == null) {
-        icao24_not_helicopters[Object.keys(registration_requests)[i]] = null;
+        tracking_icao24.untracked_aircraft.add(Object.keys(registration_requests)[i]);
       }
       else {
         delete results[i]["_id"]
@@ -200,7 +350,7 @@ let update_flights = async(nfd) => {
     }
     registration_results = results;
   })
-  
+
   // Update flight information
   for(let i=0; i<nfd.states.length; i++) {
     const icao24 = nfd.states[i].icao24;
@@ -208,7 +358,12 @@ let update_flights = async(nfd) => {
     // See if aircraft has been tracked recently
     if(!(icao24 in flights)) {
       // Check if aircraft is not a helicopter, skip
-      if(registration_results[registration_requests[icao24]] == null) continue
+      if(registration_results[registration_requests[icao24]] == null) {
+        tracking_icao24.untracked_aircraft.add(icao24);
+        continue
+      }
+
+      tracking_icao24.tracked_helicopters.add(icao24);
 
       // Add new flight and make sure it has the right structure
       flights[icao24] = JSON.parse(JSON.stringify(flight_structure));
@@ -228,16 +383,19 @@ let update_flights = async(nfd) => {
 let newFlightData = async (nfd) => {
   await update_flights(nfd);
 
-  let sendit = []
+  let aflights = []
   for(let f in flights) {
-    sendit.push(flights[f])
+    aflights.push(flights[f])
+  }
+  let atrips = []
+  for(let t in trips) {
+    atrips.push(trips[t])
   }
 
-  let metadata = {"time":nfd.time, "count":count++}
   update_tracking(flights, nfd.time);
-  io.emit('nfd', {"flights":sendit});
+  io.emit('nfd', {"flights":aflights, "trips":atrips});
 
-  logger.verbose(epoch_s() + ": Tracking " + Object.keys(flights).length + " flights")
+  logger.verbose(epoch_s() + ": Flights " + Object.keys(flights).length + "; Trips: " + Object.keys(trips).length);
 }
 
 

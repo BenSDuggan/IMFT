@@ -17,6 +17,7 @@
     "socket.io": "^4.5.1",
     "twitter-api-sdk": "^1.2.1",
     "twitter-api-v2": "^1.12.9",
+    "uuid": "^9.0.0",
     "winston": "^3.8.2"
   }
 }
