@@ -1,10 +1,6 @@
 
 process.env.IMFT_ENV = "development";
 
-
-const spawn = require("child_process").spawn;
-const fs = require('fs');
-
 var {newFlightData} = require('./src/flight-tracker.js');
 var {database} = require('./src/database.js')
 var { } = require('./src/sockets.js')

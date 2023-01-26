@@ -30,7 +30,10 @@ function Sidebar(props) {
             </div>
             <div id="sidebar-selected-flight" style={{display:props.selectedSidebar.tab=='selected-flight' ? 'block' : 'none'}}>
                 {props.selectedSidebar.tab=='selected-flight' ? 
-                <FlightSelected flight={props.flights.filter(f => f.icao24 == props.selectedSidebar.id)[0]}></FlightSelected> :
+                <FlightSelected 
+                    flight={props.flights.filter(f => f.icao24 == props.selectedSidebar.id)[0]}
+                    trip={props.trips.filter(t => t.aid == props.selectedSidebar.id)[0]}
+                    ></FlightSelected> :
                 <h2>Selected Flight (non selected)</h2>}
             </div>
         </div>

@@ -3,6 +3,7 @@ import { useMapEvents } from 'react-leaflet/hooks'
 
 import HospitalMarker  from './HospitalMarker'
 import FlightsMarker  from './FlightMarker'
+import MapPath from './MapPath'
 
 const bbox = [[37, -88.028], [41.762, -84.809]];
 
@@ -44,6 +45,14 @@ function Map(props) {
                                             flight={f} 
                                             selectedSidebar={props.selectedSidebar} 
                                             setSelectedSidebar={props.setSelectedSidebar}></FlightsMarker>
+                        )};
+                    </LayerGroup>
+                </LayersControl.Overlay>
+
+                <LayersControl.Overlay checked name="Path">
+                    <LayerGroup>
+                        {props.trips.map(t => 
+                            <MapPath key={"map-flight-path-" + t.aid} trip={t} selectedSidebar={props.selectedSidebar}></MapPath>
                         )};
                     </LayerGroup>
                 </LayersControl.Overlay>

@@ -6,10 +6,12 @@ function FlightSelected(props) {
         return d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
     }
 
+    let feet_to_miles = (feet) => feet / 5280;
     let meter_to_feet = (meter) => meter * 3.28084;
     let feet_to_meter = (feet) => feet * 0.3048;
 
     const f = props.flight;
+    const t = props.trip;
  
     return (
         <div key={f.icao24}>
@@ -56,40 +58,28 @@ function FlightSelected(props) {
 
             <div>
                 <h3>Trip</h3>
+                <span>Trip time: {(t.stats.time / 60).toFixed(1)} minutes  </span>  
+                <span>Trip distance: {feet_to_miles(t.stats.distance).toFixed(2)} miles</span><br/>
                 <table style={{width:'100%'}}>
                     <tbody>
-                        <tr style={{"vertical-align":'top', display: 'inline-block'}}>
+                        <tr style={{"verticalAlign":'top', display: 'inline-block'}}>
                             <td style={{width:'50%'}}>
                                 <strong>Departure</strong> <br />
-                                <span>Status: {f.tracking.previous.status ?? "NA"}</span><br/>
-                                <span>Reason: {f.tracking.previous.reason ?? "NA"}</span><br/>
-                                <span>Tics: {f.tracking.previous.tics ?? "NA"}</span><br/>
-                                <span>Counter: {f.tracking.previous.counter ?? "NA"}</span><br/>
-                                <span>Time: {new Date(f.tracking.previous.time ?? 0).toLocaleString()}</span><br/>
-                                {f.tracking.previous.location != null ? 
-                                <div>
-                                    <span>Location: {f.tracking.previous.location.display_name ?? "NA"}</span><br/>
-                                    <span>Type: {f.tracking.previous.location.type ?? "NA"}</span><br/>
-                                    <span>Distance: {Math.round(f.tracking.previous.location.distance) ?? "NA"}</span><br/>
-                                    <span>Zone: {f.tracking.current.location.zone ?? "NA"}</span><br/>
-                                </div>:
-                                <span>Location: NA</span>}
+                                <span>Time: {new Date(t.departure.time*1000 ?? 0).toLocaleString()}</span><br/>
+                                <span>Location: {t.departure.display_name ?? "NA"}</span><br/>
+                                <span>Type: {t.departure.type ?? "NA"}</span><br/>
+                                <span>ID: {t.departure.lid ?? "NA"}</span><br/>
+                                <span>Distance: {Math.round(t.departure.distance) ?? "NA"}</span><br/>
+                                <span>Zone: {t.departure.zone ?? "NA"}</span><br/>
                             </td>
                             <td style={{width:'50%'}}>
-                                <strong>Arrival</strong> <br/>
-                                <span>Status: {f.tracking.current.status ?? "NA"}</span><br/>
-                                <span>Reason: {f.tracking.current.reason ?? "NA"}</span><br/>
-                                <span>Tics: {f.tracking.current.tics ?? "NA"}</span><br/>
-                                <span>Counter: {f.tracking.current.counter ?? "NA"}</span><br/>
-                                <span>Time: {new Date(f.tracking.current.time ?? 0).toLocaleString()}</span><br/>
-                                {f.tracking.current.location != null ? 
-                                <div>
-                                    <span>Location: {f.tracking.current.location.display_name ?? "NA"}</span><br/>
-                                    <span>Type: {f.tracking.current.location.type ?? "NA"}</span><br/>
-                                    <span>Distance: {Math.round(f.tracking.current.location.distance) ?? "NA"}</span><br/>
-                                    <span>Zone: {f.tracking.current.location.zone ?? "NA"}</span><br/>
-                                </div>:
-                                <span>Location: NA</span>}
+                                <strong>Arrival</strong> <br />
+                                <span>Time: {new Date(t.arrival.time*1000 ?? 0).toLocaleString()}</span><br/>
+                                <span>Location: {t.arrival.display_name ?? "NA"}</span><br/>
+                                <span>Type: {t.arrival.type ?? "NA"}</span><br/>
+                                <span>ID: {t.arrival.lid ?? "NA"}</span><br/>
+                                <span>Distance: {Math.round(t.arrival.distance) ?? "NA"}</span><br/>
+                                <span>Zone: {t.arrival.zone ?? "NA"}</span><br/>
                             </td>
                         </tr>
                     </tbody>
@@ -101,14 +91,14 @@ function FlightSelected(props) {
                 <h3>Flight Tracking</h3>
                 <table style={{width:'100%'}}>
                     <tbody>
-                        <tr style={{"vertical-align":'top', display: 'inline-block'}}>
+                        <tr style={{"verticalAlign":'top', display: 'inline-block'}}>
                             <td style={{width:'33%'}}>
                                 <strong>Previous</strong> <br />
                                 <span>Status: {f.tracking.previous.status ?? "NA"}</span><br/>
                                 <span>Reason: {f.tracking.previous.reason ?? "NA"}</span><br/>
                                 <span>Tics: {f.tracking.previous.tics ?? "NA"}</span><br/>
                                 <span>Counter: {f.tracking.previous.counter ?? "NA"}</span><br/>
-                                <span>Time: {new Date(f.tracking.previous.time ?? 0).toLocaleString()}</span><br/>
+                                <span>Time: {new Date(f.tracking.previous.time*1000 ?? 0).toLocaleString()}</span><br/>
                                 {f.tracking.previous.location != null ? 
                                 <div>
                                     <span>Location: {f.tracking.previous.location.display_name ?? "NA"}</span><br/>
@@ -124,7 +114,7 @@ function FlightSelected(props) {
                                 <span>Reason: {f.tracking.current.reason ?? "NA"}</span><br/>
                                 <span>Tics: {f.tracking.current.tics ?? "NA"}</span><br/>
                                 <span>Counter: {f.tracking.current.counter ?? "NA"}</span><br/>
-                                <span>Time: {new Date(f.tracking.current.time ?? 0).toLocaleString()}</span><br/>
+                                <span>Time: {new Date(f.tracking.current.time*1000 ?? 0).toLocaleString()}</span><br/>
                                 {f.tracking.current.location != null ? 
                                 <div>
                                     <span>Location: {f.tracking.current.location.display_name ?? "NA"}</span><br/>
@@ -140,7 +130,7 @@ function FlightSelected(props) {
                                 <span>Reason: {f.tracking.next.reason ?? "NA"}</span><br/>
                                 <span>Tics: {f.tracking.next.tics ?? "NA"}</span><br/>
                                 <span>Counter: {f.tracking.next.counter ?? "NA"}</span><br/>
-                                <span>Time: {new Date(f.tracking.next.time ?? 0).toLocaleString()}</span><br/>
+                                <span>Time: {new Date(f.tracking.next.time*1000 ?? 0).toLocaleString()}</span><br/>
                                 {f.tracking.next.location != null ? 
                                 <div>
                                     <span>Location: {f.tracking.next.location.display_name ?? "NA"}</span><br/>

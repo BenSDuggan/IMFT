@@ -12,6 +12,7 @@ function App() {
 
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [metadata, setMetadata] = useState({});  
   const [socket, setSocket] = useState(null);
   const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":null});
@@ -43,8 +44,9 @@ function App() {
     })
       
     s.on('nfd', (data) => {
+      console.log(data);
       setFlights(data.flights);
-      console.log(data)
+      setTrips(data.trips);
     });
 
     s.on('hf_metadata', (data) => {
@@ -57,8 +59,8 @@ function App() {
   return( 
     
       <div className='main-container'>
-        <Sidebar flights={flights} metadata={metadata} socket={socket} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Sidebar>
-        <Map hospitals={hospitals} flights={flights} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Map>
+        <Sidebar flights={flights} trips={trips} metadata={metadata} socket={socket} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Sidebar>
+        <Map hospitals={hospitals} flights={flights} trips={trips} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Map>
       </div>
     
   )

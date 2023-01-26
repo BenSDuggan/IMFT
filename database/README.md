@@ -89,3 +89,7 @@ FAA aircraft registration, but only rotor craft. Taken from <https://registry.fa
 ]
 ```
 
+## FAA Location Identification (Airport Location)
+
+FAA database of all airports. Only interested in FFA LID, `ARPT_NAME` (location name), `SITE_TYPE_CODE` latitude, longitude, city, and state. Data is found from this page <https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription_2022-12-29/>. Zip available from <https://nfdc.faa.gov/webContent/28DaySub/extra/29_Dec_2022_APT_CSV.zip>. Data is stored in the `APT_BASE.csv` file.
+

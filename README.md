@@ -152,7 +152,7 @@ Data structure for a trip which captures the path traveled from the beginning to
 ### Flight Tracking Criteria
 
 
-#### Ground status:
+#### Ground or airborn status:
 
 Determine if an aircraft is on the ground or airborne
 
@@ -166,6 +166,9 @@ Determine if an aircraft is on the ground or airborne
         * *Some exceptions like Eski and Riley*
     * ***Assume that helicopters won't hover***
 * LOS (loss of signal): No updated data for 2 minutes or 5 intervals, which ever is less
-    * If LOS, see if aircraft is within zone 2 of hospital. If more than one result, pick the hospital with the shortest distance
+
+#### Location status
+
+Ideally a location is set under ideal conditions. For a departure that occurs when going from grounded to airborn and for an arrival that is going from airborn to grounded. However, aircraft may enter from outside the bounding box or have a signal lost near their landing site. Actually, this doesn't matter
 
 * Status will not change unless 2 consecutive new status have been observed
