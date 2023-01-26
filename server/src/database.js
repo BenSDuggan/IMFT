@@ -70,6 +70,40 @@ let Database = class {
 
         return answer;
     }
+
+    /* Find nearby FAA airports from given coordinates and max distance
+    *
+    * latitude (Number): Latitude to search
+    * longitude (Number): Longitude to search
+    * max_distance (Number): maximum distance to search
+    *
+    * Returns: Array of JSON object each of which is an airport within the searched distance
+    * 
+    * Example: `database.find_nearby_faa_lid(39.77792, -86.18018, 300).then((results) => console.log(results))`
+    */
+    async find_nearby_faa_lid(latitude, longitude, max_distance) {
+        let answer = [];
+        let term = 
+            { location: 
+                { $near: 
+                    { 
+                        $geometry: { 
+                            type: "Point", 
+                            coordinates: [Number(longitude), Number(latitude)] 
+                        },
+                        $maxDistance: Number(max_distance) 
+                    } 
+                } 
+            }
+
+        const cursor = await this.client.db(databaseName).collection("faaLID").find(term);
+        
+        await cursor.forEach((r) => {
+            answer.push(r);
+        });
+
+        return answer;
+    }
 }
 
 const database = new Database()

@@ -4,18 +4,23 @@
 
 var {express, app, http, server, io} = require('./web.js')
 var {database} = require('./database.js')
-var {devFlightData, historic_flights} = require('../test-data/dev-flight-data.js');
-var {flights} = require('./flight-tracker.js');
+const adsb = require('./adsb.js')
+var {flights, trips} = require('./flight-tracker.js');
+let {logger} = require('./logger.js')
 
 
 io.on('connection', (socket) => {
     socket.on('get_flights', (msg) => {
-        let sendit = []
+        let aflights = []
         for(let f in flights) {
-            sendit.push(flights[f])
+            aflights.push(flights[f])
+        }
+        let atrips = []
+        for(let t in trips) {
+            atrips.push(trips[t])
         }
 
-        socket.emit('nfd', {"flights":sendit});
+        socket.emit('nfd', {"flights":aflights, "trips":atrips});
     });
 
     socket.on('get_hospitals', (msg) => {
@@ -25,28 +30,32 @@ io.on('connection', (socket) => {
     });
 
     socket.on('get_hf_metadata', (msg) => {
-        historic_flights.emit_metadata()
+        if(process.env.IMFT_ENV != "production" && process.env.IMFT_ENV == "development" && adsb.receiver.service == "historic-flights")
+            adsb.receiver.emit_metadata()
     });
 
     socket.on('hf_action', (msg) => {
-        console.log(msg)
+        if(process.env.IMFT_ENV == "production" && process.env.IMFT_ENV != "development" && adsb.receiver.service != "historic-flights")
+            return
+
+        logger.verbose("socket: hf_action: " + msg.action)
         if(msg.action === "start") {
-            historic_flights.start();
+            adsb.receiver.start();
         }
         else if(msg.action === "stop") {
-            historic_flights.stop();
+            adsb.receiver.stop();
         }
         else if(msg.action === "speed") {
-            historic_flights.set_speed(Number(msg.value));
+            adsb.receiver.set_speed(Number(msg.value));
         }
         else if(msg.action === "frame") {
-            historic_flights.set_frame(Number(msg.value));
+            adsb.receiver.set_frame(Number(msg.value));
         }
         else {
-            console.error("Received invalid message");
+            logger.warn("Received invalid message");
         }
 
-        historic_flights.emit_metadata();
+        adsb.receiver.emit_metadata();
     })
 });
 

@@ -1,12 +1,18 @@
 # Pull data from the OpenSky API at regular intervals
+# Must provide path to save data
 
-import os, json, time
+import os, json, sys
 from opensky_api import OpenSkyApi
+
+with open('swag.big', "w") as file:
+    file.write("Bang bang")
+    file.close()
 
 # bbox = (min latitude, max latitude, min longitude, max longitude)
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
-filename = "curr-flights.json"
+filename = sys.argv[1]
 config_file = "~/.config/imft/opensky.json"
+print(sys.argv)
 
 username, password = None, None
 # Load config

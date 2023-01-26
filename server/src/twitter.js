@@ -140,6 +140,10 @@ let Twitter = class {
     }
 }
 
-const twitter = new Twitter({config:config.config})
+let twitter = null;
+
+if(process.env.IMFT_ENV == "production") {
+    const twitter = new Twitter({config:config.config})
+}
 
 module.exports = { twitter };

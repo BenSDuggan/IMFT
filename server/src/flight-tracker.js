@@ -13,9 +13,10 @@ var {database} = require('./database.js');
 let {logger} = require('./logger.js')
 let {twitter} = require('./twitter.js')
 const {io} = require('./web.js');
+let nodeGeocoder = require('node-geocoder');
 
 // Constants
-const los_time = 3 * 60; // How many seconds before a signal is considered lost
+const los_time = 5 * 60; // How many seconds before a signal is considered lost
 const los_tic = 5; // How many tics before a signal is considered lost
 const in_sea_level = 750; // Indiana Sea Level (assume constant since this state is flat)
 
@@ -100,7 +101,7 @@ const trip_structure = {
 }
 const trip_location_structure = {
   "lid": null, // Location ID if one exists
-  "type": "unknown", // Was the location determined using `hospital`, `faaID`, or `geo`
+  "type": "unknown", // Was the location determined using `hospital`, `faaLID`, or `geo`
   "display_name": "", // Name to display
   "time": null, // Time the status was changed
   "lat": null, // Lat where location was decided
@@ -118,37 +119,35 @@ let haversine = (lat1, lon1, lat2, lon2) => {
           Math.cos(deg2rad(lat1))*
           Math.sin(deg2rad(lon2-lon1)/2)**2
   
-  return 2 * meter_to_feet(6371e3) * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  return 2 * meter_to_feet(6371e3) * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) // Distance in feet
 }
 // Measure the distance between 2 points. Should be ~100yrds=300ft
 //console.log(haversine(39.18048154123995, -86.52535587827155, 39.18130600162018, -86.5253532904204))
 
+let options = {
+  provider: 'openstreetmap'
+};
+ 
+let geoCoder = nodeGeocoder(options);
 
-// Given a flight, check if it's `airborn`, `grounded`, or `los`
-let flight_status = (flight, time, hospital_results) => {
-  // Check for LOS
-  if(flight.tics >= los_tic || time - flight.time > los_time)
-    return {"status":"los", "reason": flight.tics >= los_tic ? "tics ":" " + time - flight.time > los_time ? "time":""}
 
-  // Check if flight is in the air
-  if(flight.latest.vertical_rate > 1 || 
-     flight.latest.velocity > 1 || 
-     flight.latest.baro_altitude > feet_to_meter(250+in_sea_level)) {
-    
-      // Within hospital zone 1? Then say grounded
-      for(let h in hospital_results) {
-        if(hospital_results[h].zone == "zone1")
-          return {"status":"grounded", "reason":"Within hospital zone 1"} // Assume on the ground
-      }
 
-      return {"status":"airborn", "reason":"Airborn conditions met; not near hospital"} // Assume in the air
+// Return true if the flight is within zone 1 of a hospital
+let flight_within_hospital_zone1 = (flight) => {
+  for(let h=0; h<database.hospitals.length; h++) {
+    let hospital = database.hospitals[h];
+
+    let dist = haversine(flight.latest.latitude, flight.latest.longitude, hospital.latitude, hospital.longitude);
+    if(dist < hospital.zones[0].radius) { // Ceiling not implemented
+      return true;
+    }
   }
-  
-  return {"status":"grounded", "reason":"Airborn conditions not met"} // Assume on the ground
+
+  return false
 }
 
 // Given a flight, check to see if a flight is at a hospital and return the hospital id or null
-let at_hospital = (flight) => {
+let find_nearby_hospitals = (flight) => {
   let results = [];
 
   for(let h=0; h<database.hospitals.length; h++) {
@@ -175,10 +174,95 @@ let at_hospital = (flight) => {
   return results.sort((a, b) => {return a.distance - b.distance})
 }
 
+// Given a flight, find the closest airports
+let find_nearby_airports = async (flight, max_distance) => {
+  let results = [];
+
+  let airports = await database.find_nearby_faa_lid(flight.latest.latitude, flight.latest.longitude, meter_to_feet(max_distance))
+  
+  for(let a=0; a<airports.length; a++) {
+    let airport = airports[a];
+
+    let dist = haversine(flight.latest.latitude, flight.latest.longitude, airport.location.coordinates[1], airport.location.coordinates[0]);
+
+    let location = {
+      "id":airport.lid,
+      "type":"faaLID",
+      "display_name":airport.name, 
+      "distance":dist,
+      "zone":null
+    }
+
+    results.push(location);
+  }
+
+  return results.sort((a, b) => {return a.distance - b.distance})
+}
+
 // Get the closest location to the flight
 // Want: id, display_name, distance, zone, type
-let closest_location = (flights) => {
-  return at_hospital(flights);
+// depth: `soft` = look for locations close to the flight, `hard` = get a geo response if another location can't be determined
+let closest_location = async(flight, depth) => {
+  if(depth == "hard")
+    logger.debug("closest_location: Doing it on hard mode!")
+
+  let hospitals = find_nearby_hospitals(flight);
+
+  if(hospitals.length > 0)
+    return hospitals[0]
+
+  let airports = null;
+  if(depth == 'hard')
+    airports = await find_nearby_airports(flight, 3000); // KM
+  else 
+    airports = await find_nearby_airports(flight, 1000); // KM
+
+  if(airports.length > 0)
+    return airports[0];
+  
+  if(depth == "hard") {
+    // Reverse Geocode
+    let location = {
+      "id":uuidv4(),
+      "type":"geo",
+      "display_name": "unknown", 
+      "distance":null,
+      "zone":null
+    }
+
+    let geo = await geoCoder.reverse({lat:flight.latest.latitude, lon:flight.latest.longitude})
+    .catch((err)=> {
+        logger.warn("closest_location: Could not get reverse geocoder information: " + err)
+        return null
+    }); 
+
+    if(geo != null && geo.length > 0) {
+      location.display_name = geo[0].formattedAddress;
+      location.distance = haversine(flight.latest.latitude, flight.latest.longitude, geo[0].latitude, geo[0].longitude);
+
+      return location
+    }
+  }
+
+  return null
+}
+
+// Given a flight, check if it's `airborn`, `grounded`, or `los`
+let flight_status = (flight, time) => {
+  // Check for LOS
+  if(flight.tics >= los_tic || time - flight.time > los_time)
+    return {"status":"los", "reason": flight.tics >= los_tic ? "tics ":" " + time - flight.time > los_time ? "time":""}
+  
+  if(flight_within_hospital_zone1(flight))
+    return {"status":"grounded", "reason":"Within hospital zone 1"} // Assume on the ground
+
+  // Check if flight is in the air
+  if(flight.latest.vertical_rate > 1 || 
+     flight.latest.velocity > 1 || 
+     flight.latest.baro_altitude > feet_to_meter(250+in_sea_level))
+      return {"status":"airborn", "reason":"Airborn conditions met; not near hospital"} // Assume in the air
+  
+  return {"status":"grounded", "reason":"Airborn conditions not met"} // Assume on the ground
 }
 
 // Process the flight that just landed
@@ -215,21 +299,38 @@ let create_trip_location = (flight) => {
 }
 
 // Update the trips
-let update_trips = (flight, old_status, new_status) => {
+let update_trips = async (flight, old_status, new_status) => {
+  // Update trip data
+  if(trips.hasOwnProperty(flight.icao24)) {
+    trips[flight.icao24].stats.time = flight.time - trips[flight.icao24].departure.time;
+
+    path_length = trips[flight.icao24].path.length;
+    trips[flight.icao24].stats.distance += haversine(flight.latest.latitude, flight.latest.longitude, trips[flight.icao24].path[path_length-1][0], trips[flight.icao24].path[path_length-1][1]);
+    trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
+  }
+
   if(old_status == new_status) {
-    logger.warn("Tracker: old and new status are the same. This shouldn't have been passed to the trip.")
     return;
   }
 
   // takeoff = new trip: grounded -> airborn
   if(old_status == "grounded" && new_status == "airborn") {
     trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
+    trips[flight.icao24].aid = flight.icao24;
     trips[flight.icao24].status = new_status;
+    trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
+
+    if(flight.tracking.current.location == null)
+      flight.tracking.current.location = await closest_location(flight, 'hard');
+
     trips[flight.icao24].departure = create_trip_location(flight);
   }
   // landed = trip end: airborn -> grounded
   else if(old_status == "airborn" && new_status == "grounded") {
     trips[flight.icao24].status = new_status;
+
+    if(flight.tracking.current.location == null)
+      flight.tracking.current.location = await closest_location(flight, 'hard');
     trips[flight.icao24].arrival = create_trip_location(flight);
 
     // TODO: Save trip to DP and clear from trips
@@ -240,13 +341,28 @@ let update_trips = (flight, old_status, new_status) => {
     // If trip doesn't exist -> make one
     if(!trips.hasOwnProperty(flight.icao24)) {
       trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
+      trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
+      trips[flight.icao24].aid = flight.icao24;
       trips[flight.icao24].status = new_status;
+
+      if(flight.tracking.current.location == null)
+        flight.tracking.current.location = await closest_location(flight, 'hard');
       trips[flight.icao24].departure = create_trip_location(flight);
+    }
+    else {
+      trips[flight.icao24].status = new_status;
+      trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
     }
   }
   // lost signal in flight = do what??: airborn -> los
   else if(old_status == "airborn" && new_status == "los") {
     trips[flight.icao24].status = new_status;
+
+    if(flight.tracking.current.location == null)
+      flight.tracking.current.location = await closest_location(flight, 'hard');
+    trips[flight.icao24].arrival = create_trip_location(flight);
+
+    // TODO: Save trip to DP and clear from trips
   }
   // visible on ground = do nothing: los -> grounded
   else if(old_status == "los" && new_status == "grounded") {
@@ -262,16 +378,16 @@ let update_trips = (flight, old_status, new_status) => {
 }
 
 // Update the tracking information
-let update_tracking = (flights, time) => {
+let update_tracking = async(flights, time) => {
   // Determine if aircraft is in the air or on the ground
   for(let f in flights) {
     let status_changed = false;
 
-    // Get closest location
-    let location = closest_location(flights[f]);
-
     // Check strict flight status rules
-    let {status, reason} = flight_status(flights[f], time, location);
+    let {status, reason} = flight_status(flights[f], time);
+
+    // Get closest location
+    let location = await closest_location(flights[f], 'soft');
 
     // Update tracking information
     if(flights[f].tracking.current.status != status) {
@@ -289,17 +405,14 @@ let update_tracking = (flights, time) => {
     // Update common variables
     flights[f].tracking.current.time = time;
     flights[f].tracking.current.tics++;
-    if(location.length > 0) {
-      flights[f].tracking.current.location = location[0]
+    if(location != null) {
+      flights[f].tracking.current.location = location;
     }
     else {
       flights[f].tracking.current.location = null;
     }
 
-    // TODO: New status -> notification / save data
-    if(status_changed) {
-      update_trips(flights[f], flights[f].tracking.previous.status, flights[f].tracking.current.status)
-    }
+    await update_trips(flights[f], flights[f].tracking.previous.status, flights[f].tracking.current.status)
 
     if(status_changed && status == "grounded")
       flight_landed(flights[f])
@@ -380,6 +493,7 @@ let update_flights = async(nfd) => {
 // Process new flight data
 let newFlightData = async (nfd) => {
   await update_flights(nfd);
+  await update_tracking(flights, nfd.time);
 
   let aflights = []
   for(let f in flights) {
@@ -390,13 +504,12 @@ let newFlightData = async (nfd) => {
     atrips.push(trips[t])
   }
 
-  update_tracking(flights, nfd.time);
   io.emit('nfd', {"flights":aflights, "trips":atrips});
 
-  logger.verbose(epoch_s() + ": Flights " + Object.keys(flights).length + "; Trips: " + Object.keys(trips).length);
+  logger.verbose(new Date(epoch_s()).toISOString() + ": Flights " + Object.keys(flights).length + "; Trips: " + Object.keys(trips).length);
 }
 
 
 
 
-module.exports = { newFlightData, flights };
+module.exports = { newFlightData, flights, trips };
