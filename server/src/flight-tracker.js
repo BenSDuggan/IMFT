@@ -3,7 +3,6 @@
  * Data path: Get new data (`newFlightData`) -> update flight position tracking (`newFlightData`) -> update tracking information (`update_tracking`) ->  -> send data
  */
 
-// TODO: Separate components and move data structures
 // TODO: Save trips to database
 // TODO: Remove from flights and trips after x period of time
 // TODO: Create an ability to not track helicopters

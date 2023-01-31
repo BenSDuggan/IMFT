@@ -27,7 +27,7 @@ process.on('SIGINT', async () => {
 
 let historic = () => {
   adsb.receiver = new adsb.HistoricFlights()
-  adsb.receiver.load("test-data/test-data-50_3.json");
+  adsb.receiver.load("test-data/test-data-100.json");
   setTimeout(() => {
     adsb.receiver.speed = 10
     //adsb.receiver.set_frame(20);
