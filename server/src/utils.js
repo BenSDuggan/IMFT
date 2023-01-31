@@ -1,5 +1,15 @@
 // Core functions and classes needed by every other class
-// Includes config, logger, and helper functions
+// Includes config and helper functions
+
+const fs = require('fs')
+const os = require('os');
+
+config_path = os.homedir() + "/.config/imft/config.json"
+
+
+/****************************
+ ***   Helper Functions   ***
+ ***************************/
 
 // Get the current time from epoch in seconds
 const epoch_s = () => Math.floor(Date.now()/1000)
@@ -18,10 +28,34 @@ let haversine = (lat1, lon1, lat2, lon2) => {
 // Measure the distance between 2 points. Should be ~100yrds=300ft
 //console.log(haversine(39.18048154123995, -86.52535587827155, 39.18130600162018, -86.5253532904204))
 
+
+/******************
+ ***   Config   ***
+ *****************/
+
+config = {};
+
+let load_config = () => {
+    if (fs.existsSync(config_path) || true) {
+        let rawdata = fs.readFileSync(config_path);
+        config = JSON.parse(rawdata);
+    }
+}
+
+let save_config = () => {
+    let data = JSON.stringify(config);
+    fs.writeFileSync(config_path, data);
+}
+
+load_config();
+
 module.exports = { 
     epoch_s, 
     meter_to_feet,
     feet_to_meter,
     deg2rad,
-    haversine
+    haversine,
+    config, 
+    load_config,
+    save_config
 };

@@ -3,17 +3,20 @@
  * Data path: Get new data (`newFlightData`) -> update flight position tracking (`newFlightData`) -> update tracking information (`update_tracking`) ->  -> send data
  */
 
-// only marked LOS when all aircraft/last aircraft is LOS
-// tracking information is not updating
+// TODO: Separate components and move data structures
+// TODO: Save trips to database
+// TODO: Remove from flights and trips after x period of time
+// TODO: Create an ability to not track helicopters
 
+let nodeGeocoder = require('node-geocoder');
 const { v4: uuidv4 } = require('uuid');
 
-let utils = require('./utils.js');
 var {database} = require('./database.js');
+var {flight_structure, trip_structure, trip_location_structure} = require('./data_structures.js')
+const {io} = require('./web.js');
 let {logger} = require('./logger.js')
 let {twitter} = require('./twitter.js')
-const {io} = require('./web.js');
-let nodeGeocoder = require('node-geocoder');
+let utils = require('./utils.js');
 
 // Constants
 const los_time = 5 * 60; // How many seconds before a signal is considered lost
@@ -30,205 +33,6 @@ let tracking_icao24 = { // Which ICAO24 are tracked or untracked
   "untracked_aircraft": new Set()
 }
 
-const flight_structure = {
-  "icao24": "", // The icao24
-  "faa":{}, // FAA registration data
-  "last":{}, // Data from the last update interval
-  "stl":{}, // Data from the second to last interval (copied from last when the next update interval occurs)
-  "latest":{}, // Latest data received, not necessarily up to date
-  "time": -1, // Time that the last flight data was received
-  "tics": 0, // How many tics has it been without data
-  "tracking": { // Tracking information
-    "current": { // The current tracking
-        "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-        "reason": "", // Reason status was changed
-        "time": -1, // When the flight status was last updated
-        "tics": 0, // How many intervals the flight status has been the same
-        "counter": 0, // How many times the flight status has flipped
-        "location": null // Location
-    },
-    "next": { // Tracking next status change
-        "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-        "reason": "", // Reason status was changed
-        "time": -1, // When the flight status was last updated
-        "tics": 0, // How many intervals the flight status has been the same
-        "counter": 0, // How many times the next status has flipped
-    },
-    "previous": { // Tracking next status change
-      "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-      "reason": "", // Reason status was changed
-      "time": -1, // When the flight status was last updated
-      "tics": 0, // How many intervals the flight status has been the same
-      "counter": 0, // How many times the next status has flipped
-  }
-  }
-}
-const trip_structure = {
-  "tid":-1, // Trip ID
-  "aid":-1, // Aircraft ID
-  "status":"", // `grounded` `airborn` `los`
-  "departure": { // Departure information
-      "lid": "", // Location ID if one exists
-      "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
-      "display_name": "", // Name to display
-      "time": 0, // Time the status was changed
-      "lat": 0, // Lat where location was decided
-      "lon": 0, // Lon where location was decided
-      "distance": 0, // Distance to true location coordinates when status was changed
-      "reason": "" // Reason status was changed to this
-  },
-  "arrival": { // Arrival information in 
-      "lid": "", // Location ID if one exists
-      "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
-      "display_name": "", // Name to display
-      "time": 0, // Time the status was changed
-      "lat": 0, // Lat where location was decided
-      "lon": 0, // Lon where location was decided
-      "distance": 0, // Distance to true location coordinates when status was changed
-      "reason": "" // Reason status was changed to this
-  },
-  "stats": {
-      "time": 0, // Trip travel time in minutes
-      "distance": 0, // Trip travel distance in miles
-  },
-  "path": [ // Aircraft travel path
-
-  ]
-}
-const trip_location_structure = {
-  "lid": null, // Location ID if one exists
-  "type": "unknown", // Was the location determined using `hospital`, `faaLID`, or `geo`
-  "display_name": "", // Name to display
-  "time": null, // Time the status was changed
-  "lat": null, // Lat where location was decided
-  "lon": null, // Lon where location was decided
-  "distance": null, // Distance to true location coordinates when status was changed
-  "reason": null // Reason status was changed to this
-}
-
-let options = {
-  provider: 'openstreetmap'
-};
- 
-let geoCoder = nodeGeocoder(options);
-
-
-
-// Return true if the flight is within zone 1 of a hospital
-let flight_within_hospital_zone1 = (flight) => {
-  for(let h=0; h<database.hospitals.length; h++) {
-    let hospital = database.hospitals[h];
-
-    let dist = utils.haversine(flight.latest.latitude, flight.latest.longitude, hospital.latitude, hospital.longitude);
-    if(dist < hospital.zones[0].radius) { // Ceiling not implemented
-      return true;
-    }
-  }
-
-  return false
-}
-
-// Given a flight, check to see if a flight is at a hospital and return the hospital id or null
-let find_nearby_hospitals = (flight) => {
-  let results = [];
-
-  for(let h=0; h<database.hospitals.length; h++) {
-    let hospital = database.hospitals[h];
-
-    let dist = utils.haversine(flight.latest.latitude, flight.latest.longitude, hospital.latitude, hospital.longitude);
-
-    for(let z=0; z<hospital.zones.length; z++) {
-      if(dist < hospital.zones[z].radius) { // Ceiling not implemented
-        let location = {
-          "id":hospital.id,
-          "type":"hospital",
-          "display_name":hospital.display_name, 
-          "distance":dist,
-          "zone":hospital.zones[z].id
-        }
-
-        results.push(location);
-        break
-      }
-    }
-  }
-
-  return results.sort((a, b) => {return a.distance - b.distance})
-}
-
-// Given a flight, find the closest airports
-let find_nearby_airports = async (flight, max_distance) => {
-  let results = [];
-
-  let airports = await database.find_nearby_faa_lid(flight.latest.latitude, flight.latest.longitude, utils.meter_to_feet(max_distance))
-  
-  for(let a=0; a<airports.length; a++) {
-    let airport = airports[a];
-
-    let dist = utils.haversine(flight.latest.latitude, flight.latest.longitude, airport.location.coordinates[1], airport.location.coordinates[0]);
-
-    let location = {
-      "id":airport.lid,
-      "type":"faaLID",
-      "display_name":airport.name, 
-      "distance":dist,
-      "zone":null
-    }
-
-    results.push(location);
-  }
-
-  return results.sort((a, b) => {return a.distance - b.distance})
-}
-
-// Get the closest location to the flight
-// Want: id, display_name, distance, zone, type
-// depth: `soft` = look for locations close to the flight, `hard` = get a geo response if another location can't be determined
-let closest_location = async(flight, depth) => {
-  if(depth == "hard")
-    logger.debug("closest_location: Doing it on hard mode!")
-
-  let hospitals = find_nearby_hospitals(flight);
-
-  if(hospitals.length > 0)
-    return hospitals[0]
-
-  let airports = null;
-  if(depth == 'hard')
-    airports = await find_nearby_airports(flight, 3000); // KM
-  else 
-    airports = await find_nearby_airports(flight, 1000); // KM
-
-  if(airports.length > 0)
-    return airports[0];
-  
-  if(depth == "hard") {
-    // Reverse Geocode
-    let location = {
-      "id":uuidv4(),
-      "type":"geo",
-      "display_name": "unknown", 
-      "distance":null,
-      "zone":null
-    }
-
-    let geo = await geoCoder.reverse({lat:flight.latest.latitude, lon:flight.latest.longitude})
-    .catch((err)=> {
-        logger.warn("closest_location: Could not get reverse geocoder information: " + err)
-        return null
-    }); 
-
-    if(geo != null && geo.length > 0) {
-      location.display_name = geo[0].formattedAddress;
-      location.distance = utils.haversine(flight.latest.latitude, flight.latest.longitude, geo[0].latitude, geo[0].longitude);
-
-      return location
-    }
-  }
-
-  return null
-}
-
 // Process the flight that just landed
 let flight_landed = (flight) => {
   if(flight.tracking.current.location == null)
@@ -239,6 +43,135 @@ let flight_landed = (flight) => {
     let tweet = "N"+flight.faa["N-NUMBER"]+" ("+flight.icao24+"), "+flight.faa["NAME"]+", just landed at "+flight.tracking.current.location.hospital.display_name+
     " ("+flight.latest.latitude+", "+flight.latest.longitude+") " + new Date(utils.epoch_s()*1000).toLocaleString();
     twitter.tweet(tweet);
+  }
+}
+
+class Location {
+  constructor() {
+    this.options = {
+      provider: 'openstreetmap',
+    };
+    this.geoCoder = nodeGeocoder(this.options);
+  }
+
+  // Return true if the flight is within zone 1 of a hospital
+  flight_within_hospital_zone1 = (flight) => {
+    for(let h=0; h<database.hospitals.length; h++) {
+      let hospital = database.hospitals[h];
+
+      let dist = utils.haversine(flight.latest.latitude, flight.latest.longitude, hospital.latitude, hospital.longitude);
+      if(dist < hospital.zones[0].radius) { // Ceiling not implemented
+        return true;
+      }
+    }
+
+    return false
+  }
+
+  // Given a flight, check to see if a flight is at a hospital and return the hospital id or null
+  find_nearby_hospitals = (flight) => {
+    let results = [];
+
+    for(let h=0; h<database.hospitals.length; h++) {
+      let hospital = database.hospitals[h];
+
+      let dist = utils.haversine(flight.latest.latitude, flight.latest.longitude, hospital.latitude, hospital.longitude);
+
+      for(let z=0; z<hospital.zones.length; z++) {
+        if(dist < hospital.zones[z].radius) { // Ceiling not implemented
+          let location = {
+            "id":hospital.id,
+            "type":"hospital",
+            "display_name":hospital.display_name, 
+            "distance":dist,
+            "zone":hospital.zones[z].id
+          }
+
+          results.push(location);
+          break
+        }
+      }
+    }
+
+    return results.sort((a, b) => {return a.distance - b.distance})
+  }
+
+  // Given a flight, find the closest airports
+  find_nearby_airports = async (flight, max_distance) => {
+    let results = [];
+
+    let airports = await database.find_nearby_faa_lid(flight.latest.latitude, flight.latest.longitude, utils.meter_to_feet(max_distance))
+    
+    for(let a=0; a<airports.length; a++) {
+      let airport = airports[a];
+
+      let dist = utils.haversine(flight.latest.latitude, flight.latest.longitude, airport.location.coordinates[1], airport.location.coordinates[0]);
+
+      let location = {
+        "id":airport.lid,
+        "type":"faaLID",
+        "display_name":airport.name, 
+        "distance":dist,
+        "zone":null
+      }
+
+      results.push(location);
+    }
+
+    return results.sort((a, b) => {return a.distance - b.distance})
+  }
+
+  // Get the closest location to the flight
+  // Want: id, display_name, distance, zone, type
+  // depth: `soft` = look for locations close to the flight, `hard` = get a geo response if another location can't be determined
+  closest_location = async(flight, depth) => {
+    if(depth == "hard")
+      logger.debug("closest_location: Doing it on hard mode!")
+
+    let hospitals = this.find_nearby_hospitals(flight);
+
+    if(hospitals.length > 0)
+      return hospitals[0]
+
+    let airports = null;
+    if(depth == 'hard')
+      airports = await this.find_nearby_airports(flight, 3000); // KM
+    else 
+      airports = await this.find_nearby_airports(flight, 1000); // KM
+
+    if(airports.length > 0)
+      return airports[0];
+    
+    if(depth == "hard") {
+      // Reverse Geocode
+      let location = {
+        "id":uuidv4(),
+        "type":"geo",
+        "display_name": "unknown", 
+        "distance":null,
+        "zone":null
+      }
+
+      let geo = await this.geoCoder.reverse({lat:flight.latest.latitude, lon:flight.latest.longitude})
+      .catch((err)=> {
+          logger.warn("closest_location: Could not get reverse geocoder information: " + err)
+          return null
+      }); 
+
+      if(geo != null && geo.length > 0) {
+        let formatted = geo[0].formattedAddress;
+
+        if((geo[0].city ?? undefined) != undefined && (geo[0].state ?? undefined) != undefined)
+          formatted = results[0].city + ", " + results[0].state;
+        
+        location.display_name = formatted;
+        location.distance = utils.haversine(flight.latest.latitude, flight.latest.longitude, geo[0].latitude, geo[0].longitude);
+
+        return location
+      }
+    }
+
+    return null
   }
 }
 
@@ -288,7 +221,7 @@ class Trips {
       this.trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
 
       if(flight.tracking.current.location == null)
-        flight.tracking.current.location = await closest_location(flight, 'hard');
+        flight.tracking.current.location = await location.closest_location(flight, 'hard');
 
       this.trips[flight.icao24].departure = this.create_trip_location(flight);
     }
@@ -297,7 +230,7 @@ class Trips {
       this.trips[flight.icao24].status = new_status;
 
       if(flight.tracking.current.location == null)
-        flight.tracking.current.location = await closest_location(flight, 'hard');
+        flight.tracking.current.location = await location.closest_location(flight, 'hard');
       this.trips[flight.icao24].arrival = this.create_trip_location(flight);
 
       // TODO: Save trip to DP and clear from this.trips
@@ -313,7 +246,7 @@ class Trips {
         this.trips[flight.icao24].status = new_status;
 
         if(flight.tracking.current.location == null)
-          flight.tracking.current.location = await closest_location(flight, 'hard');
+          flight.tracking.current.location = await location.closest_location(flight, 'hard');
         this.trips[flight.icao24].departure = this.create_trip_location(flight);
       }
       else {
@@ -326,7 +259,7 @@ class Trips {
       this.trips[flight.icao24].status = new_status;
 
       if(flight.tracking.current.location == null)
-        flight.tracking.current.location = await closest_location(flight, 'hard');
+        flight.tracking.current.location = await location.closest_location(flight, 'hard');
       this.trips[flight.icao24].arrival = this.create_trip_location(flight);
 
       // TODO: Save trip to DP and clear from trips
@@ -356,7 +289,7 @@ class Flights {
     if(flight.tics >= los_tic || time - flight.time > los_time)
       return {"status":"los", "reason": flight.tics >= los_tic ? "tics ":" " + time - flight.time > los_time ? "time":""}
     
-    if(flight_within_hospital_zone1(flight))
+    if(location.flight_within_hospital_zone1(flight))
       return {"status":"grounded", "reason":"Within hospital zone 1"} // Assume on the ground
 
     // Check if flight is in the air
@@ -446,7 +379,7 @@ class Flights {
       let {status, reason} = this.flight_status(this.flights[f], time);
 
       // Get closest location
-      let location = await closest_location(this.flights[f], 'soft');
+      let loc = await location.closest_location(this.flights[f], 'soft');
 
       // Update tracking information
       if(this.flights[f].tracking.current.status != status) {
@@ -464,8 +397,8 @@ class Flights {
       // Update common variables
       this.flights[f].tracking.current.time = time;
       this.flights[f].tracking.current.tics++;
-      if(location != null) {
-        this.flights[f].tracking.current.location = location;
+      if(loc != null) {
+        this.flights[f].tracking.current.location = loc;
       }
       else {
         this.flights[f].tracking.current.location = null;
@@ -479,6 +412,7 @@ class Flights {
   }
 }
 
+const location = new Location();
 const flights = new Flights();
 const trips = new Trips();
 
@@ -502,4 +436,4 @@ let newFlightData = async (nfd) => {
 }
 
 
-module.exports = { newFlightData, flights, trips };
+module.exports = { newFlightData, flights, trips, location };

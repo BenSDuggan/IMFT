@@ -2,7 +2,7 @@
 const { TwitterApi } = require('twitter-api-v2');
 
 const {logger} = require('./logger.js')
-const config = require('./config.js')
+const utils = require('./utils.js')
 const {epoch_s} = require('./utils.js')
 
 
@@ -134,16 +134,16 @@ let Twitter = class {
 
     // Update the config file with the tokens
     update_config() {
-        config.config.twitter.refresh_token = this.refresh_token;
-        config.config.twitter.expires_at = this.expires_at;
-        config.save_config();
+        utils.config.twitter.refresh_token = this.refresh_token;
+        utils.config.twitter.expires_at = this.expires_at;
+        utils.save_config();
     }
 }
 
 let twitter = null;
 
 if(process.env.IMFT_ENV == "production") {
-    const twitter = new Twitter({config:config.config})
+    twitter = new Twitter({config:utils.config})
 }
 
 module.exports = { twitter };

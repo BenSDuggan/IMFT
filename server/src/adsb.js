@@ -115,7 +115,6 @@ class HistoricFlights extends ADSB {
 
     // Load data
     load(file_name) {
-        this.active = true;
         fs.readFile(file_name, 'utf8', (err, rawdata) => {
             if (err) {
               logger.error(err);

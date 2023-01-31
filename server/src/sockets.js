@@ -2,7 +2,7 @@
  * Handel all of the socket requests
  */
 
-var {express, app, http, server, io} = require('./web.js')
+var {io} = require('./web.js')
 var {database} = require('./database.js')
 const adsb = require('./adsb.js')
 var {flights, trips} = require('./flight-tracker.js');
