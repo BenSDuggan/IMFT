@@ -6,9 +6,10 @@ var { } = require('./src/sockets.js')
 let { logger } = require('./src/logger.js')
 let { } = require('./src/twitter.js');
 const config = require('./src/config.js')
-let {OpenSky} = require('./src/adsb.js')
+const adsb = require('./src/adsb.js')
 
 
+logger.info(process.env.IMFT_VERSION + ": " + process.env.IMFT_ENV)
 logger.info("Production server started")
 
 // Detect if server is exiting from keyboard interrupt
@@ -18,6 +19,5 @@ process.on('SIGINT', function() {
   process.exit();
 });
 
-let opensky = new OpenSky();
-opensky.start();
-opensky.clean_data();
+adsb.receiver = new adsb.OpenSky();
+adsb.receiver.start();

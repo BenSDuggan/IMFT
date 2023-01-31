@@ -42,7 +42,7 @@ class OpenSky extends ADSB {
 
         this.service = "open-sky-network"
 
-        this.interval = 5; // Seconds
+        this.interval = 20; // Seconds
         this.interval_handler = null;
 
         this.save_path = String(path.join(__dirname, "..", 'curr-flights.json'));
@@ -83,6 +83,7 @@ class OpenSky extends ADSB {
 
     start() {
         logger.verbose("OpenSky: Start");
+        this.get_data.bind(this);
         this.interval_handler = setInterval(this.get_data.bind(this), this.interval * 1000);
     }
 
@@ -173,13 +174,21 @@ class HistoricFlights extends ADSB {
     }
 
     start() {
+        if(this.active)
+            return
+
         logger.verbose("HF: Start");
         this.interval_handler = setInterval(this.get_data.bind(this), this.interval * 1000 / this.speed);
+        this.active = true;
     }
 
     stop() {
+        if(!this.active)
+            return 
+
         logger.verbose("HF: Stop");
         clearInterval(this.interval_handler);
+        this.active = false;
     }
 
     set_frame(frame) {

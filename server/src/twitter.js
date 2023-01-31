@@ -3,7 +3,7 @@ const { TwitterApi } = require('twitter-api-v2');
 
 const {logger} = require('./logger.js')
 const config = require('./config.js')
-const {epoch_s} = require('./core.js')
+const {epoch_s} = require('./utils.js')
 
 
 const CALLBACK_URL = "http://127.0.0.1:4000/callback"

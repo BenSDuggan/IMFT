@@ -12,12 +12,12 @@ let {logger} = require('./logger.js')
 io.on('connection', (socket) => {
     socket.on('get_flights', (msg) => {
         let aflights = []
-        for(let f in flights) {
-            aflights.push(flights[f])
+        for(let f in flights.flights) {
+            aflights.push(flights.flights[f])
         }
         let atrips = []
-        for(let t in trips) {
-            atrips.push(trips[t])
+        for(let t in trips.trips) {
+            atrips.push(trips.trips[t])
         }
 
         socket.emit('nfd', {"flights":aflights, "trips":atrips});
