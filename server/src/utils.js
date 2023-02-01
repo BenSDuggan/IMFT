@@ -1,5 +1,5 @@
 // Core functions and classes needed by every other class
-// Includes config and helper functions
+// Includes config, helper, and locations functions
 
 const fs = require('fs')
 const os = require('os');
@@ -48,6 +48,7 @@ let save_config = () => {
 }
 
 load_config();
+
 
 module.exports = { 
     epoch_s, 

@@ -2,10 +2,7 @@
  * Code to interact with the database
  */
 
-// TODO: Load database params from config
-// TODO: Save trips to database
 // TODO: Get trips for a given date range and by aircraft and destination / arrival
-// TODO: Create table for dynamic data on the fly during development mode
 
 const { MongoClient } = require("mongodb");
 
@@ -117,16 +114,33 @@ let Database = class {
     *
     * Returns: true if added successfully and false otherwise
     * 
-    * Example: 
+    * Example: database.save_trip({"tid":"82fee102-c905-4bf1-93c5-13f38adbe6be","aid":"a16ce7","status":"grounded","departure":{"lid":"I80","type":"faaLID","display_name":"NOBLESVILLE","time":1669923349,"lat":39.9414,"lon":-85.8842,"distance":31899.69189402237},"arrival":{"lid":"riley","type":"hospital","display_name":"IUH Riley","time":1669923944,"lat":39.778,"lon":-86.1799,"distance":83.75294721277973},"stats":{"time":594,"distance":104389.05339403517},"path":[]}).then((result) => {console.log(result)})
     */
     async save_trip(trip) {
-        let answer = null;
+        const result = await this.client.db(databaseName).collection("trips").insertOne(trip);
 
-        const cursor = await this.client.db(databaseName).collection("faa").find(term);
-        //console.log(cursor)
+        if(result.acknowledged)
+            logger.debug("Database: Inserted new trip with tid: " + trip.tid)
+        else
+            logger.warn("Database: Could not insert trip with tid: " + trip.tid)
+
+        return result.acknowledged
+    }
+
+    /* Get the requested trip using the query
+    *
+    * term (JSON): What values should be used to search for. (eg {"N-NUMBER":"N191LL"} or {"MODE S CODE HEX":"A16CE7"})
+    *
+    * Returns: JSON object with all the matching trips
+    * 
+    * Example: `database.get_faa_registration({"MODE S CODE HEX":"A16CE7"}).then((results) => console.log(results))`
+    */
+    async get_trip(term) {
+        let answer = [];
+
+        const cursor = await this.client.db(databaseName).collection("trips").find(term);
         await cursor.forEach((r) => {
-            if(answer != null) console.log("Multiple entries matched")
-            else answer = r;
+            answer.push(r);
         });
 
         return answer;
