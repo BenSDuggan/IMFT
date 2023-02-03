@@ -2,11 +2,12 @@
  * Handel all of the socket requests
  */
 
-var {io} = require('./web.js')
-var {database} = require('./database.js')
 const adsb = require('./adsb.js')
-var {flights, trips} = require('./flight-tracker.js');
+var {database} = require('./database.js')
+var {flights} = require('./flight-tracker.js');
+var {io} = require('./web.js')
 let {logger} = require('./logger.js')
+var {trips} = require('./trips.js')
 
 
 io.on('connection', (socket) => {
@@ -57,6 +58,21 @@ io.on('connection', (socket) => {
 
         adsb.receiver.emit_metadata();
     })
+
+    socket.on('get_db_trips', (msg) => {
+        console.log(msg)
+        // Cast dates from client
+        let min_date = new Date(msg.min_date ?? new Date(new Date()-(90*24*60*60*1000)));
+        let max_date = new Date(msg.max_date ?? new Date());
+
+        trips.database_get_trip_by_date(min_date, max_date)
+        .then((results) => {
+            socket.emit('db_trips', results);
+        })
+        .catch((error) => {
+            logger.warn("sockets.get_db_trips: Could not get trips using msg ["+msg+"]. " + error)
+        })
+    });
 });
 
 

@@ -34,6 +34,10 @@ app.get('/callback', (req, res) => {
   })
 });
 
+app.get('/api/version', (req, res) => {
+  res.status(200).json({"version":"v0.50a"})
+});
+
 io.on('connection', (socket) => {
   
   socket.on('disconnect', () => {

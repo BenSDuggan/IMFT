@@ -60,6 +60,7 @@ const flight_structure = {
         "time": -1, // When the flight status was last updated
         "tics": 0, // How many intervals the flight status has been the same
         "counter": 0, // How many times the next status has flipped
+        "location": null // Location
     },
     "previous": { // Tracking next status change
       "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
@@ -67,6 +68,7 @@ const flight_structure = {
       "time": -1, // When the flight status was last updated
       "tics": 0, // How many intervals the flight status has been the same
       "counter": 0, // How many times the next status has flipped
+      "location": null // Location
   }
   }
 }

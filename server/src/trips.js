@@ -84,7 +84,7 @@ class Trips {
       this.trips[flight.icao24].stats.time = flight.time - this.trips[flight.icao24].departure.time;
 
       let path_length = this.trips[flight.icao24].path.length;
-      this.trips[flight.icao24].stats.distance += utils.haversine(flight.latest.latitude, flight.latest.longitude, this.trips[flight.icao24].path[path_length-1][0], this.trips[flight.icao24].path[path_length-1][1]);
+      this.trips[flight.icao24].stats.distance += utils.haversine(flight.latest.latitude, flight.latest.longitude, this.trips[flight.icao24].path[path_length-1][0], this.trips[flight.icao24].path[path_length-1][1]).toFixed(3);
       this.trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
     }
 
@@ -114,7 +114,7 @@ class Trips {
       this.trips[flight.icao24].arrival = this.create_trip_location(flight);
 
       // TODO: Save trip to DP and clear from this.trips
-      database.save_trip(this.trips[flight.icao24])
+      this.database_add_trip(this.trips[flight.icao24])
       .catch((error) => {
         logger.warn("Tracker: Could not save trip (" + this.trips[flight.icao24].tid + "). " + error)
       })
@@ -148,7 +148,7 @@ class Trips {
       this.trips[flight.icao24].arrival = this.create_trip_location(flight);
 
       // TODO: Save trip to DP and clear from trips
-      database.save_trip(this.trips[flight.icao24])
+      this.database_add_trip(this.trips[flight.icao24])
       .catch((error) => {
         logger.warn("Tracker: Could not save trip (" + this.trips[flight.icao24].tid + "). " + error)
       })
@@ -165,6 +165,47 @@ class Trips {
       logger.warn("Tracker: old status ("+old_status+") or new status ("+new_status+") are not valid.")
     }
   }
+
+    async database_add_trip(trip) {
+        // Prepare trip for DB: unix date -> Date()
+        trip.arrival.time = new Date(trip.arrival.time * 1000);
+        trip.departure.time = new Date(trip.departure.time * 1000);
+
+        // Add trip to DB
+        await database.save_trip(trip)
+        .then((result) => {
+            return result
+        })
+        .catch((error) => {
+            logger.warn("Tracker: Could not save trip (" + this.trips[flight.icao24].tid + "). " + error)
+            return false
+        })
+    }
+
+    
+    // Access Database
+
+    // Get aircraft (aid) indexes for the min_date (departure) and max_date (arrival)
+    async database_get_trip_by_date(min_date, max_date) {
+        min_date = new Date(min_date);
+        max_date = new Date(max_date);
+
+        let term = {$or:[{$and:[{"departure.time": {$gte:min_date}}, {"departure.time":{$lte:max_date}}]}, 
+                        {$and:[{"arrival.time": {$gte:min_date}}, {"arrival.time":{$lte:max_date}}]}]}
+
+        return await database.get_trip(term)
+    }
+
+    // Get aircraft (aid) indexes for the min_date (departure) and max_date (arrival)
+    async database_get_aid_index(min_date, max_date) {
+        min_date = new Date(min_date);
+        max_date = new Date(max_date);
+
+        let term = {$or:[{$and:[{"departure.time": {$gte:min_date}}, {"departure.time":{$lte:max_date}}]}, 
+                        {$and:[{"arrival.time": {$gte:min_date}}, {"arrival.time":{$lte:max_date}}]}]}
+
+        return await database.get_trip_index("aid", term)
+    }
 }
 
 const trips = new Trips();
