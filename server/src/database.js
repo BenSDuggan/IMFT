@@ -117,7 +117,6 @@ let Database = class {
     * Example: database.save_trip({"tid":"82fee102-c905-4bf1-93c5-13f38adbe6be","aid":"a16ce7","status":"grounded","departure":{"lid":"I80","type":"faaLID","display_name":"NOBLESVILLE","time":1669923349,"lat":39.9414,"lon":-85.8842,"distance":31899.69189402237},"arrival":{"lid":"riley","type":"hospital","display_name":"IUH Riley","time":1669923944,"lat":39.778,"lon":-86.1799,"distance":83.75294721277973},"stats":{"time":594,"distance":104389.05339403517},"path":[]}).then((result) => {console.log(result)})
     */
     async save_trip(trip) {
-        return false;
         const result = await this.client.db(databaseName).collection("trips").insertOne(trip);
 
         if(result.acknowledged)

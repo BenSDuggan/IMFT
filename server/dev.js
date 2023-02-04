@@ -31,6 +31,7 @@ let trip2 = {"tid":"4d5361a3-9f19-4109-8e22-a3e7c8f26383","aid":"a1709e","status
 let terms = {"departure.time": {$gte: new Date(1669923726*1000)}}
 
 const {trips} = require('./src/trips.js')
+
 /*
 trips.database_add_trip(trip2)
 .then((result) => {
@@ -41,6 +42,7 @@ trips.database_add_trip(trip2)
 })
 */
 
+/*
 let a = new Date();
 trips.database_get_aid_index(new Date(1669923726*1000), new Date(1669923944*1000))
 .then((result) => {
@@ -51,6 +53,7 @@ trips.database_get_aid_index(new Date(1669923726*1000), new Date(1669923944*1000
 .catch((error) => {
   console.log(error)
 })
+*/
 
 let historic = () => {
   adsb.receiver = new adsb.HistoricFlights()

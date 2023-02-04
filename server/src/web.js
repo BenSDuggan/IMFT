@@ -2,17 +2,23 @@
  * 
  */
 
+const bodyParser = require('body-parser');
 const express = require('express');
-const app = express();
 const http = require('http');
-const server = http.createServer(app);
+const { env } = require('process');
 const { Server } = require("socket.io");
-const io = new Server(server);
 
 const { logger } = require('./logger.js')
+var {trips} = require('./trips.js')
 const { twitter } = require('./twitter.js')
 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
 //app.use(express.static('.'))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/twitter', (req, res) => {
   twitter.get_twitter_auth_link().then((link) => {
@@ -34,8 +40,50 @@ app.get('/callback', (req, res) => {
   })
 });
 
+
+/*********************
+ ***   Trips API   ***
+ ********************/
+
 app.get('/api/version', (req, res) => {
-  res.status(200).json({"version":"v0.50a"})
+  res.status(200).json({"version":process.env.IMFT_VERSION})
+});
+
+app.get('/api/trip/:tid', (req, res) => {
+  console.log(req.params)
+  let options = {tid:req.params.tid};
+
+  trips.database_get_trip(options)
+  .then((results) => {
+    res.status(200).json(results)
+  })
+  .catch((error) => {
+      logger.warn("web./api/trip:trips.database_get_trip(): Could not get trips using options ["+JSON.stringify(options)+"]. " + String(error))
+  })
+
+  //res.status(200).json({"version":process.env.IMFT_VERSION})
+});
+
+app.post('/api/trips', (req, res) => {
+  // Cast dates from client
+  let max_date = new Date(req.body.max_date ?? new Date());
+  let min_date = new Date(req.body.min_date ?? new Date(new Date()-(90*24*60*60*1000)));
+
+  let options = {min_date:min_date, max_date:max_date};
+
+  trips.database_get_trip(options)
+  .then((results) => {
+    results = results.map((result) => {
+      result.path = []
+      return result;
+    })
+    res.status(200).json(results)
+  })
+  .catch((error) => {
+      logger.warn("web./api/trips:trips.database_get_trip(): Could not get trips using options ["+JSON.stringify(options)+"]. " + String(error))
+  })
+
+  //res.status(200).json({"version":process.env.IMFT_VERSION})
 });
 
 io.on('connection', (socket) => {

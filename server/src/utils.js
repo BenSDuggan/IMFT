@@ -16,6 +16,7 @@ const epoch_s = () => Math.floor(Date.now()/1000)
 
 let meter_to_feet = (meter) => meter * 3.28084;
 let feet_to_meter = (feet) => feet * 0.3048;
+let feet_to_mile = (feet) => feet / 5280;
 let deg2rad = (deg) => deg * Math.PI/180
 let haversine = (lat1, lon1, lat2, lon2) => {
   let a = Math.sin(deg2rad(lat2-lat1)/2)**2+
@@ -54,6 +55,7 @@ module.exports = {
     epoch_s, 
     meter_to_feet,
     feet_to_meter,
+    feet_to_mile,
     deg2rad,
     haversine,
     config, 

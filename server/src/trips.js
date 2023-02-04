@@ -84,7 +84,7 @@ class Trips {
       this.trips[flight.icao24].stats.time = flight.time - this.trips[flight.icao24].departure.time;
 
       let path_length = this.trips[flight.icao24].path.length;
-      this.trips[flight.icao24].stats.distance += utils.haversine(flight.latest.latitude, flight.latest.longitude, this.trips[flight.icao24].path[path_length-1][0], this.trips[flight.icao24].path[path_length-1][1]).toFixed(3);
+      this.trips[flight.icao24].stats.distance += utils.feet_to_mile(utils.haversine(flight.latest.latitude, flight.latest.longitude, this.trips[flight.icao24].path[path_length-1][0], this.trips[flight.icao24].path[path_length-1][1])).toFixed(3);
       this.trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
     }
 
@@ -166,34 +166,92 @@ class Trips {
     }
   }
 
-    async database_add_trip(trip) {
-        // Prepare trip for DB: unix date -> Date()
-        trip.arrival.time = new Date(trip.arrival.time * 1000);
-        trip.departure.time = new Date(trip.departure.time * 1000);
+  async database_add_trip(trip) {
+    return false;
+      // Prepare trip for DB: unix date -> Date()
+      trip.arrival.time = new Date(trip.arrival.time * 1000);
+      trip.departure.time = new Date(trip.departure.time * 1000);
 
-        // Add trip to DB
-        await database.save_trip(trip)
-        .then((result) => {
-            return result
-        })
-        .catch((error) => {
-            logger.warn("Tracker: Could not save trip (" + this.trips[flight.icao24].tid + "). " + error)
-            return false
-        })
-    }
+      // Add trip to DB
+      await database.save_trip(trip)
+      .then((result) => {
+          return result
+      })
+      .catch((error) => {
+          logger.warn("Tracker: Could not save trip (" + this.trips[flight.icao24].tid + "). " + error)
+          return false
+      })
+  }
 
     
     // Access Database
 
-    // Get aircraft (aid) indexes for the min_date (departure) and max_date (arrival)
-    async database_get_trip_by_date(min_date, max_date) {
-        min_date = new Date(min_date);
-        max_date = new Date(max_date);
+    // Get trips. Options include tid, aid, lid, departure_lid, arrival_lid, min_date, max_date
+    async database_get_trip(options) {
+      let term = {};
+      let first_term = true;
 
-        let term = {$or:[{$and:[{"departure.time": {$gte:min_date}}, {"departure.time":{$lte:max_date}}]}, 
-                        {$and:[{"arrival.time": {$gte:min_date}}, {"arrival.time":{$lte:max_date}}]}]}
+      // Filter by date
+      if(options.hasOwnProperty("min_date") && options.hasOwnProperty("max_date")) {
+        let min_date = new Date(options.min_date);
+        let max_date = new Date(options.max_date);
 
-        return await database.get_trip(term)
+        term = {$and:[{$or:[{$and:[{"departure.time": {$gte:min_date}}, {"departure.time":{$lte:max_date}}]}, 
+                        {$and:[{"arrival.time": {$gte:min_date}}, {"arrival.time":{$lte:max_date}}]}]}]};
+        first_term = false;
+      }
+
+      // Filter by tid
+      if(options.hasOwnProperty("tid")) {
+        if(first_term) {
+          term = {$and:[{"tid": String(options.tid)}]}
+          first_term = false;
+        }
+        else 
+          term[$and].push({"tid": String(options.tid)});
+      }
+
+      // Filter by aid
+      if(options.hasOwnProperty("aid")) {
+        if(first_term) {
+          term = {$and:[{"aid": String(options.aid)}]}
+          first_term = false;
+        }
+        else 
+          term[$and].push({"aid": String(options.aid)});
+      }
+
+      // Filter by departure_lid
+      if(options.hasOwnProperty("departure_lid")) {
+        if(first_term) {
+          term = {$and:[{"departure.lid": String(options.departure_lid)}]}
+          first_term = false;
+        }
+        else 
+          term[$and].push({"departure.lid": String(options.departure_lid)});
+      }
+
+      // Filter by destination_lid
+      if(options.hasOwnProperty("arrival_lid")) {
+        if(first_term) {
+          term = {$and:[{"arrival.lid": String(options.arrival_lid)}]}
+          first_term = false;
+        }
+        else 
+          term[$and].push({"arrival.lid": String(options.arrival_lid)});
+      }
+
+      // Filter by lid
+      if(options.hasOwnProperty("lid")) {
+        if(first_term) {
+          term = {$and:[{$or:[{"departure.lid": String(options.lid)}, {"arrival.lid": String(options.lid)}]}]}
+          first_term = false;
+        }
+        else 
+          term[$and].push({$or:[{"departure.lid": String(options.lid)}, {"arrival.lid": String(options.lid)}]});
+      }
+
+      return await database.get_trip(term)
     }
 
     // Get aircraft (aid) indexes for the min_date (departure) and max_date (arrival)
