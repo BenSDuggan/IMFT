@@ -46,7 +46,7 @@ html, body {
 
 #sidebar {
    width: 700px;
-   height: 100vh;
+   height: 100%;
    display: inline-block;
    overflow:scroll;
 
@@ -54,12 +54,16 @@ html, body {
 
 #map {
   width: calc(100% - 700px);
-  height: 100vh;
+  height: 100%;
   display: inline-block;
 }
 
+#main-container_live {
+  height: calc(100vh - 62px);
+}
+
 .leaflet-popup-close-button {
-display: none;
+  display: none;
 }
 
 .mapIcon {

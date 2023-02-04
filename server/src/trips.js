@@ -84,7 +84,7 @@ class Trips {
       this.trips[flight.icao24].stats.time = flight.time - this.trips[flight.icao24].departure.time;
 
       let path_length = this.trips[flight.icao24].path.length;
-      this.trips[flight.icao24].stats.distance += utils.feet_to_mile(utils.haversine(flight.latest.latitude, flight.latest.longitude, this.trips[flight.icao24].path[path_length-1][0], this.trips[flight.icao24].path[path_length-1][1])).toFixed(3);
+      this.trips[flight.icao24].stats.distance += utils.feet_to_mile(utils.haversine(flight.latest.latitude, flight.latest.longitude, this.trips[flight.icao24].path[path_length-1][0], this.trips[flight.icao24].path[path_length-1][1]));
       this.trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
     }
 
@@ -167,10 +167,10 @@ class Trips {
   }
 
   async database_add_trip(trip) {
-    return false;
       // Prepare trip for DB: unix date -> Date()
       trip.arrival.time = new Date(trip.arrival.time * 1000);
       trip.departure.time = new Date(trip.departure.time * 1000);
+      trip.stats.distance = Number(trip.stats.distance.toFixed(2))
 
       // Add trip to DB
       await database.save_trip(trip)

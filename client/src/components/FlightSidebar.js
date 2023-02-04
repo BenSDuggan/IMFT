@@ -1,3 +1,5 @@
+import React from "react";
+
 import { v4 as uuidv4 } from 'uuid';
 
 import FlightTile from './FlightTile.js'
@@ -7,15 +9,15 @@ function FlightSidebar(props) {
     let dtodd = (d) => {
         let dd = [];
         for(let i=0;i<d.length;i++) {
-            if(i%2==0) dd.push([]);
+            if(i%2===0) dd.push([]);
             dd[dd.length-1].push(d[i]);
         }
         return dd
     }
 
-    let airborn = props.flights.filter(f => f.tracking.current.status == "airborn");
-    let grounded = props.flights.filter(f => f.tracking.current.status == "grounded");
-    let los = props.flights.filter(f => f.tracking.current.status == "los");
+    let airborn = props.flights.filter(f => f.tracking.current.status === "airborn");
+    let grounded = props.flights.filter(f => f.tracking.current.status === "grounded");
+    let los = props.flights.filter(f => f.tracking.current.status === "los");
 
     let aairborn = dtodd(airborn);
     let ggrounded = dtodd(grounded);

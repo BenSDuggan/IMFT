@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Sidebar from './components/Sidebar';
-import Map from './components/Map';
-//import SocketContext from "./context/socket";
+import Live from "./components/Live";
+import Menu from './components/Menu'
+import Trips from './components/Trips';
+import Trip from './components/Trip.js';
 
 import io from 'socket.io-client';
 
@@ -13,12 +15,12 @@ function App() {
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
   const [trips, setTrips] = useState([]);
-  const [metadata, setMetadata] = useState({});  
+  const [metadata, setMetadata] = useState({});
   const [socket, setSocket] = useState(null);
   const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":null});
 
   let selectSidebar = (d) => {
-      if(d == 'flights' || d == 'hospitals')
+      if(d === 'flights' || d == 'hospitals')
           setSelectedSidebar({"tab":d, "id":null});
       else
           setSelectedSidebar({"tab":"selected-flight", "id":d});
@@ -36,6 +38,7 @@ function App() {
     s.emit("get_hospitals", {});
     s.emit("get_flights", {});
     s.emit("get_hf_metadata", {});
+    
 
     // Responders
     s.on('hospitals', (data) => {
@@ -53,16 +56,37 @@ function App() {
       setMetadata(data);
     });
 
+    s.on('db_trips', (data) => {
+      console.log(data)
+    })
+
     return () => s.disconnect();
-  }, [setSocket]);
+  }, []);
 
   return( 
-    
-      <div className='main-container'>
-        <Sidebar flights={flights} trips={trips} metadata={metadata} socket={socket} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Sidebar>
-        <Map hospitals={hospitals} flights={flights} trips={trips} selectedSidebar={selectedSidebar} setSelectedSidebar={selectSidebar}></Map>
-      </div>
-    
+    <div>
+      <Menu></Menu>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={
+            <Live
+              flights={flights}
+              trips={trips}
+              hospitals={hospitals}
+              metadata={metadata}
+              socket={socket}
+              selectedSidebar={selectedSidebar}
+              setSelectedSidebar={selectSidebar}>  
+            </Live>
+          } />
+          <Route path="/trips" element={
+            <Trips></Trips>} />
+          <Route path="/hospitals" element={<h2>Hospitals</h2>} />
+          <Route path="/aircraft" element={<h2>Aircraft</h2>} />
+          <Route path="/trip/:tid" element={<Trip></Trip>} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   )
 }
 

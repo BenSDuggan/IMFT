@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import React from "react";
 
 function FlightSelected(props) {
     const timeString = (time) => {
@@ -6,9 +6,7 @@ function FlightSelected(props) {
         return d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
     }
 
-    let feet_to_miles = (feet) => feet / 5280;
     let meter_to_feet = (meter) => meter * 3.28084;
-    let feet_to_meter = (feet) => feet * 0.3048;
 
     const f = props.flight;
     const t = props.trip;
@@ -59,7 +57,7 @@ function FlightSelected(props) {
             <div>
                 <h3>Trip</h3>
                 <span>Trip time: {(t.stats.time / 60).toFixed(1)} minutes  </span>  
-                <span>Trip distance: {feet_to_miles(t.stats.distance).toFixed(2)} miles</span><br/>
+                <span>Trip distance: {t.stats.distance.toFixed(2)} miles</span><br/>
                 <table style={{width:'100%'}}>
                     <tbody>
                         <tr style={{"verticalAlign":'top', display: 'inline-block'}}>
@@ -99,7 +97,7 @@ function FlightSelected(props) {
                                 <span>Tics: {f.tracking.previous.tics ?? "NA"}</span><br/>
                                 <span>Counter: {f.tracking.previous.counter ?? "NA"}</span><br/>
                                 <span>Time: {new Date(f.tracking.previous.time*1000 ?? 0).toLocaleString()}</span><br/>
-                                {f.tracking.previous.location != null ? 
+                                {f.tracking.previous.location !== null ? 
                                 <div>
                                     <span>Location: {f.tracking.previous.location.display_name ?? "NA"}</span><br/>
                                     <span>Type: {f.tracking.previous.location.type ?? "NA"}</span><br/>
@@ -115,7 +113,7 @@ function FlightSelected(props) {
                                 <span>Tics: {f.tracking.current.tics ?? "NA"}</span><br/>
                                 <span>Counter: {f.tracking.current.counter ?? "NA"}</span><br/>
                                 <span>Time: {new Date(f.tracking.current.time*1000 ?? 0).toLocaleString()}</span><br/>
-                                {f.tracking.current.location != null ? 
+                                {f.tracking.current.location !== null ? 
                                 <div>
                                     <span>Location: {f.tracking.current.location.display_name ?? "NA"}</span><br/>
                                     <span>Type: {f.tracking.current.location.type ?? "NA"}</span><br/>
@@ -131,7 +129,7 @@ function FlightSelected(props) {
                                 <span>Tics: {f.tracking.next.tics ?? "NA"}</span><br/>
                                 <span>Counter: {f.tracking.next.counter ?? "NA"}</span><br/>
                                 <span>Time: {new Date(f.tracking.next.time*1000 ?? 0).toLocaleString()}</span><br/>
-                                {f.tracking.next.location != null ? 
+                                {f.tracking.next.location !== null ? 
                                 <div>
                                     <span>Location: {f.tracking.next.location.display_name ?? "NA"}</span><br/>
                                     <span>Type: {f.tracking.next.location.type ?? "NA"}</span><br/>
@@ -152,7 +150,7 @@ function FlightSelected(props) {
                 <div>
                     <span>{f.faa["STREET"]} </span>
                     <span>{f.faa["STREET2"]} </span> <br />
-                    {f.faa["STREET2"] != "" ? <div><span>{f.faa["STREET2"]} </span> <br /></div>: "" }
+                    {f.faa["STREET2"] !== "" ? <div><span>{f.faa["STREET2"]} </span> <br /></div>: "" }
                     <span>{f.faa["CITY"]}, </span>
                     <span>{f.faa["STATE"]}, </span>
                     <span>{f.faa["ZIP CODE"]}, </span>

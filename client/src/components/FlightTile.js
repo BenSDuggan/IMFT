@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import React from "react";
 
 function FlightTile(props) {
     const timeString = (time) => {
@@ -7,7 +7,6 @@ function FlightTile(props) {
     }
 
     let meter_to_feet = (meter) => meter * 3.28084;
-    let feet_to_meter = (feet) => feet * 0.3048;
 
     const f = props.flight;
  
@@ -54,7 +53,7 @@ function FlightTile(props) {
 
 
             <div>
-                {f.tracking.current.status == "grounded" && f.tracking.current.location != null ? 
+                {f.tracking.current.status === "grounded" && f.tracking.current.location != null ? 
                 <div>
                     <i className="fa-solid fa-hospital"></i> 
                     <span>{f.tracking.current.location.display_name}</span>

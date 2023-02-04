@@ -172,3 +172,6 @@ Determine if an aircraft is on the ground or airborne
 Ideally a location is set under ideal conditions. For a departure that occurs when going from grounded to airborn and for an arrival that is going from airborn to grounded. However, aircraft may enter from outside the bounding box or have a signal lost near their landing site. Actually, this doesn't matter
 
 * Status will not change unless 2 consecutive new status have been observed
+
+
+

@@ -50,7 +50,6 @@ app.get('/api/version', (req, res) => {
 });
 
 app.get('/api/trip/:tid', (req, res) => {
-  console.log(req.params)
   let options = {tid:req.params.tid};
 
   trips.database_get_trip(options)

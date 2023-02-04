@@ -1,3 +1,5 @@
+import React from "react";
+
 import { MapContainer, TileLayer, LayersControl, LayerGroup } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
 
@@ -14,25 +16,31 @@ function DeselectFlight(props) {
       }
     })
     return null
-  }
+}
 
 function Map(props) {
-    
+    let box = props.bbox ?? bbox;
+    let hospitals = props.hospitals ?? [];
+    let flights = props.flights ?? [];
+    let trips = props.trips ?? [];
+    let selectedSidebar = props.selectedSidebar ?? "";
+    let setSelectedSidebar = props.setSelectedSidebar ?? (() => {});
+
     return(
         <MapContainer id="map" 
-                      bounds={bbox} 
+                      bounds={box} 
                       scrollWheelZoom={true}>
             <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
 
-            <DeselectFlight setSelectedSidebar={props.setSelectedSidebar} />
+            <DeselectFlight setSelectedSidebar={setSelectedSidebar} />
 
             <LayersControl position="topright">
                 <LayersControl.Overlay checked name="Hospitals">
                     <LayerGroup>
-                        {props.hospitals.map(h => 
+                        {hospitals.map(h => 
                             <HospitalMarker key={"map-hospital-" + h.id}  hospital={h}></HospitalMarker>
                         )};
                     </LayerGroup>
@@ -40,19 +48,19 @@ function Map(props) {
 
                 <LayersControl.Overlay checked name="Flights">
                     <LayerGroup>
-                        {props.flights.map(f => 
+                        {flights.map(f => 
                             <FlightsMarker key={"map-flights-" + f.icao24}
                                             flight={f} 
-                                            selectedSidebar={props.selectedSidebar} 
-                                            setSelectedSidebar={props.setSelectedSidebar}></FlightsMarker>
+                                            selectedSidebar={selectedSidebar} 
+                                            setSelectedSidebar={setSelectedSidebar}></FlightsMarker>
                         )};
                     </LayerGroup>
                 </LayersControl.Overlay>
 
                 <LayersControl.Overlay checked name="Path">
                     <LayerGroup>
-                        {props.trips.map(t => 
-                            <MapPath key={"map-flight-path-" + t.aid} trip={t} selectedSidebar={props.selectedSidebar}></MapPath>
+                        {trips.map(t => 
+                            <MapPath key={"map-flight-path-" + t.aid} trip={t} selectedSidebar={selectedSidebar}></MapPath>
                         )};
                     </LayerGroup>
                 </LayersControl.Overlay>
