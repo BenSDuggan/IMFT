@@ -167,6 +167,9 @@ class Trips {
   }
 
   async database_add_trip(trip) {
+    if(process.env.IMFT_ENV !== "production") 
+      return false;
+
       // Prepare trip for DB: unix date -> Date()
       trip.arrival.time = new Date(trip.arrival.time * 1000);
       trip.departure.time = new Date(trip.departure.time * 1000);

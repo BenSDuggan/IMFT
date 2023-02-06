@@ -2,7 +2,7 @@
 
 const utils = require('./src/utils.js')
 
-process.env.IMFT_ENV = utils.config.env ?? "development";
+process.env.IMFT_ENV = utils.config.env ?? "production";
 process.env.IMFT_VERSION = utils.config.version ?? "vUnknown"
 
 const { logger } = require('./src/logger.js')
