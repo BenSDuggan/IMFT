@@ -1,158 +1,54 @@
 # Indiana Medical Flight Tracking (IMFT)
 
-Project to track medical helicopters in Indiana. Tweeting locations at <https://twitter.com/IN_MFT>.
+Project to track medical helicopters in Indiana. Tweeting locations at <https://twitter.com/IN_MFT>. Website coming soon!
+
+![IMFT Logo](logo.png)
 
 ## Install
 
-1. `sudo apt install python3-pip zip`
-2. Install node
-    1. `curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - `
-    2. `sudo apt-get install -y nodejs`
-3. Install MongoDB
-    1. `wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc |  gpg --dearmor | sudo tee /usr/share/keyrings/mongodb.gpg > /dev/null`
-    2. `echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list`
-    3. `sudo apt update`
-    4. `sudo apt install mongodb-org`
-    5. `sudo systemctl start mongod`
-    6. `sudo systemctl enable mongod`
+1. Install Python, MongoDB, and Node on your respective system. On Linux:
+    1. `sudo apt install git python3-pip zip`
+    2. Install node
+        1. `curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - `
+        2. `sudo apt-get install -y nodejs`
+        3. Install MongoDB
+            1. `wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc |  gpg --dearmor | sudo tee /usr/share/keyrings/mongodb.gpg > /dev/null`
+            2. `echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list`
+            3. `sudo apt update`
+            4. `sudo apt install mongodb-org`
+            5. `sudo systemctl start mongod`
+            6. `sudo systemctl enable mongod`
+2. Install [server](/server) directory. Inside the [server](/server) folder run: `npm install`
+3. Install [client](/client) directory. Inside the [client](/client) folder run: `npm install`
 4. Install OpenSky
     1. `git clone https://github.com/openskynetwork/opensky-api`
     2. `pip install -e opensky-api/python`
+5. Initialize database. From within the [database](/database) directory run the following commands.
+    1. `npm install`
+    2. `node src/make-hospitals.js`
+    3. `node src/make-faa.js`
+    4. `node src/make-faa-lid.js`
 
 
-## OpenSkies
+## Challenges
 
-```
-from opensky_api import OpenSkyApi
-api = OpenSkyApi()
-s = api.get_states()
-print(s)
-```
-
-### Documentation
-
-<https://openskynetwork.github.io/opensky-api/rest.html>
-
-### Quota
-
-* OpenSkies:
-    * Antonymous 100 / day
-    * Signed in 1000 / day
-    * Can get your data from your sensor unlimited
-* ADS-B Exchange $10 / mo
-    * 10,000
-    * Best coverage in Indianapolis
-* Flight Aware 
-    * $20 / mo
-
-## Data structures
-
-### Flights data structure
-
-Used by server and client to store the locations of aircraft.
-
-```
-[
-    {
-        "icao24": "", // The icao24
-        "faa":{}, // FAA registration data
-        "last":{}, // Data from the last update interval
-        "stl":{}, // Data from the second to last interval (copied from last when the next update interval occurs)
-        "latest":{}, // Latest data received, not necessarily up to date
-        "time": -1, // Time that the last flight data was received
-        "tics": 0, // How many tics has it been without data
-        "tracking": { // Tracking information
-            "current": { // The current tracking
-                "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-                "reason": "", // Reason status was changed
-                "time": -1, // When the flight status was last updated
-                "tics": 0, // How many intervals the flight status has been the same
-                "counter": 0, // How many times the flight status has flipped
-                "location": null // Location
-            },
-            "next": { // Tracking next status change
-                "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-                "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-                "reason": "", // Reason status was changed
-                "time": -1, // When the flight status was last updated
-                "tics": 0, // How many intervals the flight status has been the same
-                "counter": 0, // How many times the flight status has flipped
-                "location": null // Location
-            },
-            "previous": { // Tracking previous status change
-                "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-                "status": "los", // Is the aircraft: `airborn`, `grounded`, or `los`
-                "reason": "", // Reason status was changed
-                "time": -1, // When the flight status was last updated
-                "tics": 0, // How many intervals the flight status has been the same
-                "counter": 0, // How many times the flight status has flipped
-                "location": null // Location
-            }
-        }
-    }
-]
-```
-
-### Trip Data Structure
-
-Data structure for a trip which captures the path traveled from the beginning to the end of a flights path.
-
-```
-{
-    "tid":-1, // Trip ID
-    "aid":-1, // Aircraft ID
-    "status":"", // `grounded` `airborn` `los`
-    "departure": { // Departure information
-        "lid": "", // Location ID if one exists
-        "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
-        "display_name": "", // Name to display
-        "time": 0, // Time the status was changed
-        "lat": 0, // Lat where location was decided
-        "lon": 0, // Lon where location was decided
-        "distance": 0, // Distance to true location coordinates when status was changed
-        "reason": "" // Reason status was changed to this
-    },
-    "arrival": { // Arrival information in 
-        "lid": "", // Location ID if one exists
-        "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
-        "display_name": "", // Name to display
-        "time": 0, // Time the status was changed
-        "lat": 0, // Lat where location was decided
-        "lon": 0, // Lon where location was decided
-        "distance": 0, // Distance to true location coordinates when status was changed
-        "reason": "" // Reason status was changed to this
-    },
-    "stats": {
-        "time": 0, // Trip travel time in minutes
-        "distance": 0, // Trip travel distance in miles
-    },
-    "path": [ // Aircraft travel path
-
-    ]
-}
-```
-
-### How Flight Data is Managed
-
-* Want to keep record of recent flights with data
-* Want to create trips when aircraft are airborn
-* Everything airborn that is being tracked needs a trip
-* 
-
-
-## What is a flight
-
-### Challenges
-
+* Limitations on free and paid ADS-B services: 
+    * [OpenSkies](https://openskynetwork.github.io/opensky-api/rest.html)
+        * Antonymous 100 / day
+        * Signed in 1000 / day (~ 1 poll / 90 seconds)
+        * Can get your data from your sensor unlimited
+        * Doesn't have good coverage of Northern Indiana
+    * ADS-B Exchange $10 / mo
+        * 10,000 / mo ()
+        * Best coverage in Indianapolis
+    * Flight Aware 
+        * $20 / mo
 * Aircraft can come into the airspace (from outside Indiana) and already be in flight
-* Not all planes will be received during every update interval
-* Assume speed and altitude data is correct
 * Helicopters can hover, so if vertical speed and horizontal speed are 0, you don't know if it's hovering or not
+* It is difficult to determine air/ground and location status
 
-### Flight Tracking Criteria
 
-
-#### Ground or airborn status:
+### Ground or airborn status:
 
 Determine if an aircraft is on the ground or airborne
 
@@ -167,11 +63,10 @@ Determine if an aircraft is on the ground or airborne
     * ***Assume that helicopters won't hover***
 * LOS (loss of signal): No updated data for 2 minutes or 5 intervals, which ever is less
 
-#### Location status
+### Location status
 
 Ideally a location is set under ideal conditions. For a departure that occurs when going from grounded to airborn and for an arrival that is going from airborn to grounded. However, aircraft may enter from outside the bounding box or have a signal lost near their landing site. Actually, this doesn't matter
 
-* Status will not change unless 2 consecutive new status have been observed
 
 
 
