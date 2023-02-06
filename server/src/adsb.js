@@ -41,23 +41,37 @@ class OpenSky extends ADSB {
         super();
 
         this.service = "open-sky-network"
+        this.active = false;
 
         this.interval = 20; // Seconds
         this.interval_handler = null;
 
-        this.save_path = String(path.join(__dirname, "..", 'curr-flights.json'));
+        this.save_path = String(path.join(__dirname, '..', 'curr-flights.json'));
 
         this.expected_keys = {"icao24":"icao24", "callsign":"callsign", "time_position":"time_position", "last_contact":"time", "longitude":"longitude", "latitude":"latitude", "baro_altitude":"baro_altitude", "on_ground":"on_ground", "velocity":"velocity", "true_track":"track", "vertical_rate":"vertical_rate", "sensors":"sensors", "geo_altitude":"geo_altitude", "squawk":"squawk", "spi":"spi", "position_source":"position_source"}
+
+        this.clear_file();
+    }
+
+    clear_file() {
+        fs.writeFile(this.save_path, "{}", err => {
+            if (err) {
+              logger.warn("OpenSky:clear_file: Could not clear NFD file: " + String(err));
+            }
+          });
     }
 
     get_data() {
-        const child = spawn('python3',["get-data.py", this.save_path]);
+        const script_path = String(path.join(__dirname, 'get-data.py'));
+        const child = spawn('python3',[script_path, this.save_path]);
         child.addListener('close', (e) => {
             let rawdata = fs.readFileSync(this.save_path);
             let nfd = JSON.parse(rawdata);
             
             nfd = this.clean_data(nfd);
             newFlightData(nfd);
+
+            this.clear_file();
         });
         child.addListener('error', (e) => console.error(e));
     }
@@ -82,14 +96,22 @@ class OpenSky extends ADSB {
     }
 
     start() {
+        if(this.active)
+            return
+
         logger.verbose("OpenSky: Start");
         this.get_data.bind(this);
         this.interval_handler = setInterval(this.get_data.bind(this), this.interval * 1000);
+        this.active = true;
     }
 
     stop() {
+        if(!this.active)
+            return 
+
         logger.verbose("OpenSky: Stop");
         clearInterval(this.interval_handler);
+        this.active = false;
     }
 }
 

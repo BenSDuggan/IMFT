@@ -231,11 +231,6 @@ const flights = new Flights();
 
 // Process new flight data
 let newFlightData = async (nfd) => {
-  let x = nfd.states.filter((data) => {return data.icao24 == "a1709e"});
-  if(x.length > 0) {
-    x = x[0]
-    console.log(nfd.time + " : " + x.time_position + " : " + x["time"])
-  }
 
   await flights.update_flights(nfd);
   await flights.update_tracking(nfd.time);

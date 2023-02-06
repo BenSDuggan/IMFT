@@ -4,10 +4,6 @@
 import os, json, sys
 from opensky_api import OpenSkyApi
 
-with open('swag.big', "w") as file:
-    file.write("Bang bang")
-    file.close()
-
 # bbox = (min latitude, max latitude, min longitude, max longitude)
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
 filename = sys.argv[1]
@@ -35,3 +31,5 @@ for s in states.states:
 
 with open(filename, "w") as file:
     json.dump(flights, file)
+
+sys.stdout.flush()
