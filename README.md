@@ -35,11 +35,11 @@ Project to track medical helicopters in Indiana. Tweeting locations at <https://
 * Limitations on free and paid ADS-B services: 
     * [OpenSkies](https://openskynetwork.github.io/opensky-api/rest.html)
         * Antonymous 100 / day
-        * Signed in 1000 / day (~ 1 poll / 90 seconds)
+        * Signed in 1000 / day (~1 poll / 90 sec)
         * Can get your data from your sensor unlimited
         * Doesn't have good coverage of Northern Indiana
     * ADS-B Exchange $10 / mo
-        * 10,000 / mo ()
+        * 10,000 / mo (~1 poll / 4.32 min)
         * Best coverage in Indianapolis
     * Flight Aware 
         * $20 / mo

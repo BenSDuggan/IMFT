@@ -92,6 +92,7 @@ let flight_landed = (flight) => {
 class Flights {
   constructor() {
     this.flights = {};
+    this.nfd = [];
   }
 
   // Given a flight, check if it's `airborn`, `grounded`, or `los`
@@ -115,8 +116,10 @@ class Flights {
   // Update the flights dict
   async update_flights(nfd) {
     if(!("states" in nfd)) {
+      this.nfd = [];
       return 
     }
+    this.nfd =nfd.states;
 
     // Prepare flights and make dict
     for(let f in this.flights) {
@@ -248,7 +251,7 @@ let newFlightData = async (nfd) => {
 
   io.emit('nfd', {"flights":aflights, "trips":atrips});
 
-  logger.verbose(new Date(utils.epoch_s()).toISOString() + ": Flights " + Object.keys(flights.flights).length + "; Trips: " + Object.keys(trips.trips).length);
+  logger.verbose(new Date(utils.epoch_s()*1000).toISOString() + ": NFD: "+flights.nfd.length+"; Flights " + Object.keys(flights.flights).length + "; Trips: " + Object.keys(trips.trips).length);
 }
 
 
