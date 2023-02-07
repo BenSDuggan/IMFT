@@ -115,11 +115,19 @@ class Flights {
 
   // Update the flights dict
   async update_flights(nfd) {
+    this.nfd = [];
+
     if(!("states" in nfd)) {
-      this.nfd = [];
       return 
     }
-    this.nfd =nfd.states;
+
+    // Remove flights that are outside the more specific Indiana bounding box
+    for(let i=0; i<nfd.states.length; i++) {
+      if(utils.point_within_bounds([nfd.states[i].latitude, nfd.states[i].longitude]))
+        this.nfd.push(nfd.states[i]);
+    }
+
+    nfd.states = this.nfd;
 
     // Prepare flights and make dict
     for(let f in this.flights) {

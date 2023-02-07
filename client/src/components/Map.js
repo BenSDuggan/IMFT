@@ -1,21 +1,26 @@
 import React from "react";
 
-import { MapContainer, TileLayer, LayersControl, LayerGroup } from 'react-leaflet'
+import { MapContainer, TileLayer, LayersControl, LayerGroup, Polyline } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
 
 import HospitalMarker  from './HospitalMarker'
 import FlightsMarker  from './FlightMarker'
-import MapPath from './MapPath'
 
+
+const limeOptions = { color: 'lime' }
 const bbox = [[37, -88.028], [41.762, -84.809]];
 
 function DeselectFlight(props) {
-    const map = useMapEvents({
+    useMapEvents({
       click: () => {
         props.setSelectedSidebar('flights')
       }
     })
     return null
+}
+
+function MapPath(props) {
+    return ( <Polyline pathOptions={limeOptions} positions={props.trip.path} /> )
 }
 
 function Map(props) {
