@@ -10,8 +10,8 @@ function FlightsMarker(props) {
         let color = "#034f84";
 
         if(flight.tracking.current.status ?? false) {
-            if (flight.tracking.current.status === "grounded") { color = "#5be7a9"; }
-            else if (flight.tracking.current.status === "airborn") { color = "#ff6464"; }
+            if (flight.tracking.current.status === "grounded") { color = "#7bc043"; }
+            else if (flight.tracking.current.status === "airborn") { color = "#ffa700"; }
             else if (flight.tracking.current.status === "los") { color = "#666666"; }
         }
         if(props.selectedSidebar.id == flight.icao24) { color = "#B10DC9"; }
@@ -24,11 +24,28 @@ function FlightsMarker(props) {
             iconSize: [20, 20],
             className: 'mapIcon'
         });
+
+        const myCustomColour = '#583470'
+
+        const markerHtmlStyles = `
+        background-color: ${myCustomColour};
+        width: 3rem;
+        height: 3rem;
+        display: block;
+        left: -1.5rem;
+        top: -1.5rem;
+        position: relative;
+        border-radius: 3rem 3rem 0;
+        transform: rotate(45deg);
+        border: 1px solid #FFFFFF`
+
+
         const airCraftIcon2 = new L.icon({
+            className: "my-custom-pin",
             iconUrl: 'helicopter.svg',
             iconSize: [35],
         });
-        return airCraftIcon
+        return airCraftIcon2
     }
 
     return(

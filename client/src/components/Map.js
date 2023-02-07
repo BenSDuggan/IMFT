@@ -7,7 +7,7 @@ import HospitalMarker  from './HospitalMarker'
 import FlightsMarker  from './FlightMarker'
 
 
-const limeOptions = { color: 'lime' }
+const limeOptions = { color: '#ee4035' }
 const bbox = [[37, -88.028], [41.762, -84.809]];
 
 function DeselectFlight(props) {
