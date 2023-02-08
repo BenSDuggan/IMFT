@@ -43,7 +43,7 @@ class OpenSky extends ADSB {
         this.service = "open-sky-network"
         this.active = false;
 
-        this.interval = 20; // Seconds
+        this.interval = 90; // Seconds
         this.interval_handler = null;
 
         this.save_path = String(path.join(__dirname, '..', 'curr-flights.json'));

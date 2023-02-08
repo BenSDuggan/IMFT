@@ -6,7 +6,12 @@ import L from 'leaflet';
 function FlightsMarker(props) {
     
     const flightIcon = (flight) => {
-        const heading = (flight.latest.true_track + 270) % 360;
+        let heading = (flight.latest.true_track + 270) % 360;
+        let heading_p = heading;
+        heading_p = heading>90&&heading<=180?180-heading:heading_p;;
+        heading_p = heading>180&&heading<270?180-heading:heading_p;
+        console.log(heading_p)
+
         let color = "#034f84";
 
         if(flight.tracking.current.status ?? false) {
@@ -20,32 +25,14 @@ function FlightsMarker(props) {
         // fa-helicopter
         // fa-helicopter-symbol
         const airCraftIcon = new L.divIcon({
-            html: '<i class="fa-solid fa-helicopter fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading + 'deg; color:'+color+';"></i>',
+            html: '<span ' + (heading>90&&heading<270?'class="fa-flip-horizontal"':'') + ' style="display: inline-block;">'+
+                    '<i class="fa-solid fa-helicopter fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading_p +
+                     'deg; color:'+color+';"></i></span>',
             iconSize: [20, 20],
             className: 'mapIcon'
         });
 
-        const myCustomColour = '#583470'
-
-        const markerHtmlStyles = `
-        background-color: ${myCustomColour};
-        width: 3rem;
-        height: 3rem;
-        display: block;
-        left: -1.5rem;
-        top: -1.5rem;
-        position: relative;
-        border-radius: 3rem 3rem 0;
-        transform: rotate(45deg);
-        border: 1px solid #FFFFFF`
-
-
-        const airCraftIcon2 = new L.icon({
-            className: "my-custom-pin",
-            iconUrl: 'helicopter.svg',
-            iconSize: [35],
-        });
-        return airCraftIcon2
+        return airCraftIcon
     }
 
     return(
