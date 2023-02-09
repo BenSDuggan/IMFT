@@ -35,7 +35,7 @@ function Trips(props) {
       }, []);
 
     return (
-        <Container>
+        <Container className="main" fluid="lg">
             <h2>Trips</h2>
 
             <Pagination>

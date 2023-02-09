@@ -1,5 +1,6 @@
 import React from "react";
 
+import Container from 'react-bootstrap/Container';
 import { MapContainer, TileLayer, LayersControl, LayerGroup, Polyline } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
 
@@ -32,7 +33,8 @@ function Map(props) {
     let setSelectedSidebar = props.setSelectedSidebar ?? (() => {});
 
     return(
-        <MapContainer id="map" 
+        <Container fluid="true" id="map">
+        <MapContainer  id="map"
                       bounds={box} 
                       scrollWheelZoom={true}>
             <TileLayer
@@ -71,6 +73,7 @@ function Map(props) {
                 </LayersControl.Overlay>
             </LayersControl>
         </MapContainer>
+        </Container>
     )
 }
 

@@ -68,5 +68,34 @@ Determine if an aircraft is on the ground or airborne
 Ideally a location is set under ideal conditions. For a departure that occurs when going from grounded to airborn and for an arrival that is going from airborn to grounded. However, aircraft may enter from outside the bounding box or have a signal lost near their landing site. Actually, this doesn't matter
 
 
+## ToDo
 
+* Add dynamic pull rates to ADS-B logic
+    * If the ADS-B controller knows the quota for a 24 hour period, then pull less at night (when helicopters are not flying) and pull more often during the day (when helicopters are flying)
+    * Variables used by controller
+        * Night is between 7PM EST and 7AM EST
+        * `quota`: the number of requests that can be made within a 24 hour period
+        * `current_rate`: the current pull rate (in seconds)
+        * `mean_rate`: the number of time (in seconds) between pulls if pulls were evenly spread out during the day so quota was used completely
+        * `min_rate`: the largest time (in seconds) between pulls (highest number)
+        * `max_rate`: the smallest time (in seconds) between pulls (smallest number)
+        * `day_mean_rate`: the rate we should pull at to use the rest of the quota
+    * Pulling logic
+        * At night: If an aircraft is flying then make a request using the `mean_rate` time. If no aircraft are flying, set the pull rate at each interval to `current_rate += Math.ceiling((min_rate-current_rate)/2)`;
+        * During day: If no aircraft are flying pull at `day_mean_rate`
+* Add garbage collector to remove old `grounded` or `los` flights from `flights` and `trips` (will make map look nicer, doesn't affect functionality)
+* Fix live view
+    * Fix FlightSidebar: 
+        * Remove spacing between lines
+    * Implement Live view with grid
+        * Reactive
+* Trip view
+* 
 
+<Map 
+                hospitals={props.hospitals} 
+                flights={props.flights} 
+                trips={props.trips} 
+                selectedSidebar={props.selectedSidebar} 
+                setSelectedSidebar={props.setSelectedSidebar}>    
+            </Map>

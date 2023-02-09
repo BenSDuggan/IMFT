@@ -10,7 +10,6 @@ function FlightsMarker(props) {
         let heading_p = heading;
         heading_p = heading>90&&heading<=180?180-heading:heading_p;;
         heading_p = heading>180&&heading<270?180-heading:heading_p;
-        console.log(heading_p)
 
         let color = "#034f84";
 

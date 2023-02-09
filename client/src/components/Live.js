@@ -1,13 +1,19 @@
 
 import React from "react";
 
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+
 import Map from './Map';
 import Sidebar from './Sidebar';
 
 function Live(props) {    
 
     return (
-        <div id="main-container_live">
+        <Container className="main" id="main_live" fluid="true">
+            <Row className="fill_grid">
+            <Col sm={4} className="fill_grid">
             <Sidebar 
                 flights={props.flights} 
                 trips={props.trips} 
@@ -16,6 +22,8 @@ function Live(props) {
                 selectedSidebar={props.selectedSidebar} 
                 setSelectedSidebar={props.setSelectedSidebar}>    
             </Sidebar>
+            </Col>
+            <Col sm={8} className="fill_grid">
             <Map 
                 hospitals={props.hospitals} 
                 flights={props.flights} 
@@ -23,7 +31,9 @@ function Live(props) {
                 selectedSidebar={props.selectedSidebar} 
                 setSelectedSidebar={props.setSelectedSidebar}>    
             </Map>
-        </div>
+            </Col>
+            </Row>
+        </Container>
     )
 }
 

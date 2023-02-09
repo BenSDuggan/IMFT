@@ -1,6 +1,9 @@
 
 import React from "react";
 
+import Container from 'react-bootstrap/Container';
+import Pagination from 'react-bootstrap/Pagination';
+
 import FlightSidebar from './FlightSidebar';
 import MetaData from './MetaData';
 import FlightSelected from './FlightSelected'
@@ -10,17 +13,25 @@ function Sidebar(props) {
 
     return (
         <div id="sidebar">
-            {Object.keys(props.metadata).length > 0 && props.metadata.active ? <MetaData data={props.metadata} socket={props.socket}></MetaData> : <div></div>}
+            {Object.keys(props.metadata).length > 0 && props.metadata.active ? <MetaData data={props.metadata} socket={props.socket}></MetaData> : <></>}
 
 
-            <div className="sidebar-nav" id="sidebar-menu">
-                <button className="sidebar-nav-button" 
-                        onClick={() => props.setSelectedSidebar("flights")}
-                        style={{ backgroundColor:props.selectedSidebar.tab==='flights' ? '#0084ff' : 'inherit'}}>Flights</button>
-                <button className="sidebar-nav-button" 
-                        onClick={() => props.setSelectedSidebar("hospitals")}
-                        style={{ backgroundColor:props.selectedSidebar.tab==='hospitals' ? '#0084ff' : 'inherit'}}>Hospitals</button>
-            </div>
+            <Pagination>
+                <Pagination.Item 
+                    key={'flights'} 
+                    active={props.selectedSidebar.tab==='flights'} 
+                    onClick={() => props.setSelectedSidebar("flights")}
+                    className="">
+                        Flights
+                </Pagination.Item>
+                <Pagination.Item
+                    key={'hospitals'} 
+                    active={props.selectedSidebar.tab==='hospitals'} 
+                    onClick={() => props.setSelectedSidebar("hospitals")}
+                    className="">
+                        Hospitals
+                </Pagination.Item>
+            </Pagination>
 
             <div id="sidebar-flights" style={{display:props.selectedSidebar.tab==='flights' ? 'block' : 'none'}}>
                 <FlightSidebar flights={props.flights} selectFlight={props.setSelectedSidebar}></FlightSidebar>

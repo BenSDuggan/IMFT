@@ -64,7 +64,7 @@ function App() {
   }, []);
 
   return( 
-    <div>
+    <>
       <Menu></Menu>
       <BrowserRouter>
         <Routes>
@@ -86,7 +86,7 @@ function App() {
           <Route path="/trip/:tid" element={<Trip></Trip>} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </>
   )
 }
 

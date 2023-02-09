@@ -11,7 +11,7 @@ function Menu() {
     <>
       <Navbar expand="md" bg="light" variant="light">
         <>
-        <Navbar.Brand href="/">Indianapolis Medical Flight Tracking</Navbar.Brand>
+        <Navbar.Brand href="/">Indiana Medical Flight Tracking</Navbar.Brand>
         <Navbar.Toggle aria-controls="menu-navbar-nav" />
         <Navbar.Collapse id="menu-navbar-nav">
           <Nav className="me-auto">
