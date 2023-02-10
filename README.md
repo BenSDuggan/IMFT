@@ -90,12 +90,4 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
     * Implement Live view with grid
         * Reactive
 * Trip view
-* 
 
-<Map 
-                hospitals={props.hospitals} 
-                flights={props.flights} 
-                trips={props.trips} 
-                selectedSidebar={props.selectedSidebar} 
-                setSelectedSidebar={props.setSelectedSidebar}>    
-            </Map>

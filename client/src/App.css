@@ -67,9 +67,8 @@ html, body {
 }
 
 #sidebar {
-   height: 100%;
    display: inline-block;
-   overflow:scroll;
+   overflow-y:auto;
 }
 
 #map {

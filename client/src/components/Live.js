@@ -13,7 +13,7 @@ function Live(props) {
     return (
         <Container className="main" id="main_live" fluid="true">
             <Row className="fill_grid">
-            <Col sm={4} className="fill_grid">
+            <Col sm={5} className="fill_grid" id="sidebar" >
             <Sidebar 
                 flights={props.flights} 
                 trips={props.trips} 
@@ -23,7 +23,7 @@ function Live(props) {
                 setSelectedSidebar={props.setSelectedSidebar}>    
             </Sidebar>
             </Col>
-            <Col sm={8} className="fill_grid">
+            <Col sm={7} className="fill_grid">
             <Map 
                 hospitals={props.hospitals} 
                 flights={props.flights} 

@@ -12,7 +12,7 @@ function Sidebar(props) {
     
 
     return (
-        <div id="sidebar">
+        <>
             {Object.keys(props.metadata).length > 0 && props.metadata.active ? <MetaData data={props.metadata} socket={props.socket}></MetaData> : <></>}
 
 
@@ -47,7 +47,7 @@ function Sidebar(props) {
                     ></FlightSelected> :
                 <h2>Selected Flight (non selected)</h2>}
             </div>
-        </div>
+        </>
         )
 }
 
