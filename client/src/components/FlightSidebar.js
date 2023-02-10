@@ -11,7 +11,7 @@ let FlightRow = (props) => {
     let f = props.flight;
 
     return (
-    <tr className='' key={uuidv4()} onClick={() => props.selectFlight(f.icao24)}>
+    <tr className='' onClick={() => props.selectFlight(f.icao24)}>
         <td>{"N"+f.faa["N-NUMBER"]}</td>
         <td>{f.latest.squawk}</td>
         <td>{f.faa.NAME}</td>
@@ -35,18 +35,20 @@ let FlightTable = (props) => {
     return (
         <Table className='' key={"table_"+props.status}>
             <thead>
-                <th><i className="fa-solid fa-plane"></i></th>
-                <th><i className="fa-solid fa-tower-broadcast"></i></th>
-                <th>Name</th>
-                <th><i className="fa-solid fa-clock"></i></th>
-                <th><i className="fa-regular fa-compass"></i></th>
-                <th><i className="fa-solid fa-mountain-sun"></i></th>
-                <th><i className="fa-solid fa-gauge-high"></i></th>
-                <th><i className="fa-solid fa-arrow-trend-up"></i></th>
+                <tr>
+                    <th><i className="fa-solid fa-plane"></i></th>
+                    <th><i className="fa-solid fa-tower-broadcast"></i></th>
+                    <th>Name</th>
+                    <th><i className="fa-solid fa-clock"></i></th>
+                    <th><i className="fa-regular fa-compass"></i></th>
+                    <th><i className="fa-solid fa-mountain-sun"></i></th>
+                    <th><i className="fa-solid fa-gauge-high"></i></th>
+                    <th><i className="fa-solid fa-arrow-trend-up"></i></th>
+                </tr>
             </thead>
             <tbody>
                 {props.flights.map(f => 
-                    <FlightRow flight={f} selectFlight={props.selectFlight} key={"table-body_"+props.status}></FlightRow>
+                    <FlightRow flight={f} selectFlight={props.selectFlight} key={"table-body_"+f.icao24}></FlightRow>
                 )}
             </tbody>
         </Table>
@@ -61,31 +63,42 @@ let FlightSidebar = (props) => {
     let grounded = props.flights.filter(f => f.tracking.current.status === "grounded");
     let los = props.flights.filter(f => f.tracking.current.status === "los");
 
+    let select_accordion = (key) => {
+        if(accordion.includes(key)) {
+            let a = accordion;
+            a = a.filter((aa) => aa !== key);
+            setAccordion(a);
+        }
+        else if(key !== null) {
+            setAccordion(prevState => (
+                [...prevState, key]
+            ))
+        }
+    }
+
     return (
-        <div id="all-flights">
-            <Accordion defaultActiveKey={accordion} flush>
-                <Accordion.Item eventKey="airborn">
-                    <Accordion.Header>Airborn ({airborn.length})</Accordion.Header>
-                    <Accordion.Body style={{padding:"0px"}}>
-                        <FlightTable flights={airborn} selectFlight={props.selectFlight} status="airborn"></FlightTable>
-                    </Accordion.Body>
-                </Accordion.Item>
+        <Accordion flush activeKey={accordion} onSelect={select_accordion}>
+            <Accordion.Item eventKey="airborn">
+                <Accordion.Header>Airborn ({airborn.length})</Accordion.Header>
+                <Accordion.Body style={{padding:"0px"}}>
+                    <FlightTable flights={airborn} selectFlight={props.selectFlight} status="airborn"></FlightTable>
+                </Accordion.Body>
+            </Accordion.Item>
 
-                <Accordion.Item eventKey="grounded">
-                    <Accordion.Header>Grounded ({grounded.length})</Accordion.Header>
-                    <Accordion.Body style={{padding:"0px"}}>
-                        <FlightTable flights={grounded} selectFlight={props.selectFlight} status="grounded"></FlightTable>
-                    </Accordion.Body>
-                </Accordion.Item>
+            <Accordion.Item eventKey="grounded">
+                <Accordion.Header>Grounded ({grounded.length})</Accordion.Header>
+                <Accordion.Body style={{padding:"0px"}}>
+                    <FlightTable flights={grounded} selectFlight={props.selectFlight} status="grounded"></FlightTable>
+                </Accordion.Body>
+            </Accordion.Item>
 
-                <Accordion.Item eventKey="los">
-                    <Accordion.Header>Loss of Signal ({los.length})</Accordion.Header>
-                    <Accordion.Body style={{padding:"0px"}}>
-                        <FlightTable flights={los} selectFlight={props.selectFlight} status="los"></FlightTable>
-                    </Accordion.Body>
-                </Accordion.Item>
-            </Accordion>
-        </div>)
+            <Accordion.Item eventKey="los">
+                <Accordion.Header>Loss of Signal ({los.length})</Accordion.Header>
+                <Accordion.Body style={{padding:"0px"}}>
+                    <FlightTable flights={los} selectFlight={props.selectFlight} status="los"></FlightTable>
+                </Accordion.Body>
+            </Accordion.Item>
+        </Accordion>)
 }
 
 export default FlightSidebar;
