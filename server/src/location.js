@@ -124,7 +124,7 @@ class Location {
           let formatted = geo[0].formattedAddress;
   
           if((geo[0].city ?? undefined) != undefined && (geo[0].state ?? undefined) != undefined)
-            formatted = results[0].city + ", " + results[0].state;
+            formatted = geo[0].city + ", " + geo[0].state;
           
           location.display_name = formatted;
           location.distance = utils.haversine(flight.latest.latitude, flight.latest.longitude, geo[0].latitude, geo[0].longitude);

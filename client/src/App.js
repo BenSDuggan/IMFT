@@ -5,7 +5,6 @@ import Live from "./components/Live";
 import Menu from './components/Menu'
 import Trips from './components/Trips';
 import Trip from './components/Trip.js';
-import Example from './components/Test.js';
 
 import io from 'socket.io-client';
 
@@ -82,7 +81,7 @@ function App() {
           } />
           <Route path="/trips" element={
             <Trips></Trips>} />
-          <Route path="/hospitals" element={<Example></Example>} />
+          <Route path="/hospitals" element={<h2>Hospitals</h2>} />
           <Route path="/aircraft" element={<h2>Aircraft</h2>} />
           <Route path="/trip/:tid" element={<Trip></Trip>} />
         </Routes>
