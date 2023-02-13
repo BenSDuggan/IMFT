@@ -60,9 +60,9 @@ function Trips(props) {
                         <td><a href={"/trip/"+trip.tid}>View Trip</a></td>
                         <td>{trip.departure.display_name} @ {display_date(trip.departure.time)}</td>
                         <td>{trip.arrival.display_name} @ {display_date(trip.arrival.time)}</td>
-                        <td>({trip.aid})</td>
+                        <td>{trip.aircraft.display_name} <span>&#47;</span> <span>&#47;</span> N{trip.aircraft["N-NUMBER"]}</td>
                         <td>{trip.stats.distance.toFixed(2)}</td>
-                        <td>{trip.stats.time}</td>
+                        <td>{Math.round(trip.stats.time/60)}</td>
                     </tr>)}
             </tbody>
             </Table>

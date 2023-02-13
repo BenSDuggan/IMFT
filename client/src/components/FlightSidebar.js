@@ -16,7 +16,6 @@ let FlightRow = (props) => {
         <td>{f.latest.squawk}</td>
         <td>{f.faa.NAME}</td>
         <td>{f.tics}</td>
-        <td>{Math.round(f.latest.true_track)}</td>
         <td>{Math.round(meter_to_feet(f.latest.geo_altitude))}</td>
         <td>{ Math.round(meter_to_feet(f.latest.velocity))}</td>
         <td>{Math.round(meter_to_feet(f.latest.vertical_rate)) > 0 ? 
@@ -26,6 +25,7 @@ let FlightRow = (props) => {
             <i className="fa-solid fa-right-left"></i>}
             <span> {Math.round(meter_to_feet(f.latest.vertical_rate))} </span>
         </td>
+        <td>{Math.round(f.latest.track)}</td>
     </tr>
     )
 }
@@ -39,11 +39,11 @@ let FlightTable = (props) => {
                     <th><i className="fa-solid fa-plane"></i></th>
                     <th><i className="fa-solid fa-tower-broadcast"></i></th>
                     <th>Name</th>
-                    <th><i className="fa-solid fa-clock"></i></th>
                     <th><i className="fa-regular fa-compass"></i></th>
                     <th><i className="fa-solid fa-mountain-sun"></i></th>
                     <th><i className="fa-solid fa-gauge-high"></i></th>
                     <th><i className="fa-solid fa-arrow-trend-up"></i></th>
+                    <th><i className="fa-solid fa-clock"></i></th>
                 </tr>
             </thead>
             <tbody>

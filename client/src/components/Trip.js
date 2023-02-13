@@ -2,7 +2,13 @@
 import React, {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+
+import FlightSelected from './FlightSelected'
 import Map from './Map';
+
 
 let create_bbox = (path) => {
     let [min_lat, min_lon, max_lat, max_lon] = [85, 180, -85, -180];
@@ -20,7 +26,7 @@ let create_bbox = (path) => {
     return [[min_lat, min_lon], [max_lat, max_lon]]
 }
 
-function Trip(props) {
+function Trip() {
     let { tid } = useParams();
 
     const [trip, setTrip] = useState([]);
@@ -35,6 +41,7 @@ function Trip(props) {
             if (!ignore) {
                 res.json().then((data) => {
                   setTrip(data);
+                  console.log(data)
                 })
                 .catch((error) => console.error(error));
             }
@@ -46,14 +53,25 @@ function Trip(props) {
 
     return (
         <>
-            <h2>Trip</h2>
-
             <div id="main-container_live">
                 {trip.length === 1?
-                <Map 
-                    trips={trip}
-                    bbox={create_bbox(trip[0].path)}>
-                </Map>:<></>}
+                <Container className="main" id="main_live" fluid="true">
+                    <Row className="fill_grid">
+                    <Col sm={5} className="fill_grid" id="sidebar" >
+                        <FlightSelected 
+                            flight={null} 
+                            trip={trip[0]} >
+                        </FlightSelected>
+                    </Col>
+                    <Col sm={7} className="fill_grid">
+                    <Map 
+                        trips={trip} 
+                        bbox={create_bbox(trip[0].path)}>    
+                    </Map>
+                    </Col>
+                    </Row>
+                </Container>:
+                <></>}
             </div>
         </>
     )

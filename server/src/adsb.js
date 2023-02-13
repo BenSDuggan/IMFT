@@ -87,7 +87,6 @@ class OpenSky extends ADSB {
             }
 
             states[i]["altitude"] = nfd.states[i]["geo_altitude"] ?? (nfd.states[i]["baro_altitude"] ?? null);
-            states[i]["track"] = nfd.states[i]["true_track"] ?? null;
         }
 
         nfd.states = states;
@@ -132,7 +131,7 @@ class HistoricFlights extends ADSB {
         this.speed = 1;
         this.interval_handler = null;
 
-        this.expected_keys = {"icao24":"icao24", "callsign":"callsign", "time_position":"time_position", "last_contact":"time", "longitude":"longitude", "latitude":"latitude", "baro_altitude":"baro_altitude", "on_ground":"on_ground", "velocity":"velocity", "true_track":"true_track", "vertical_rate":"vertical_rate", "sensors":"sensors", "geo_altitude":"geo_altitude", "squawk":"squawk", "spi":"spi", "position_source":"position_source"}
+        this.expected_keys = {"icao24":"icao24", "callsign":"callsign", "time_position":"time_position", "last_contact":"time", "longitude":"longitude", "latitude":"latitude", "baro_altitude":"baro_altitude", "on_ground":"on_ground", "velocity":"velocity", "true_track":"track", "vertical_rate":"vertical_rate", "sensors":"sensors", "geo_altitude":"geo_altitude", "squawk":"squawk", "spi":"spi", "position_source":"position_source"}
     }
 
     // Load data
@@ -186,7 +185,6 @@ class HistoricFlights extends ADSB {
             }
 
             states[i]["altitude"] = nfd.states[i]["geo_altitude"] ?? (nfd.states[i]["baro_altitude"] ?? null);
-            states[i]["track"] = nfd.states[i]["true_track"] ?? null;
         }
 
         nfd.states = states;

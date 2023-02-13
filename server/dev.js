@@ -32,7 +32,7 @@ let historic = () => {
   setTimeout(() => {
     adsb.receiver.speed = 10
     adsb.receiver.set_frame(0);
-    adsb.receiver.start();
+    adsb.receiver.stop();
   }, 1000)
 }
 

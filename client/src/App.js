@@ -17,6 +17,7 @@ function App() {
   const [trips, setTrips] = useState([]);
   const [metadata, setMetadata] = useState({});
   const [socket, setSocket] = useState(null);
+  const [connected, setConnected] = useState(false);
   const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":null});
 
   let selectSidebar = (d) => {
@@ -32,6 +33,12 @@ function App() {
 
     s.on("connect", () => {
       console.log("connected")
+      setConnected(true)
+    });
+
+    s.on("disconnect", () => {
+      console.log("disconnected")
+      setConnected(false)
     });
 
     // Getters
@@ -65,7 +72,7 @@ function App() {
 
   return( 
     <>
-      <Menu></Menu>
+      <Menu connected={connected}></Menu>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={

@@ -11,8 +11,13 @@ let utils = require('./utils.js');
 // Data structures
 const trip_structure = {
     "tid":-1, // Trip ID
-    "aid":-1, // Aircraft ID
     "status":"", // `grounded` `airborn` `los`
+    "aircraft": { // Aircraft information
+      "aid":-1, // Aircraft ID
+      "N-NUMBER": null, // Aircraft N-Number
+      "display_name": "", // Aircraft name or display name
+      "faa": {} // FAA information (only included if quired from trip API endpoint)
+    },
     "departure": { // Departure information
         "lid": "", // Location ID if one exists
         "type": "", // Was the location determined using `hospital`, `faaID`, or `geo`
@@ -96,7 +101,9 @@ class Trips {
     if(old_status == "grounded" && new_status == "airborn") {
       this.trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
       this.trips[flight.icao24].tid = uuidv4();
-      this.trips[flight.icao24].aid = flight.icao24;
+      this.trips[flight.icao24].aircraft.aid = flight.icao24;
+      this.trips[flight.icao24].aircraft.display_name = flight.faa.NAME;
+      this.trips[flight.icao24].aircraft["N-NUMBER"] = flight.faa["N-NUMBER"];
       this.trips[flight.icao24].status = new_status;
       this.trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
 
@@ -126,7 +133,10 @@ class Trips {
       if(!this.trips.hasOwnProperty(flight.icao24)) {
         this.trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
         this.trips[flight.icao24].tid = uuidv4();
-        this.trips[flight.icao24].aid = flight.icao24;
+        this.trips[flight.icao24].aircraft.aid = flight.icao24;
+        this.trips[flight.icao24].aircraft.aid = flight.icao24;
+        this.trips[flight.icao24].aircraft.display_name = flight.faa.NAME;
+        this.trips[flight.icao24].aircraft["N-NUMBER"] = flight.faa["N-NUMBER"];
         this.trips[flight.icao24].status = new_status;
         this.trips[flight.icao24].path.push([flight.latest.latitude, flight.latest.longitude]);
 
@@ -217,11 +227,11 @@ class Trips {
       // Filter by aid
       if(options.hasOwnProperty("aid")) {
         if(first_term) {
-          term = {$and:[{"aid": String(options.aid)}]}
+          term = {$and:[{"aircraft.aid": String(options.aid)}]}
           first_term = false;
         }
         else 
-          term[$and].push({"aid": String(options.aid)});
+          term[$and].push({"aircraft.aid": String(options.aid)});
       }
 
       // Filter by departure_lid
@@ -265,7 +275,7 @@ class Trips {
         let term = {$or:[{$and:[{"departure.time": {$gte:min_date}}, {"departure.time":{$lte:max_date}}]}, 
                         {$and:[{"arrival.time": {$gte:min_date}}, {"arrival.time":{$lte:max_date}}]}]}
 
-        return await database.get_trip_index("aid", term)
+        return await database.get_trip_index("aircraft.aid", term)
     }
 }
 
