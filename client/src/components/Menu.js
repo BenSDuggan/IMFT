@@ -7,7 +7,7 @@ function Menu(props) {
 
   return( 
     <>
-      <Navbar expand="md" bg={props.connected ? "dark" : "danger"} variant="dark" >
+      <Navbar expand="md" bg={props.connected ? "dark" : "danger"} variant="dark" className="main_nav">
         <>
         <Navbar.Brand href="/" >Indiana Medical Flight Tracking</Navbar.Brand>
         <Navbar.Toggle aria-controls="menu-navbar-nav" />

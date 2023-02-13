@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 
 import Accordion from 'react-bootstrap/Accordion';
+import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
-import { v4 as uuidv4 } from 'uuid';
 
 
 let meter_to_feet = (meter) => meter * 3.28084;
@@ -33,7 +33,8 @@ let FlightRow = (props) => {
 let FlightTable = (props) => {
 
     return (
-        <Table className='' key={"table_"+props.status}>
+        <Container className='table-responsive' >
+        <Table key={"table_"+props.status}>
             <thead>
                 <tr>
                     <th><i className="fa-solid fa-plane"></i></th>
@@ -52,6 +53,7 @@ let FlightTable = (props) => {
                 )}
             </tbody>
         </Table>
+        </Container>
     )
 }
 

@@ -11,7 +11,8 @@ import Sidebar from './Sidebar';
 function Live(props) {    
 
     return (
-        <Container className="main" id="main_live" fluid="true">
+        <>
+        <Container className="d-md-block d-none" id="main_live" fluid="true">
             <Row className="fill_grid">
             <Col sm={5} className="fill_grid" id="sidebar" >
             <Sidebar 
@@ -24,16 +25,42 @@ function Live(props) {
             </Sidebar>
             </Col>
             <Col sm={7} className="fill_grid">
-            <Map 
-                hospitals={props.hospitals} 
-                flights={props.flights} 
-                trips={props.trips} 
-                selectedSidebar={props.selectedSidebar} 
-                setSelectedSidebar={props.setSelectedSidebar}>    
-            </Map>
+            <Container fluid="true" id="map">
+                <Map 
+                    hospitals={props.hospitals} 
+                    flights={props.flights} 
+                    trips={props.trips} 
+                    selectedSidebar={props.selectedSidebar} 
+                    setSelectedSidebar={props.setSelectedSidebar}>    
+                </Map>
+            </Container>
             </Col>
             </Row>
         </Container>
+        <Container className="d-md-none d-block fill_grid" id="main_live" fluid>
+            <Row>
+            <Container fluid="true" style={{height:"60vh"}}>
+                <Map 
+                    hospitals={props.hospitals} 
+                    flights={props.flights} 
+                    trips={props.trips} 
+                    selectedSidebar={props.selectedSidebar} 
+                    setSelectedSidebar={props.setSelectedSidebar}>    
+                </Map>
+            </Container>
+            </Row>
+            <Row>
+                <Sidebar 
+                    flights={props.flights} 
+                    trips={props.trips} 
+                    metadata={props.metadata} 
+                    socket={props.socket} 
+                    selectedSidebar={props.selectedSidebar} 
+                    setSelectedSidebar={props.setSelectedSidebar}>    
+                </Sidebar>
+            </Row>
+        </Container>
+        </>
     )
 }
 

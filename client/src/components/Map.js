@@ -88,7 +88,6 @@ function Map(props) {
     let setSelectedSidebar = props.setSelectedSidebar ?? (() => {});
 
     return(
-        <Container fluid="true" id="map">
         <MapContainer  id="map"
                       bounds={box} 
                       scrollWheelZoom={true}>
@@ -134,7 +133,6 @@ function Map(props) {
                 </LayersControl.Overlay>
             </LayersControl>
         </MapContainer>
-        </Container>
     )
 }
 

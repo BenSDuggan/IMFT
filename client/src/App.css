@@ -3,8 +3,8 @@ html, body {
   height:100%;
 }
 
-.main {
-  height: calc(100vh - 56px);
+.main_nav {
+  padding-left: 20px;
 }
 
 .fill_height {
@@ -32,30 +32,6 @@ html, body {
 	outline: inherit;
 }
 
-.flight-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.flight-table-row {
-  border-bottom: 2px solid #333;
-}
-
-.flight-table-row:last-child {
-  border-bottom: 0px;
-}
-
-.flight-tile-row:first-child {
-  border-right: 2px solid #333;
-}
-
-.flight-tile-row:last-child {
-  border-right: 0px;
-}
-
-.flight-tile-row {
-  width: 50%;
-}
 
 
 #root {
@@ -63,7 +39,7 @@ html, body {
 }
 
 #main_live {
-  
+  height: calc(100vh - 60px); 
 }
 
 #sidebar {

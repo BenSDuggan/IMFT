@@ -42,30 +42,31 @@ function Trips(props) {
                 <Pagination.Item key={30} active={true}>30</Pagination.Item>
                 <Pagination.Item key={60}>60</Pagination.Item>
             </Pagination>
-
-            <Table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Aircraft</th>
-                    <th>Distance (miles)</th>
-                    <th>Travel time (min)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {trips.map((trip) => 
-                    <tr key={trip.tid}>
-                        <td><a href={"/trip/"+trip.tid}>View Trip</a></td>
-                        <td>{trip.departure.display_name} @ {display_date(trip.departure.time)}</td>
-                        <td>{trip.arrival.display_name} @ {display_date(trip.arrival.time)}</td>
-                        <td>{trip.aircraft.display_name} <span>&#47;</span> <span>&#47;</span> N{trip.aircraft["N-NUMBER"]}</td>
-                        <td>{trip.stats.distance.toFixed(2)}</td>
-                        <td>{Math.round(trip.stats.time/60)}</td>
-                    </tr>)}
-            </tbody>
-            </Table>
+            <Container className="table-responsive">
+                <Table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Aircraft</th>
+                        <th>Distance (miles)</th>
+                        <th>Travel time (min)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {trips.map((trip) => 
+                        <tr key={trip.tid}>
+                            <td><a href={"/trip/"+trip.tid}>View Trip</a></td>
+                            <td>{trip.departure.display_name} @ {display_date(trip.departure.time)}</td>
+                            <td>{trip.arrival.display_name} @ {display_date(trip.arrival.time)}</td>
+                            <td>{trip.aircraft.display_name} <span>&#47;</span> <span>&#47;</span> N{trip.aircraft["N-NUMBER"]}</td>
+                            <td>{trip.stats.distance.toFixed(2)}</td>
+                            <td>{Math.round(trip.stats.time/60)}</td>
+                        </tr>)}
+                </tbody>
+                </Table>
+            </Container>
         </Container>
     )
 }
