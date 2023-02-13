@@ -85,9 +85,6 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
         * During day: If no aircraft are flying pull at `day_mean_rate`
 * Add garbage collector to remove old `grounded` or `los` flights from `flights` and `trips` (will make map look nicer, doesn't affect functionality)
 * Fix live view
-    * Fix FlightSidebar: 
-        * Remove spacing between lines
     * Implement Live view with grid
         * Reactive
-* Trip view
 

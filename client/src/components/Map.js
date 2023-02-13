@@ -84,7 +84,7 @@ function Map(props) {
     let hospitals = props.hospitals ?? [];
     let flights = props.flights ?? [];
     let trips = props.trips ?? [];
-    let selectedSidebar = props.selectedSidebar ?? "";
+    let selectedSidebar = props.selectedSidebar ?? {"tab":"flights", "id":null};
     let setSelectedSidebar = props.setSelectedSidebar ?? (() => {});
 
     return(
@@ -98,6 +98,12 @@ function Map(props) {
             />
 
             <DeselectFlight setSelectedSidebar={setSelectedSidebar} />
+
+            {selectedSidebar.id !== null ? 
+                <MapPath 
+                    key={"map-flight-path-selected-" + selectedSidebar.id} 
+                    trip={trips.filter(t => t.aircraft.aid === selectedSidebar.id)[0]}></MapPath> :
+                <></>}
 
             <LayersControl position="topright">
                 <LayersControl.Overlay checked name="Hospitals">
@@ -119,10 +125,10 @@ function Map(props) {
                     </LayerGroup>
                 </LayersControl.Overlay>
 
-                <LayersControl.Overlay checked name="Path">
+                <LayersControl.Overlay name="Path">
                     <LayerGroup>
                         {trips.map(t => 
-                            <MapPath key={"map-flight-path-" + t.aircraft.aid} trip={t} selectedSidebar={selectedSidebar}></MapPath>
+                            <MapPath key={"map-flight-path-" + t.aircraft.aid} trip={t}></MapPath>
                         )};
                     </LayerGroup>
                 </LayersControl.Overlay>

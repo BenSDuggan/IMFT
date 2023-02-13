@@ -66,7 +66,8 @@ function Trip() {
                     <Col sm={7} className="fill_grid">
                     <Map 
                         trips={trip} 
-                        bbox={create_bbox(trip[0].path)}>    
+                        bbox={create_bbox(trip[0].path)}
+                        selectedSidebar={{"tab":"selected-flight", "id":trip[0].aircraft.aid}} >    
                     </Map>
                     </Col>
                     </Row>
