@@ -128,9 +128,10 @@ class Trips {
     }
     // takeoff or picking up from previous trip or entered airspace from somewhere else = new or continue trip: los -> airborn
     else if(old_status == "los" && new_status == "airborn") {
-      // If trip exists -> don't do anything
+      // OLD: If trip exists -> don't do anything
+      // NEW: Always create a new trip if previously LOS -> trust that LOS means it landed or is lost for this trip
       // If trip doesn't exist -> make one
-      if(!this.trips.hasOwnProperty(flight.icao24)) {
+      if(!this.trips.hasOwnProperty(flight.icao24) || true) {
         this.trips[flight.icao24] = JSON.parse(JSON.stringify(trip_structure));
         this.trips[flight.icao24].tid = uuidv4();
         this.trips[flight.icao24].aircraft.aid = flight.icao24;

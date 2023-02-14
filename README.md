@@ -84,7 +84,4 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
         * At night: If an aircraft is flying then make a request using the `mean_rate` time. If no aircraft are flying, set the pull rate at each interval to `current_rate += Math.ceiling((min_rate-current_rate)/2)`;
         * During day: If no aircraft are flying pull at `day_mean_rate`
 * Add garbage collector to remove old `grounded` or `los` flights from `flights` and `trips` (will make map look nicer, doesn't affect functionality)
-* Fix live view
-    * Implement Live view with grid
-        * Reactive
 

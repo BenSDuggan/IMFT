@@ -1,6 +1,5 @@
 import React from "react";
 
-import Container from 'react-bootstrap/Container';
 import L from 'leaflet';
 import { LayersControl, LayerGroup, Polyline, MapContainer, Marker, TileLayer } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'

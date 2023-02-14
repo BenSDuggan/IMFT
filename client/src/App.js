@@ -21,7 +21,7 @@ function App() {
   const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":null});
 
   let selectSidebar = (d) => {
-      if(d === 'flights' || d == 'hospitals')
+      if(d === 'flights' || d === 'hospitals')
           setSelectedSidebar({"tab":d, "id":null});
       else
           setSelectedSidebar({"tab":"selected-flight", "id":d});
