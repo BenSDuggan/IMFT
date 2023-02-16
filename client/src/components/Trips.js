@@ -25,8 +25,13 @@ function Trips(props) {
         if (!ignore) {
             res.json().then((data) => {
                 let t = JSON.parse(JSON.stringify(trips));
-                t.push(...data)
-                setTrips(t);
+
+                if(option.page == 0)
+                    setTrips(data);
+                else {
+                    t.push(...data)
+                    setTrips(t);
+                }
             })
             .catch((error) => console.error(error));
         }
@@ -37,22 +42,22 @@ function Trips(props) {
 
         switch (key) {
             case '1d':
-                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000)});
+                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000), page:0});
                 break;
             case '1w':
-                setOption({...option, min_date:new Date(new Date() - 7*24*60*60*1000)});
+                setOption({...option, min_date:new Date(new Date() - 7*24*60*60*1000), page:0});
                 break;
             case '1m':
-                setOption({...option, min_date:new Date(new Date() - 30*24*60*60*1000)});
+                setOption({...option, min_date:new Date(new Date() - 30*24*60*60*1000), page:0});
                 break;
             case '2m':
-                setOption({...option, min_date:new Date(new Date() - 60*24*60*60*1000)});
+                setOption({...option, min_date:new Date(new Date() - 60*24*60*60*1000), page:0});
                 break;
             case '3m':
-                setOption({...option, min_date:new Date(new Date() - 90*24*60*60*1000)});
+                setOption({...option, min_date:new Date(new Date() - 90*24*60*60*1000), page:0});
                 break;
             default:
-                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000)});
+                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000), page:0});
         }
     }
 
