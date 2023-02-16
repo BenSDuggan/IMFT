@@ -215,6 +215,8 @@ class Trips {
         first_term = false;
       }
 
+      options.page = options.page ?? 0;
+
       // Filter by tid
       if(options.hasOwnProperty("tid")) {
         if(first_term) {
@@ -265,7 +267,7 @@ class Trips {
           term[$and].push({$or:[{"departure.lid": String(options.lid)}, {"arrival.lid": String(options.lid)}]});
       }
 
-      return await database.get_trip(term)
+      return await database.get_trip(term, 10, options.page);
     }
 
     // Get aircraft (aid) indexes for the min_date (departure) and max_date (arrival)

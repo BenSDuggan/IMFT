@@ -15,7 +15,7 @@ let FlightRow = (props) => {
         <td>{"N"+f.faa["N-NUMBER"]}</td>
         <td>{f.latest.squawk}</td>
         <td>{f.faa.NAME}</td>
-        <td>{f.tics}</td>
+        <td>{Math.round(f.latest.track)}</td>
         <td>{Math.round(meter_to_feet(f.latest.geo_altitude))}</td>
         <td>{ Math.round(meter_to_feet(f.latest.velocity))}</td>
         <td>{Math.round(meter_to_feet(f.latest.vertical_rate)) > 0 ? 
@@ -25,7 +25,7 @@ let FlightRow = (props) => {
             <i className="fa-solid fa-right-left"></i>}
             <span> {Math.round(meter_to_feet(f.latest.vertical_rate))} </span>
         </td>
-        <td>{Math.round(f.latest.track)}</td>
+        <td>{f.tics}</td>
     </tr>
     )
 }

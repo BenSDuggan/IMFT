@@ -130,15 +130,23 @@ let Database = class {
     /* Get the requested trip using the query
     *
     * term (JSON): What values should be used to search for. (eg {"N-NUMBER":"N191LL"} or {"MODE S CODE HEX":"A16CE7"})
+    * num_results (Number): How many results to show
+    * page (Number): Which page to display (will skip page * num_results)
     *
     * Returns: JSON object with all the matching trips
     * 
     * Example: `database.get_faa_registration({"MODE S CODE HEX":"A16CE7"}).then((results) => console.log(results))`
     */
-    async get_trip(term) {
+    async get_trip(term, num_results, page) {
         let answer = [];
 
-        const cursor = await this.client.db(databaseName).collection("trips").find(term);
+        const cursor = await this.client
+                                .db(databaseName)
+                                .collection("trips")
+                                .find(term)
+                                .sort( { "arrival.time":-1 } )
+                                .skip(num_results*page)
+                                .limit(num_results);
         await cursor.forEach((r) => {
             answer.push(r);
         });

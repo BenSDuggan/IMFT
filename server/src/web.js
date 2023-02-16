@@ -80,9 +80,10 @@ app.get('/api/trip/:tid', (req, res) => {
 app.post('/api/trips', (req, res) => {
   // Cast dates from client
   let max_date = new Date(req.body.max_date ?? new Date());
-  let min_date = new Date(req.body.min_date ?? new Date(new Date()-(90*24*60*60*1000)));
+  let min_date = new Date(req.body.min_date ?? new Date(new Date()-(7*24*60*60*1000)));
+  let page = Number(req.body.page) ?? 0;
 
-  let options = {min_date:min_date, max_date:max_date};
+  let options = {min_date:min_date, max_date:max_date, page:page};
 
   trips.database_get_trip(options)
   .then((results) => {

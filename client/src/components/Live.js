@@ -39,7 +39,7 @@ function Live(props) {
         </Container>
         <Container className="d-md-none d-block fill_grid" id="main_live" fluid>
             <Row>
-            <Container fluid="true" style={{height:"60vh"}}>
+            <Container fluid="true" style={{height:"50vh"}}>
                 <Map 
                     hospitals={props.hospitals} 
                     flights={props.flights} 

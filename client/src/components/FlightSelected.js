@@ -67,7 +67,7 @@ let FlightTracking = (props) => {
                             <span>Location: {f.tracking.previous.location.display_name ?? "NA"}</span><br/>
                             <span>Type: {f.tracking.previous.location.type ?? "NA"}</span><br/>
                             <span>Distance: {Math.round(f.tracking.previous.location.distance) ?? "NA"}</span><br/>
-                            <span>Zone: {f.tracking.current.location.zone ?? "NA"}</span><br/>
+                            <span>Zone: {f.tracking.previous.location.zone ?? "NA"}</span><br/>
                         </div>:
                         <span>Location: NA</span>}
                     </td>
