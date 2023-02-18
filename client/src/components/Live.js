@@ -14,7 +14,7 @@ function Live(props) {
         <>
         <Container className="d-md-block d-none" id="main_live" fluid="true">
             <Row className="fill_grid">
-            <Col sm={5} className="fill_grid" id="sidebar" >
+            <Col  className="fill_grid" id="sidebar" >
             <Sidebar 
                 flights={props.flights} 
                 trips={props.trips} 

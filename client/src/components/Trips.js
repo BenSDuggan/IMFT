@@ -2,19 +2,26 @@
 import React, {useEffect, useState} from "react";
 
 import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Pagination from 'react-bootstrap/Pagination';
+import Row from 'react-bootstrap/Row';
 import Table from 'react-bootstrap/Table';
 
 function Trips(props) {
-    const [range, setRange] = useState("1w");
+    const [range, setRange] = useState("3m");
     const [trips, setTrips] = useState([]);
-    const [option, setOption] = useState({"min_date":new Date(new Date() - 604800*1000), "page":0})
+    const [option, setOption] = useState({"min_date":new Date(new Date() - 90*24*60*60*1000), max_date: new Date(), "page":0, "submit":true})
     
     let display_date = (date) => new Date(date).toLocaleString();
 
     async function get_trips(ignore) {
-        let data = {min_date:option.min_date, page:option.page};
+        if(!option.submit)
+            return
+        else
+            setOption({...option, submit:false})
+
+        let data = {min_date:option.min_date, max_date:option.max_date, page:option.page};
 
         const res = await fetch("api/trips", { 
             method: 'post',
@@ -24,9 +31,10 @@ function Trips(props) {
 
         if (!ignore) {
             res.json().then((data) => {
+                console.log(data)
                 let t = JSON.parse(JSON.stringify(trips));
 
-                if(option.page == 0)
+                if(option.page === 0)
                     setTrips(data);
                 else {
                     t.push(...data)
@@ -42,22 +50,22 @@ function Trips(props) {
 
         switch (key) {
             case '1d':
-                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000), page:0});
+                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000), max_date:new Date(), page:0, submit:true});
                 break;
             case '1w':
-                setOption({...option, min_date:new Date(new Date() - 7*24*60*60*1000), page:0});
+                setOption({...option, min_date:new Date(new Date() - 7*24*60*60*1000), max_date:new Date(), page:0, submit:true});
                 break;
             case '1m':
-                setOption({...option, min_date:new Date(new Date() - 30*24*60*60*1000), page:0});
+                setOption({...option, min_date:new Date(new Date() - 30*24*60*60*1000), max_date:new Date(), page:0, submit:true});
                 break;
             case '2m':
-                setOption({...option, min_date:new Date(new Date() - 60*24*60*60*1000), page:0});
+                setOption({...option, min_date:new Date(new Date() - 60*24*60*60*1000), max_date:new Date(), page:0, submit:true});
                 break;
             case '3m':
-                setOption({...option, min_date:new Date(new Date() - 90*24*60*60*1000), page:0});
+                setOption({...option, min_date:new Date(new Date() - 90*24*60*60*1000), max_date:new Date(), page:0, submit:true});
                 break;
             default:
-                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000), page:0});
+                setOption({...option, min_date:new Date(new Date() - 1*24*60*60*1000), max_date:new Date(), page:0, submit:true});
         }
     }
 
@@ -72,14 +80,43 @@ function Trips(props) {
     return (
         <Container className="main" fluid="lg">
             <h2>Trips</h2>
-
-            <Pagination>
-                <Pagination.Item key={'1d'} active={'1d' === range} onClick={()=>set_filter_date('1d')}>1 D</Pagination.Item>
-                <Pagination.Item key={'1w'} active={'1w' === range} onClick={()=>set_filter_date('1w')}>1 W</Pagination.Item>
-                <Pagination.Item key={'1m'} active={'1m' === range} onClick={()=>set_filter_date('1m')}>1 M</Pagination.Item>
-                <Pagination.Item key={'2m'} active={'2m' === range} onClick={()=>set_filter_date('2m')}>2 M</Pagination.Item>
-                <Pagination.Item key={'3m'} active={'3m' === range} onClick={()=>set_filter_date('3m')}>3 M</Pagination.Item>
-            </Pagination>
+            <Container>
+                <Row>
+                    <Col sm={3}>
+                        <Pagination>
+                            <Pagination.Item key={'1d'} active={'1d' === range} onClick={()=>set_filter_date('1d')}>1 D</Pagination.Item>
+                            <Pagination.Item key={'1w'} active={'1w' === range} onClick={()=>set_filter_date('1w')}>1 W</Pagination.Item>
+                            <Pagination.Item key={'1m'} active={'1m' === range} onClick={()=>set_filter_date('1m')}>1 M</Pagination.Item>
+                            <Pagination.Item key={'2m'} active={'2m' === range} onClick={()=>set_filter_date('2m')}>2 M</Pagination.Item>
+                            <Pagination.Item key={'3m'} active={'3m' === range} onClick={()=>set_filter_date('3m')}>3 M</Pagination.Item>
+                        </Pagination>
+                    </Col>
+                    <Col sm={2}>
+                        <input 
+                            type="date" 
+                            value={option.min_date.toISOString().split("T")[0]} 
+                            min="1970-01-01" 
+                            max={new Date().toISOString().split("T")[0]}
+                            onChange={(e) => setOption({...option, min_date:new Date(e.target.value)})}></input>
+                    </Col>
+                    <Col sm={2}>
+                        <input 
+                            type="date" 
+                            value={option.max_date.toISOString().split("T")[0]} 
+                            min="1970-01-01" 
+                            max={new Date().toISOString().split("T")[0]}
+                            onChange={(e) => setOption({...option, max_date:new Date(e.target.value)})}></input>
+                    </Col>
+                    <Col sm={2}>
+                        <Button 
+                            variant="primary" 
+                            onClick={() => {
+                                setOption({...option, page:0, submit:true})
+                                setRange("other")
+                            }}>Filter</Button>
+                    </Col>
+                </Row>
+            </Container>
             <Container className="table-responsive">
                 <Table>
                 <thead>
@@ -105,7 +142,7 @@ function Trips(props) {
                 </tbody>
                 </Table>
             </Container>
-            <Button variant="secondary" onClick={()=>setOption({...option, page:option.page + 1})}>Load more</Button>
+            <Button variant="secondary" onClick={()=>setOption({...option, page:option.page + 1, submit:true})}>Load more</Button>
         </Container>
     )
 }

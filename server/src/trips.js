@@ -267,7 +267,7 @@ class Trips {
           term[$and].push({$or:[{"departure.lid": String(options.lid)}, {"arrival.lid": String(options.lid)}]});
       }
 
-      return await database.get_trip(term, 10, options.page);
+      return await database.get_trip(term, 1, options.page);
     }
 
     // Get aircraft (aid) indexes for the min_date (departure) and max_date (arrival)
