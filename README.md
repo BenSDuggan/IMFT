@@ -83,7 +83,6 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
 
 ## ToDo
 
-* Versioning
 * Add dynamic pull rates to ADS-B logic
     * If the ADS-B controller knows the quota for a 24 hour period, then pull less at night (when helicopters are not flying) and pull more often during the day (when helicopters are flying)
     * Variables used by controller
@@ -97,8 +96,6 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
     * Pulling logic
         * At night: If an aircraft is flying then make a request using the `mean_rate` time. If no aircraft are flying, set the pull rate at each interval to `current_rate += Math.ceiling((min_rate-current_rate)/2)`;
         * During day: If no aircraft are flying pull at `day_mean_rate`
-* Add garbage collector to remove old `grounded` or `los` flights from `flights` and `trips` (will make map look nicer, doesn't affect functionality)
-* Increase rate of pulling
 * Fix problem with multiple trips being created when aircraft isn't moving or from receiving bad data
 * Require x intervals for state to change
     * Use `next` status in `flights`

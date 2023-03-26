@@ -7,14 +7,15 @@ from opensky_api import OpenSkyApi
 # bbox = (min latitude, max latitude, min longitude, max longitude)
 bbox = (37.80122453312876, 41.761724847409944, -88.02821002978239, -84.80904449801197)
 filename = sys.argv[1]
-config_file = "~/.config/imft/opensky.json"
+config_file = "~/.config/imft/config.json"
 print(sys.argv)
 
 username, password = None, None
 # Load config
 with open(os.path.expanduser(config_file), "r") as file:
     config = json.load(file)
-    username, password = config["username"], config["password"]
+    opensky_config = config["adsb"]["opensky"]
+    username, password = opensky_config["username"], opensky_config["password"]
 
 
 api = OpenSkyApi(username=username, password=password)

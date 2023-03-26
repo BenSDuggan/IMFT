@@ -7,6 +7,7 @@ const spawn = require("child_process").spawn;
 var {express, app, http, server, io} = require('../src/web.js')
 let { logger } = require('./logger.js')
 var {newFlightData} = require('./flight-tracker.js');
+const utils = require('./utils.js');
 
 
 const FLIGHT_STRUCTURE = {"icao24": null, "callsign": null, "squawk": null, "time_position": null, "time": null, "longitude": null, "latitude": null, "altitude": null, "baro_altitude": null, "geo_altitude": null, "track": null, "velocity": null, "vertical_rate": null, "on_ground": null, "sensors": null, "spi": false, "position_source": null}
@@ -43,8 +44,9 @@ class OpenSky extends ADSB {
         this.service = "open-sky-network"
         this.active = false;
 
-        this.interval = 90; // Seconds
         this.interval_handler = null;
+        this.interval = Math.floor((24 * 60 * 60) / utils.config.adsb.opensky.quota); // Seconds
+        logger.info("OpenSky: Pulling every " + this.interval + " seconds");
 
         this.save_path = String(path.join(__dirname, '..', 'curr-flights.json'));
 
@@ -73,7 +75,7 @@ class OpenSky extends ADSB {
 
             this.clear_file();
         });
-        child.addListener('error', (e) => console.error(e));
+        child.addListener('error', (e) => logger.error("ADSB: OpenSky: get_data(): " + String(e)));
     }
 
     clean_data(nfd) {

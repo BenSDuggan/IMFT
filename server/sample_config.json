@@ -15,6 +15,10 @@
         "remove_los": 600
     },
     "adsb": {
-        "quota": 4000
+        "opensky": {
+            "username": "",
+            "password": "",
+            "quota": 4000
+        }
     }
 }
