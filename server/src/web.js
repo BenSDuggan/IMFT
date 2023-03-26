@@ -48,6 +48,8 @@ if(process.env.IMFT_ENV === "development") {
  ***   Trips API   ***
  ********************/
 
+ /***   Gets   ***/
+
 app.get('/api/version', (req, res) => {
   res.status(200).json({"version":process.env.IMFT_VERSION})
 });
@@ -77,6 +79,9 @@ app.get('/api/trip/:tid', (req, res) => {
   })
 });
 
+
+/***   Post   ***/
+
 app.post('/api/trips', (req, res) => {
   // Cast dates from client
   let max_date = new Date(req.body.max_date ?? new Date());
@@ -99,6 +104,24 @@ app.post('/api/trips', (req, res) => {
 
   //res.status(200).json({"version":process.env.IMFT_VERSION})
 });
+
+
+/***   Delete   ***/
+
+if(process.env.IMFT_ENV === "development") {
+  app.delete('/api/trip/:tid', (req, res) => {
+    // TODO: Clean incoming request
+    let trip = req.params.tid;
+
+    trips.database_get_trip(options)
+    .then((results) => {
+      if(results.length === 0) {}
+    })
+    .catch((error) => {
+        logger.warn("web./api/trip:trips.database_get_trip(): Could not get trips using options ["+JSON.stringify(options)+"]. " + String(error))
+    })
+  });
+}
 
 io.on('connection', (socket) => {
   

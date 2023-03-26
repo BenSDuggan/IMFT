@@ -32,6 +32,17 @@ html, body {
 	outline: inherit;
 }
 
+.trip-date-container {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.trip-date-input {
+  vertical-align: middle;
+}
+
 
 
 #root {

@@ -243,6 +243,10 @@ let newFlightData = async (nfd) => {
   await flights.update_flights(nfd);
   await flights.update_tracking(nfd.time);
 
+  tracking_garbage_collector(nfd.time);
+
+
+  // Prepare data to send to clients
   let aflights = []
   for(let f in flights.flights) {
     aflights.push(flights.flights[f])
@@ -255,6 +259,43 @@ let newFlightData = async (nfd) => {
   io.emit('nfd', {"flights":aflights, "trips":atrips});
 
   logger.verbose(new Date(utils.epoch_s()*1000).toISOString() + ": NFD: "+flights.nfd.length+"; Flights " + Object.keys(flights.flights).length + "; Trips: " + Object.keys(trips.trips).length);
+}
+
+
+// Garbage collector for flights and trips data
+// Runs every time new data is retrieved
+let tracking_garbage_collector = (time) => {
+  let remove_grounded = + time - utils.config.tracking.remove_grounded;
+  let remove_los = + time - utils.config.tracking.remove_los;
+
+  let old_flights = flights.flights;
+  // Clean flights
+  for(f in old_flights) {
+    let remove = false;
+
+    if(flights.flights[f].tracking.current.status == "grounded" &&
+       flights.flights[f].time < remove_grounded)
+        remove = true;
+
+    if(flights.flights[f].tracking.current.status == "los" &&
+       flights.flights[f].time < remove_los) 
+        remove = true;
+
+    if(remove) {
+      let remove_trips = Object.keys(trips.trips).filter(t => trips.trips[t].aircraft.aid == flights.flights[f].icao24);
+      remove_trips.map(t => delete trips.trips[t])
+
+      delete flights.flights[f];
+    }
+  }
+}
+
+// Clean data every interval (using remove_grounded or remove_los, whichever is smaller)
+// Only in production mode since we need to specify a time
+if(process.env.IMFT_ENV == "production") {
+  setInterval(() => tracking_garbage_collector(utils.epoch_s()),
+                    utils.config.tracking.remove_grounded > utils.config.tracking.remove_los ? 
+                    utils.config.tracking.remove_los : utils.config.tracking.remove_grounded)
 }
 
 

@@ -30,9 +30,9 @@ let historic = () => {
   adsb.receiver = new adsb.HistoricFlights()
   adsb.receiver.load("test-data/test-data-100.json");
   setTimeout(() => {
-    adsb.receiver.speed = 10
+    adsb.receiver.speed = 10;
     adsb.receiver.set_frame(0);
-    adsb.receiver.stop();
+    adsb.receiver.start();
   }, 1000)
 }
 

@@ -4,6 +4,10 @@ Project to track medical helicopters in Indiana. Tweeting locations at <https://
 
 ![IMFT Logo](logo.png)
 
+## Version
+
+* `0.5.0`
+
 ## Install
 
 1. Install Python, MongoDB, and Node on your respective system. On Linux:
@@ -34,9 +38,18 @@ Project to track medical helicopters in Indiana. Tweeting locations at <https://
 
 * Limitations on free and paid ADS-B services: 
     * [OpenSkies](https://openskynetwork.github.io/opensky-api/rest.html)
-        * Antonymous 100 / day
-        * Signed in 1000 / day (~1 poll / 90 sec)
-        * Can get your data from your sensor unlimited
+        * New quotas!!!
+            * Authenticated user: 4,000 pulls/day
+            * Authenticated user that contributes with 30% up time: 8,000 pulls/day
+            * Pull criterial
+                * 1 credit: 0 - 25 (<500x500km) (Indiana!)
+                * 2 credit: 25 - 100 (<1000x1000km)
+                * 3 credit: 100 - 400 (<2000x2000km)
+                * 4 credit: over 400 or all (>2000x2000km)
+        * Old Quotas
+            * Antonymous 100 / day
+            * Signed in 1000 / day (~1 poll / 90 sec)
+            * Can get your data from your sensor unlimited
         * Doesn't have good coverage of Northern Indiana
     * ADS-B Exchange $10 / mo
         * 10,000 / mo (~1 poll / 4.32 min)
@@ -70,6 +83,7 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
 
 ## ToDo
 
+* Versioning
 * Add dynamic pull rates to ADS-B logic
     * If the ADS-B controller knows the quota for a 24 hour period, then pull less at night (when helicopters are not flying) and pull more often during the day (when helicopters are flying)
     * Variables used by controller
@@ -84,4 +98,19 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
         * At night: If an aircraft is flying then make a request using the `mean_rate` time. If no aircraft are flying, set the pull rate at each interval to `current_rate += Math.ceiling((min_rate-current_rate)/2)`;
         * During day: If no aircraft are flying pull at `day_mean_rate`
 * Add garbage collector to remove old `grounded` or `los` flights from `flights` and `trips` (will make map look nicer, doesn't affect functionality)
+* Increase rate of pulling
+* Fix problem with multiple trips being created when aircraft isn't moving or from receiving bad data
+* Require x intervals for state to change
+    * Use `next` status in `flights`
+* Fix menu not highlighting text when on page
+* Dockerize
+* Views
+    * Hospitals
+    * Aircraft
+* Aircraft database upgrade
+    * Separate aircraft database from FAA lookup. Focused on Medical helicopters adn providing additional information
+    * Add `medical_flight` tag to aircraft
+    * Add faa `display_name`
+* Admin page to edit all this information
+* Remove aircraft that are not medical helicopters
 

@@ -1,0 +1,20 @@
+{
+    "environment":"development",
+    "version":"v0.5.1b",
+    "database": {
+        "name":"flight-tracker"
+    },
+    "twitter": {
+        "client_id":null,
+        "client_secret":null,
+        "refresh_token":null,
+        "expires_at":-1
+    },
+    "tracking": {
+        "remove_grounded": 600,
+        "remove_los": 600
+    },
+    "adsb": {
+        "quota": 4000
+    }
+}

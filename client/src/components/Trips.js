@@ -9,9 +9,14 @@ import Row from 'react-bootstrap/Row';
 import Table from 'react-bootstrap/Table';
 
 function Trips(props) {
-    const [range, setRange] = useState("3m");
+    const [range, setRange] = useState("1d");
     const [trips, setTrips] = useState([]);
-    const [option, setOption] = useState({"min_date":new Date(new Date() - 90*24*60*60*1000), max_date: new Date(), "page":0, "submit":true})
+    const [option, setOption] = useState({
+        "min_date":new Date(new Date() - 90*24*60*60*1000), 
+        "max_date": new Date(), 
+        "lid":props.lid ?? null, 
+        "page":0, 
+        "submit":true})
     
     let display_date = (date) => new Date(date).toLocaleString();
 
@@ -91,15 +96,15 @@ function Trips(props) {
                             <Pagination.Item key={'3m'} active={'3m' === range} onClick={()=>set_filter_date('3m')}>3 M</Pagination.Item>
                         </Pagination>
                     </Col>
-                    <Col sm={2}>
+                    <Col sm={3} className="trip-date-container">
                         <input 
+                            className="trip-date-input"
                             type="date" 
                             value={option.min_date.toISOString().split("T")[0]} 
                             min="1970-01-01" 
                             max={new Date().toISOString().split("T")[0]}
                             onChange={(e) => setOption({...option, min_date:new Date(e.target.value)})}></input>
-                    </Col>
-                    <Col sm={2}>
+                        <span style={{padding: "0px 5px 0px 5px"}}>-</span>
                         <input 
                             type="date" 
                             value={option.max_date.toISOString().split("T")[0]} 
@@ -107,7 +112,7 @@ function Trips(props) {
                             max={new Date().toISOString().split("T")[0]}
                             onChange={(e) => setOption({...option, max_date:new Date(e.target.value)})}></input>
                     </Col>
-                    <Col sm={2}>
+                    <Col sm={1}>
                         <Button 
                             variant="primary" 
                             onClick={() => {
