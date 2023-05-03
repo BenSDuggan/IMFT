@@ -30,6 +30,7 @@ function Live(props) {
                     hospitals={props.hospitals} 
                     flights={props.flights} 
                     trips={props.trips} 
+                    nfd={props.nfd}
                     selectedSidebar={props.selectedSidebar} 
                     setSelectedSidebar={props.setSelectedSidebar}>    
                 </Map>

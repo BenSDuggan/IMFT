@@ -22,6 +22,42 @@ function HospitalMarker(props) {
     )
 }
 
+function AircraftMarker(props) {
+    
+    const flightIcon = (flight) => {
+        let heading = (flight.track + 270) % 360;
+        let heading_p = heading;
+        heading_p = heading>90&&heading<=180?180-heading:heading_p;;
+        heading_p = heading>180&&heading<270?180-heading:heading_p;
+
+        let color = "#034f84";
+
+
+        // fa-helicopter
+        // fa-helicopter-symbol
+        const airCraftIcon = new L.divIcon({
+            html: '<span ' + (heading>90&&heading<270?'class="fa-flip-horizontal"':'') + ' style="display: inline-block;">'+
+                    '<i class="fa-solid fa-plane fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading_p +
+                     'deg; color:'+color+';"></i></span>',
+            iconSize: [20, 20],
+            className: 'mapIcon'
+        });
+
+        return airCraftIcon
+    }
+
+    return(
+        <Marker position={[props.flight.latitude, props.flight.longitude]} 
+                icon={flightIcon(props.flight)}
+                eventHandlers={{
+                    click: () => {
+                      props.setSelectedSidebar(props.flight.icao24)
+                    },
+                  }}>
+        </Marker>
+    )
+}
+
 function FlightsMarker(props) {
     
     const flightIcon = (flight) => {
@@ -83,6 +119,7 @@ function Map(props) {
     let hospitals = props.hospitals ?? [];
     let flights = props.flights ?? [];
     let trips = props.trips ?? [];
+    let nfd = props.nfd ?? [];
     let selectedSidebar = props.selectedSidebar ?? {"tab":"flights", "id":null};
     let setSelectedSidebar = props.setSelectedSidebar ?? (() => {});
 
@@ -119,6 +156,14 @@ function Map(props) {
                                             flight={f} 
                                             selectedSidebar={selectedSidebar} 
                                             setSelectedSidebar={setSelectedSidebar}></FlightsMarker>
+                        )};
+                    </LayerGroup>
+                </LayersControl.Overlay>
+                <LayersControl.Overlay name="All Aircraft">
+                    <LayerGroup>
+                        {nfd.map(n => 
+                            <AircraftMarker key={"map-flights-" + n.icao24}
+                                            flight={n} ></AircraftMarker>
                         )};
                     </LayerGroup>
                 </LayersControl.Overlay>

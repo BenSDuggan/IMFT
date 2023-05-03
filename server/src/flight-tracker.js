@@ -247,6 +247,10 @@ let newFlightData = async (nfd) => {
 
 
   // Prepare data to send to clients
+  let anfd = []
+  for(let n in nfd.states) {
+    anfd.push(nfd.states[n])
+  }
   let aflights = []
   for(let f in flights.flights) {
     aflights.push(flights.flights[f])
@@ -256,7 +260,7 @@ let newFlightData = async (nfd) => {
     atrips.push(trips.trips[t])
   }
 
-  io.emit('nfd', {"flights":aflights, "trips":atrips});
+  io.emit('nfd', {"flights":aflights, "trips":atrips, "nfd": anfd});
 
   logger.verbose(new Date(utils.epoch_s()*1000).toISOString() + ": NFD: "+flights.nfd.length+"; Flights " + Object.keys(flights.flights).length + "; Trips: " + Object.keys(trips.trips).length);
 }
@@ -294,8 +298,8 @@ let tracking_garbage_collector = (time) => {
 // Only in production mode since we need to specify a time
 if(process.env.IMFT_ENV == "production") {
   setInterval(() => tracking_garbage_collector(utils.epoch_s()),
-                    utils.config.tracking.remove_grounded > utils.config.tracking.remove_los ? 
-                    utils.config.tracking.remove_los : utils.config.tracking.remove_grounded)
+                    (utils.config.tracking.remove_grounded > utils.config.tracking.remove_los ? 
+                    utils.config.tracking.remove_los : utils.config.tracking.remove_grounded)*1000)
 }
 
 

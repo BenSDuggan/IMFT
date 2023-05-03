@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Aircraft from "./Aircraft";
+import Hospitals from "./components/Hospitals";
 import Live from "./components/Live";
 import Menu from './components/Menu'
-import Trips from './components/Trips';
 import Trip from './components/Trip.js';
+import Trips from './components/Trips';
 
 import io from 'socket.io-client';
 
@@ -15,6 +17,7 @@ function App() {
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [nfd, setNfd] = useState([]);
   const [metadata, setMetadata] = useState({});
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -57,6 +60,7 @@ function App() {
       console.log(data);
       setFlights(data.flights);
       setTrips(data.trips);
+      setNfd(data.nfd);
     });
 
     s.on('hf_metadata', (data) => {
@@ -79,6 +83,7 @@ function App() {
             <Live
               flights={flights}
               trips={trips}
+              nfd={nfd}
               hospitals={hospitals}
               metadata={metadata}
               socket={socket}
@@ -88,8 +93,8 @@ function App() {
           } />
           <Route path="/trips" element={
             <Trips></Trips>} />
-          <Route path="/hospitals" element={<h2>Hospitals</h2>} />
-          <Route path="/aircraft" element={<h2>Aircraft</h2>} />
+          <Route path="/hospitals" element={<Hospitals></Hospitals>} />
+          <Route path="/aircraft" element={<Aircraft></Aircraft>} />
           <Route path="/trip/:tid" element={<Trip></Trip>} />
         </Routes>
       </BrowserRouter>

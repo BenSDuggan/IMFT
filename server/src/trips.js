@@ -85,7 +85,7 @@ class Trips {
 
   async update_trips(flight, old_status, new_status, status_changed) {
     // Update trip data
-    if(this.trips.hasOwnProperty(flight.icao24)) {
+    if(this.trips.hasOwnProperty(flight.icao24) && this.trips[flight.icao24].status == "airborn") {
       this.trips[flight.icao24].stats.time = flight.time - this.trips[flight.icao24].departure.time;
 
       let path_length = this.trips[flight.icao24].path.length;
