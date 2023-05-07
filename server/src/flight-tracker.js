@@ -269,6 +269,9 @@ let newFlightData = async (nfd) => {
 // Garbage collector for flights and trips data
 // Runs every time new data is retrieved
 let tracking_garbage_collector = (time) => {
+  // TODO: fix garbage collection method. It currently not displaying aircraft after their first trip
+  return false;
+
   let remove_grounded = + time - utils.config.tracking.remove_grounded;
   let remove_los = + time - utils.config.tracking.remove_los;
 
