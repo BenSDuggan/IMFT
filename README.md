@@ -6,7 +6,7 @@ Project to track medical helicopters in Indiana. Tweeting locations at <https://
 
 ## Version
 
-* `0.5.0`
+* `0.5.0` -> `0.6.0`
 
 ## Install
 
@@ -97,8 +97,9 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
         * At night: If an aircraft is flying then make a request using the `mean_rate` time. If no aircraft are flying, set the pull rate at each interval to `current_rate += Math.ceiling((min_rate-current_rate)/2)`;
         * During day: If no aircraft are flying pull at `day_mean_rate`
 * Fix problem with multiple trips being created when aircraft isn't moving or from receiving bad data
-* Require x intervals for state to change
-    * Use `next` status in `flights`
+    * Require x intervals for state to change
+        * Use `next` status in `flights`
+    * If no movement then no trip created
 * Fix menu not highlighting text when on page
 * Dockerize
 * Views
@@ -110,4 +111,3 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
     * Add faa `display_name`
 * Admin page to edit all this information
 * Remove aircraft that are not medical helicopters
-
