@@ -172,6 +172,7 @@ export interface Location {
 export interface Organization {
     "oid": string, // Organization id
     "display_name": string, // Display name
+    "description": string, // Organization description
     "locations": string[], // Locations this organization owns
     "aircraft": string[] // Aircraft his organization owns
 }

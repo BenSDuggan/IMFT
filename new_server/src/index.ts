@@ -1,11 +1,9 @@
 
 
-import {  } from './logger'
-import { Flight, StateShort } from './structures'
-import {  } from './database'
+import { logger } from './logger'
+import { Flight, Organization, StateShort } from './types/structures'
+import { Database } from './database'
 import './web'
-
-console.log("swag")
 
 let ss:StateShort = {
     "time":1, // Time position was sent
@@ -19,4 +17,31 @@ let ss:StateShort = {
     "on_ground":true, // On ground or not
 }
 
-console.log(ss)
+let o1:Organization = {
+    "oid":"fghijklmnop",
+    "display_name":"IUH",
+    "description": "Test 1",
+    "locations":[],
+    "aircraft":["abc","123"]
+}
+
+let o2:Organization = {
+    "oid":"pp",
+    "display_name":"Parkview",
+    "description": "Test 2",
+    "locations":["FW1"],
+    "aircraft":["908abc","wer"]
+}
+
+const database:Database = new Database();
+
+database.connect().then(() => {
+    logger.info("Connected to the database");
+})
+
+//database.insert_organization([o1,o2]).then((result) => { console.log(result) })
+
+//database.update_organization("pp", {display_name:"Parkview Health", locations:["hi"]}).then((result) => { console.log(result) })
+
+
+database.get_organization({}).then((result) => { console.log(result); })

@@ -1,6 +1,5 @@
 import express, { Application, Request, Response } from 'express';
 
-console.log("hi");
 
 export const app: Application = express();
 
