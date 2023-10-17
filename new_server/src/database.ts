@@ -14,6 +14,7 @@ import {
 
 import { logger } from "./logger"
 import { Flight, Organization, StateShort } from './types/structures'
+import exp from "constants";
 
 //const utils = require('./utils.js');
 
@@ -23,12 +24,12 @@ const DATABASE_NAME:string = "IMFTDEV";
 
 const uri:string = "mongodb://localhost:27017/?maxPoolSize=20&w=majority";
 
+
 export class Database {
     client: MongoClient;
 
     constructor() {
-        // Create a new MongoClient
-        this.client = new MongoClient(uri);
+        this.client = new MongoClient(uri); // Create a new MongoClient
     }
 
     // Connect to the db
@@ -49,7 +50,7 @@ export class Database {
     *
     * Returns: JSON object with the matched terms
     */
-    async get_organization(terms:JSON|{}) {
+    async get_organizations(terms:JSON|{}) {
         let answer:any = [];
 
         const cursor = await this.client.db(DATABASE_NAME).collection<Organization>("organization").find(terms);
@@ -57,41 +58,40 @@ export class Database {
         return await cursor.toArray();
     }
 
-    /* Saves the given organization to the organizations collection
+    /* Add the given organization to the organizations collection
     *
     * organization (Organization or Organization[]): The organization to add
     *
     * Returns: true if added successfully and false otherwise
-    * 
-    * Example: database.save_trip({"tid":"82fee102-c905-4bf1-93c5-13f38adbe6be","aid":"a16ce7","status":"grounded","departure":{"lid":"I80","type":"faaLID","display_name":"NOBLESVILLE","time":1669923349,"lat":39.9414,"lon":-85.8842,"distance":31899.69189402237},"arrival":{"lid":"riley","type":"hospital","display_name":"IUH Riley","time":1669923944,"lat":39.778,"lon":-86.1799,"distance":83.75294721277973},"stats":{"time":594,"distance":104389.05339403517},"path":[]}).then((result) => {console.log(result)})
     */
     async insert_organization(organization:Organization|Organization[]) {
-        let successfully:boolean = false;
+        let successful:boolean = false;
         let count:number = 1;
         
         if(Array.isArray(organization)) {
             count = organization.length;
             const result:InsertManyResult = await this.client.db(DATABASE_NAME).collection<Organization>("organization").insertMany(organization);
-            successfully = result.acknowledged;
+            successful = result.acknowledged;
         }
         else {
             const result:InsertOneResult = await this.client.db(DATABASE_NAME).collection<Organization>("organization").insertOne(organization);
-            successfully = result.acknowledged;
+            successful = result.acknowledged;
         }
 
-        if(successfully)
+        if(successful)
             logger.debug("Database: Inserted '"+count+"' organization.")
         else
             logger.error("Database: Could not insert '"+count+"' organization.")
 
-        return successfully
+        return successful
     }
 
-    /* Saves the given organization to the organizations collection
+    /* Update the organization given the `oid` and updated structure
     *
-    * organization (Organization or Organization[]): The organization to add
+    * oid (string): The `oid` of the organization to update
+    * updates (JSON or Organization): Full organization or just the updated key-value pairs. If updating an array, the full new array must be included. For example, if adding `c` to `["a", "b"]`, then the value must be `["a", "b", "c"]`.
     *
-    * Returns: true if added successfully and false otherwise
+    * Returns: true if successfully updated and false otherwise
     */
     async update_organization(oid:string, updates:object) {
         const result:UpdateResult = await this.client.db(DATABASE_NAME).collection<Organization>("organization").updateOne(
@@ -111,17 +111,15 @@ export class Database {
     *
     * oid (string|string[]): The OID or list of OIDs to be removed
     *
-    * Returns: JSON object with the matched terms
+    * Returns: true if successfully updated and false otherwise
     */
     async delete_organization(oid:string|string[]) {
         let result:DeleteResult;
+        let expected_number:number = 1;
         
         if(Array.isArray(oid)) {
-            let temp:object[] = [];
-            for(let o in oid) { 
-                temp.push({"oid":oid[o]});
-            }
-            let term:object = {$or:temp};
+            let term:object = {$or:oid.map((o) => {return {"oid":o}})};
+            expected_number = oid.length;
 
             result = await this.client.db(DATABASE_NAME).collection<Organization>("organization").deleteMany(term);
         }
@@ -129,13 +127,13 @@ export class Database {
             result = await this.client.db(DATABASE_NAME).collection<Organization>("organization").deleteOne({"oid":oid});
         }
 
-        if(result.deletedCount >= 1)
+        if(result.deletedCount === expected_number)
             logger.debug("Database: Deleted '" + result.deletedCount +"' organizations")
         else
             logger.error("Database: Could not delete '" + result.deletedCount + "' organizations")
 
-        return result.deletedCount >= 1
+        return result.deletedCount === expected_number
     }
 }
 
-
+export const database:Database = new Database();

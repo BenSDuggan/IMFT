@@ -19,7 +19,7 @@ Server install instructions can be found [here](https://www.mongodb.com/docs/man
 * Start shell: `mongosh`
     * View databases: `show dbs`
     * Create/enter database: `use <name>`
-    * Implicitly write/create collection: `db.user.insert({name: "Ada Lovelace", age: 205})`
+    * Implicitly write/create collection: `db.user.insertOne({name: "Ada Lovelace", age: 205})`
     * Explicitly create collection: `` <https://www.mongodb.com/docs/manual/reference/method/db.createCollection/>
     * Drop collection: `db.<collection to drop>.drop()`. Will return `true` if deleted
 

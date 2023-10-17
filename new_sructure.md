@@ -11,7 +11,7 @@ The two main data structures are `flight` and `trip`. Flights are updated with t
 * `State`: ADS-B information at a given time point
 * `StateShort`: ADS-B information at a given time point but without redundant information
 
-### Flights
+#### Flights
 
 Used by server and client to store the locations of aircraft.
 
@@ -52,7 +52,7 @@ Used by server and client to store the locations of aircraft.
 }
 ```
 
-### Trips
+#### Trips
 
 This data structure matches the `trips` data structure which goes in the database. Data structure for a trip which captures the path traveled from the beginning to the end of a flights path.
 
@@ -93,7 +93,7 @@ This data structure matches the `trips` data structure which goes in the databas
 }
 ```
 
-## State
+#### State
 
 Represents one point in the aircrafts trace.
 
@@ -116,7 +116,7 @@ Represents one point in the aircrafts trace.
 }
 ```
 
-## StateShort
+#### StateShort
 
 Represents one point in the aircrafts trace.
 
@@ -133,6 +133,15 @@ Represents one point in the aircrafts trace.
     "on_ground":"", // On ground or not
 }
 ```
+
+### API
+
+* Organization
+    * `/api/organizations` (GET): Get all of the organizations
+    * `/api/organizations/{:oid}` (GET): Get the specified organization by `oid`
+    * `/api/organizations/{:oid}` (DELETE): Removed the specified organization by `oid`
+* Miscellaneous 
+    * `/api/version` (GET): Gets the current server version 
 
 ## Database
 
@@ -268,8 +277,9 @@ FAA aircraft registration, but only rotor craft. Taken from <https://registry.fa
 {
     "oid": "", // Organization id
     "display_name": "", // Display name
-    "locations": [], // Locations this organization owns
-    "aircraft": [] // Aircraft his organization owns
+    "description": "", // Organization description
+    "locations": [], //LID of locations this organization owns
+    "aircraft": [] // AID of aircraft his organization owns
 }
 ```
 

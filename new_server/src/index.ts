@@ -2,7 +2,7 @@
 
 import { logger } from './logger'
 import { Flight, Organization, StateShort } from './types/structures'
-import { Database } from './database'
+import { database } from './database'
 import './web'
 
 let ss:StateShort = {
@@ -33,8 +33,6 @@ let o2:Organization = {
     "aircraft":["908abc","wer"]
 }
 
-const database:Database = new Database();
-
 database.connect().then(() => {
     logger.info("Connected to the database");
 })
@@ -43,5 +41,6 @@ database.connect().then(() => {
 
 //database.update_organization("pp", {display_name:"Parkview Health", locations:["hi"]}).then((result) => { console.log(result) })
 
+//database.delete_organization(["fghijklmnop", "pp"]).then((result) => console.log(result));
 
-database.get_organization({}).then((result) => { console.log(result); })
+database.get_organizations({}).then((result) => { console.log(result); })
