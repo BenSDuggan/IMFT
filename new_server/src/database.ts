@@ -140,11 +140,31 @@ export class Database {
         return result.deletedCount === expected_number
     }
 
-    async delete_one<Type extends Document>(key:string, id:string): Promise<boolean> {
-        //const filter:Filter<Type> = { "oid": oid } ;
-        let result:DeleteResult = await this.client.db(DATABASE_NAME).collection<Type>("organization").deleteOne({key:id});
+    async delete(col:string, ids:string|string[]): Promise<boolean> {
+        if(Array.isArray(ids)) {
+            //if(ids.length === 0) return false;
 
-        return true;
+            let filter: { [key: string]: string }[] = ids.map((i) => {return {[col]:i}});
+            let result: DeleteResult = await this.client.db(DATABASE_NAME).collection("organization").deleteMany({$or:filter});
+            return result.deletedCount == ids.length;
+        }
+        else {
+            let filter: { [key: string]: string } = { [col]: ids };
+            let result: DeleteResult = await this.client.db(DATABASE_NAME).collection("organization").deleteOne(filter);
+            return result.deletedCount == 1;
+        }
+    }
+
+    async delete_one(col: string, ids: string): Promise<boolean> {
+        let filter: { [key: string]: string } = { [col]: ids };
+        let result: DeleteResult = await this.client.db(DATABASE_NAME).collection("organization").deleteOne(filter);
+        return result.deletedCount > 0;
+    }
+
+    async delete_many(col: string, ids: string[]): Promise<boolean> {
+        let filter: { [key: string]: string }[] = ids.map((i) => {return {[col]:i}});
+        let result: DeleteResult = await this.client.db(DATABASE_NAME).collection("organization").deleteMany({$or:filter});
+        return result.deletedCount > 0;
     }
 
     /* Delete an organization
