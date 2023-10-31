@@ -3,6 +3,7 @@
  */
 
 // TODO: Get trips for a given date range and by aircraft and destination / arrival
+// TODO: Make types actually correct
 
 import { 
     MongoClient, 
@@ -16,7 +17,6 @@ import {
 
 import { logger } from "./logger"
 import { Flight, Organization, StateShort } from './types/structures'
-import exp from "constants";
 
 
 //const utils = require('./utils.js');
@@ -27,7 +27,7 @@ const DATABASE_NAME:string = "IMFTDEV";
 
 const uri:string = "mongodb://localhost:27017/?maxPoolSize=20&w=majority";
 
-const DOCID_COL = {"oid":"organization"}
+const DOCID_COL:{[key:string]: string} = {"oid":"organization"}
 
 export class Database {
     client:MongoClient;
@@ -45,6 +45,14 @@ export class Database {
     // Disconnect from the DB
     async disconnect() {
         await this.client.close();
+    }
+
+    // Get a collection from a document ID
+    documentID_collection(did:string):string {
+        if(did in DOCID_COL)
+            return DOCID_COL[did];
+
+        return ""
     }
 
     /* Search organization
@@ -112,22 +120,26 @@ export class Database {
 
     /* Delete an document
     *
-    * doc (string): The document to delete by its id (eg `oid` for organization)
+    * did (string): The document to delete by its id (eg `oid` for organization)
     * ids (string|string[]): The ID or list of ID to be removed
     *
     * Returns: true if successfully updated and false otherwise
     */
-    async delete(doc:string, ids:string|string[]): Promise<boolean> {
+    async delete(did:string, ids:string|string[]): Promise<boolean> {
+        const collection:string = this.documentID_collection(did);
+        if(collection.length == 0) 
+            return false;
+
         if(Array.isArray(ids)) {
             if(ids.length === 0) return false;
 
-            let filter: { [key: string]: string }[] = ids.map((i) => {return {[doc]:i}});
-            let result: DeleteResult = await this.client.db(DATABASE_NAME).collection("organization").deleteMany({$or:filter});
+            let filter: { [key: string]: string }[] = ids.map((i) => {return {[did]:i}});
+            let result: DeleteResult = await this.client.db(DATABASE_NAME).collection(collection).deleteMany({$or:filter});
             return result.deletedCount == ids.length;
         }
         else {
-            let filter: { [key: string]: string } = { [doc]: ids };
-            let result: DeleteResult = await this.client.db(DATABASE_NAME).collection("organization").deleteOne(filter);
+            let filter: { [key: string]: string } = { [did]: ids };
+            let result: DeleteResult = await this.client.db(DATABASE_NAME).collection(collection).deleteOne(filter);
             return result.deletedCount == 1;
         }
     }
