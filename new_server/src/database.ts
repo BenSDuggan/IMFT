@@ -9,12 +9,15 @@ import {
     type InsertOneResult, 
     type InsertManyResult, 
     type UpdateResult,
-    type DeleteResult 
+    type DeleteResult, 
+    type Filter,
+    Document
 } from "mongodb"
 
 import { logger } from "./logger"
 import { Flight, Organization, StateShort } from './types/structures'
 import exp from "constants";
+
 
 //const utils = require('./utils.js');
 
@@ -107,13 +110,15 @@ export class Database {
         return result.acknowledged
     }
 
+
+
     /* Delete an organization
     *
     * oid (string|string[]): The OID or list of OIDs to be removed
     *
     * Returns: true if successfully updated and false otherwise
     */
-    async delete_organization(oid:string|string[]) {
+    async delete_organization(oid:string|string[]): Promise<boolean> {
         let result:DeleteResult;
         let expected_number:number = 1;
         
@@ -134,6 +139,44 @@ export class Database {
 
         return result.deletedCount === expected_number
     }
+
+    async delete_one<Type extends Document>(key:string, id:string): Promise<boolean> {
+        //const filter:Filter<Type> = { "oid": oid } ;
+        let result:DeleteResult = await this.client.db(DATABASE_NAME).collection<Type>("organization").deleteOne({key:id});
+
+        return true;
+    }
+
+    /* Delete an organization
+    *
+    * oid (string|string[]): The OID or list of OIDs to be removed
+    *
+    * Returns: true if successfully updated and false otherwise
+    */
+   /*
+    async delete<Type extends Document>(key:string, id:string|string[]): Promise<boolean> {
+        let result:DeleteResult;
+        let expected_number:number = 1;
+        
+        if(Array.isArray(id)) {
+            let term = {$or:id.map((i) => {return {key:i}})};
+            expected_number = id.length;
+
+            result = await this.client.db(DATABASE_NAME).collection<Type>("organization").deleteMany(term);
+        }
+        else {
+            const query = { key: id };
+            result = await this.client.db(DATABASE_NAME).collection<Type>("organization").deleteOne({query});
+        }
+
+        if(result.deletedCount === expected_number)
+            logger.debug("Database: Deleted '" + result.deletedCount +"' organizations")
+        else
+            logger.error("Database: Could not delete '" + result.deletedCount + "' organizations")
+
+        return result.deletedCount === expected_number
+    }
+    */
 }
 
 export const database:Database = new Database();

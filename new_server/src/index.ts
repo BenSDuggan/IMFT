@@ -37,10 +37,14 @@ database.connect().then(() => {
     logger.info("Connected to the database");
 })
 
-//database.insert_organization([o1,o2]).then((result) => { console.log(result) })
+//database.insert_organization([o2]).then((result) => { console.log(result) })
 
 //database.update_organization("pp", {display_name:"Parkview Health", locations:["hi"]}).then((result) => { console.log(result) })
 
 //database.delete_organization(["fghijklmnop", "pp"]).then((result) => console.log(result));
 
 database.get_organizations({}).then((result) => { console.log(result); })
+
+//database.delete<Organization>("oid", ["pp", "fghijklmnop"]);
+
+//database.delete_organization(["pp", "fghijklmnop"]);
