@@ -39,11 +39,15 @@ database.connect().then(() => {
 
 //database.insert_organization([o1, o2]).then((result) => { console.log(result) })
 
+//database.insert("oid", [o1,o2]).then((result) => { console.log(result) })
+
 //database.update_organization("pp", {display_name:"Parkview Health", locations:["hi"]}).then((result) => { console.log(result) })
+
+//database.update("oid", "pp", {display_name:"Parkview Health", locations:["hi"]}).then((result) => { console.log(result) })
 
 //database.delete_organization(["fghijklmnop", "pp"]).then((result) => console.log(result));
 
-database.get_organizations({}).then((result) => { console.log(result); })
+database.get("oid", {}).then((result) => { console.log(result); })
 
 //database.delete<Organization>("oid", ["pp", "fghijklmnop"]);
 

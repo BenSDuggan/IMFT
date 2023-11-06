@@ -4,7 +4,7 @@ import express, { Application, Request, Response } from 'express';
 
 import { logger } from './logger'
 import { database } from './database'
-import { Organization } from './types/structures';
+import { type Organization } from './types/structures';
 
 export const app:Application = express();
 
@@ -31,29 +31,29 @@ app.get(API_BASE_URL+'/version', (req: Request, res: Response): void => {
  // Get specific organization
 app.get(API_BASE_URL+'/organizations/:oid', (req: Request, res: Response): void => {
     let oid:string = req.params.oid;
-    database.get_organizations({"oid":oid}).then((result) => {
+    database.get("oid",{"oid":oid}).then((result) => {
         if(Array.isArray(result) && result.length > 0) 
-            res.status(200).json(result)
+            res.status(200).json({"successful":true, "data":result});
         else if(Array.isArray(result))
-            res.status(404).end();
+            res.status(404).json({"successful":true, "data":result}).end();
         else 
-            res.status(400).end();
+            res.status(400).json({"successful":true, "data":result}).end();
     }).catch((err) => {
-        logger.error("Web: could not fetch organization from database. " + err);
-        res.status(500).end();
+        logger.error("Web: could not fetch organization from database. " + err.message);
+        res.status(500).json({"successful":false, "data":err.message}).end();
     });
 });
 
 // Get many organizations. Further refine by giving dates and page number
 app.get(API_BASE_URL+'/organizations/', (req: Request, res: Response): void => {
-    database.get_organizations({}).then((result) => { 
+    database.get("oid", {}).then((result) => { 
         if(Array.isArray(result)) 
-            res.status(200).json(result)
+            res.status(200).json({"successful":true, "data":result});
         else 
-            res.status(400).end();
+            res.status(400).json({"successful":true, "data":result}).end();
     }).catch((err) => {
-        logger.error("Web: could not fetch organization from database. " + err);
-        res.status(500).end();
+        logger.error("Web: could not fetch organization from database. " + err.message);
+        res.status(500).json({"successful":false, "data":err.message}).end();
     });
 });
 
@@ -61,14 +61,14 @@ app.get(API_BASE_URL+'/organizations/', (req: Request, res: Response): void => {
 app.post(API_BASE_URL+'/organizations/', (req: Request, res: Response): void => {
     let organization:Organization = req.body;
     
-    database.insert_organization(organization).then((result) => { 
+    database.insert<Organization>("oid", organization).then((result) => { 
         if(result) 
-            res.status(200).json(result)
+            res.status(200).json({"successful":result, "data":""});
         else 
-            res.status(400).end();
+            res.status(400).json({"successful":result, "data":""}).end();
     }).catch((err) => {
-        logger.error("Web: could not fetch organization from database. " + err);
-        res.status(500).end();
+        logger.error("Web: could not fetch organization from database. " + err.message);
+        res.status(500).json({"successful":false, "data":err.message}).end();
     });
 });
 
@@ -79,25 +79,25 @@ app.put(API_BASE_URL+'/organizations/', (req: Request, res: Response): void => {
         return
     }
     
-    database.update_organization(req.body.oid, req.body).then((result) => { 
+    database.update("oid", req.body.oid, req.body).then((result) => { 
         if(result) 
-            res.status(200).json(result)
+            res.status(200).json({"successful":result, "data":""})
         else 
             res.status(400).end();
     }).catch((err) => {
-        logger.error("Web: could not fetch organization from database. " + err);
-        res.status(500).end();
+        logger.error("Web: could not fetch organization from database. " + err.message);
+        res.status(500).json({"successful":false, "data":err.message}).end();
     });
 });
 
 // Remove organization
 app.delete(API_BASE_URL+'/organizations/:oid', (req: Request, res: Response): void => {
     let oid:string = req.params.oid;
-    database.delete_organization(oid).then((result) => { 
-        res.status(200).json(result);
+    database.delete("oid", oid).then((result) => { 
+        res.status(200).json({"successful":result, "data":""});
     }).catch((err) => {
-        logger.error("Web: could not delete organization from database. " + err);
-        res.status(500).end();
+        logger.error("Web: could not delete organization from database. " + err.message);
+        res.status(500).json({"successful":false, "data":err.message}).end();
     });
 });
 
