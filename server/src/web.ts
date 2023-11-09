@@ -2,13 +2,14 @@
 import bodyParser from 'body-parser'
 import express, { Application, Request, Response } from 'express';
 
-import { logger } from './logger'
+import { logger } from './utils/logger'
 
 import * as organizationAPI from './routes/organization_api'
+import * as locationAPI from './routes/location_api'
 
 export const app:Application = express();
 
-const PORT:number = 3001;
+const PORT:number = 4000;
 
 const API_BASE_URL:string = '/api';
 
@@ -25,11 +26,17 @@ app.get(API_BASE_URL+'/version', (req: Request, res: Response): void => {
 });
 
 
-app.get(API_BASE_URL+'/organizations/:oid', organizationAPI.getOrgID);
+app.get(API_BASE_URL+'/organizations/:id', organizationAPI.getOrgID);
 app.get(API_BASE_URL+'/organizations/', organizationAPI.getOrg);
 app.post(API_BASE_URL+'/organizations/', organizationAPI.postOrg);
 app.put(API_BASE_URL+'/organizations/', organizationAPI.putOrg);
-app.delete(API_BASE_URL+'/organizations/:oid', organizationAPI.deleteOrg);
+app.delete(API_BASE_URL+'/organizations/:id', organizationAPI.deleteOrg);
+
+app.get(API_BASE_URL+'/locations/:id', locationAPI.getLocID);
+app.get(API_BASE_URL+'/locations/', locationAPI.getLoc);
+app.post(API_BASE_URL+'/locations/', locationAPI.postLoc);
+app.put(API_BASE_URL+'/locations/', locationAPI.putLoc);
+app.delete(API_BASE_URL+'/locations/:id', locationAPI.deleteLoc);
 
 app.listen(PORT, (): void => {
     logger.info('Server started on port: ' + PORT);

@@ -3,12 +3,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Aircraft from "./Aircraft";
 import Hospitals from "./components/Hospitals";
+import Organizations from "./components/Organizations";
 import Live from "./components/Live";
 import Menu from './components/Menu'
 import Trip from './components/Trip.js';
 import Trips from './components/Trips';
 
-import io from 'socket.io-client';
+//import io from 'socket.io-client';
 
 import './App.css';
 
@@ -21,14 +22,16 @@ function App() {
   const [metadata, setMetadata] = useState({});
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
-  const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":null});
+  const [selectedSidebar, setSelectedSidebar] = useState({"tab":"flights", "id":""});
 
-  let selectSidebar = (d) => {
+  let selectSidebar = (d:string) => {
       if(d === 'flights' || d === 'hospitals')
-          setSelectedSidebar({"tab":d, "id":null});
+          setSelectedSidebar({"tab":d, "id":""});
       else
           setSelectedSidebar({"tab":"selected-flight", "id":d});
   }
+
+  /*
   
   useEffect(() => {
     const s = io();
@@ -73,6 +76,7 @@ function App() {
 
     return () => s.disconnect();
   }, []);
+  */
 
   return( 
     <>
@@ -95,6 +99,7 @@ function App() {
             <Trips></Trips>} />
           <Route path="/hospitals" element={<Hospitals></Hospitals>} />
           <Route path="/aircraft" element={<Aircraft></Aircraft>} />
+          <Route path="/organization" element={<Organizations></Organizations>} />
           <Route path="/trip/:tid" element={<Trip></Trip>} />
         </Routes>
       </BrowserRouter>

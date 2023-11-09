@@ -12,10 +12,11 @@ import {
     type UpdateResult,
     type DeleteResult, 
     type Filter,
+    type WithId,
     Document
 } from "mongodb"
 
-import { logger } from "./logger"
+import { logger } from "./utils/logger"
 import { Flight, Organization, StateShort } from './types/structures'
 
 
@@ -27,7 +28,7 @@ const DATABASE_NAME:string = "IMFTDEV";
 
 const uri:string = "mongodb://localhost:27017/?maxPoolSize=20&w=majority";
 
-const DOCID_COL:{[key:string]: string} = {"oid":"organization"}
+const DOCID_COL:{[key:string]: string} = {"oid":"organization", "lid":"location"}
 
 export class Database {
     client:MongoClient;
@@ -59,15 +60,22 @@ export class Database {
     *
     * did (string): The document to delete by its id (eg `oid` for organization)
     * term (JSON): What values should be used to search for. (eg {"N-NUMBER":"N191LL"} or {"MODE S CODE HEX":"A16CE7"})
+    * num_results (number): How many results to return
+    * page (number): What page to return
     *
     * Returns: JSON object with the matched terms
     */
-    async get<T extends Document>(did:string, terms:{}) {
+    async get<T extends Document>(did:string, terms:{}, num_results:number=10, page:number=0):Promise<WithId<T>[]> {
         const collection:string = this.documentID_collection(did);
         if(collection.length == 0) 
-            return false;
+            return [];
         
-        const cursor = await this.client.db(DATABASE_NAME).collection<T>(collection).find(terms);
+        const cursor = await this.client
+        .db(DATABASE_NAME)
+        .collection<T>(collection)
+        .find(terms)
+        .skip(num_results*page)
+        .limit(num_results);
 
         return await cursor.toArray();
     }
@@ -126,7 +134,7 @@ export class Database {
     */
     async delete(did:string, id:string|string[]): Promise<boolean> {
         const collection:string = this.documentID_collection(did);
-        if(collection.length == 0) 
+        if(collection.length == 0)
             return false;
 
         if(Array.isArray(id)) {

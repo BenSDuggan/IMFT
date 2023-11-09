@@ -111,3 +111,5 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
     * Add faa `display_name`
 * Admin page to edit all this information
 * Remove aircraft that are not medical helicopters
+[ ] Verify input from API
+[ ] Safe input from API

@@ -1,4 +1,4 @@
-import { logger } from '../src/logger'
+import { logger } from '../src/utils/logger'
 import { Flight, Organization, StateShort } from '../src/types/structures'
 import { database } from '../src/database'
 

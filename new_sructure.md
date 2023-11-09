@@ -1,17 +1,52 @@
 # New Structure starting in September 2023
 
-## Server
+## Data structures
 
-The two main data structures are `flight` and `trip`. Flights are updated with the current ADS-B data and is how the progress of an aircraft is tracked. Trips track the actual begin to end of travel and are meant to be stored in a database.
-
-### Data structures
-
+* `locations`: Common locations where aircraft land. Includes data from the FAA LID airport registry and additional data manually entered. Unique scene 
+* `organization`: Information about specific organizations including their aircraft and locations
 * `flights`: Stores information about current positions of aircraft and their status
 * `trips`: Stores information about the trip an aircraft is taking
 * `State`: ADS-B information at a given time point
 * `StateShort`: ADS-B information at a given time point but without redundant information
 
-#### Flights
+### Locations
+
+```
+{
+    "lid": string, // Location ID
+    "oid": string, // Organization ID
+    "display_name": string, // Display name
+    "city": string, // City the location is in
+    "state": string, // State the location is in
+    "type":string, // Location type (hospital, airport, lz)
+    "lat": number, // Location latitude
+    "lon": number, // Location longitude
+    "elevation": number, // Elevation
+    "zone": null | { // Optional but if included an aircraft will be marked as landed if within this zone
+        "radius": number, // Radius of zone from lat/long
+        "ceiling": number, // Height limit for zone
+    },
+    "faa": null | { // FAA Location data if available
+        "no": string, // Location number
+        "type": string, // Airport type
+        "name": string, // Airport name
+    }
+}
+```
+
+### Organization
+
+```
+{
+    "oid": string, // Organization id
+    "display_name": string, // Display name
+    "description": string, // Organization description
+    "locations": string[], // LID of locations this organization owns
+    "aircraft": string[] // AID of aircraft his organization owns
+}
+```
+
+### Flights
 
 Used by server and client to store the locations of aircraft.
 
@@ -52,7 +87,7 @@ Used by server and client to store the locations of aircraft.
 }
 ```
 
-#### Trips
+### Trips
 
 This data structure matches the `trips` data structure which goes in the database. Data structure for a trip which captures the path traveled from the beginning to the end of a flights path.
 
@@ -93,7 +128,7 @@ This data structure matches the `trips` data structure which goes in the databas
 }
 ```
 
-#### State
+### State
 
 Represents one point in the aircrafts trace.
 
@@ -116,7 +151,7 @@ Represents one point in the aircrafts trace.
 }
 ```
 
-#### StateShort
+### StateShort
 
 Represents one point in the aircrafts trace.
 
@@ -134,6 +169,10 @@ Represents one point in the aircrafts trace.
 }
 ```
 
+## Server
+
+The two main data structures are `flight` and `trip`. Flights are updated with the current ADS-B data and is how the progress of an aircraft is tracked. Trips track the actual begin to end of travel and are meant to be stored in a database.
+
 ### API
 
 * Organization
@@ -150,7 +189,6 @@ MongoDB
 ### Collections
 
 * `trips`: Stores each of the trips
-* `locations`: Common locations where aircraft land. Includes data from the FAA LID airport registry and additional data manually entered. Unique scene 
 * `aircraft`: Stores each of the aircraft. Includes the FAA N-number registry
 * `organization`: Information about specific organizations including their aircraft and locations
 
@@ -195,31 +233,7 @@ Stores all of the individual trips.
 }
 ```
 
-#### locations
 
-```
-{
-    "lid": "", // Location ID
-    "oid": "", // Organization ID
-    "display_name": "", // Display name
-    "lat": "", // Location latitude
-    "lon": "", // Location longitude
-    "zone": { // Optional but if included an aircraft will be marked as landed if within this zone
-        "radius": 0, // Radius of zone from lat/long
-        "ceiling": 0, // Height limit for zone
-    },
-    "faa": { // FAA Location data
-        "no":"", // Location number
-        "type":"", // Airport type
-        "name", // Airport name
-        "state", // State
-        "county", // County
-        "lat", // Latitude
-        "lon", // Longitude
-        "elevation" // Elevation
-    }
-}
-```
 
 #### aircraft
 
@@ -271,17 +285,7 @@ FAA aircraft registration, but only rotor craft. Taken from <https://registry.fa
 }
 ```
 
-#### organization
 
-```
-{
-    "oid": "", // Organization id
-    "display_name": "", // Display name
-    "description": "", // Organization description
-    "locations": [], //LID of locations this organization owns
-    "aircraft": [] // AID of aircraft his organization owns
-}
-```
 
 
 

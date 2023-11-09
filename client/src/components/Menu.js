@@ -17,6 +17,7 @@ function Menu(props) {
             <Nav.Link href="/trips">Trips</Nav.Link>
             <Nav.Link href="/hospitals">Hospital</Nav.Link>
             <Nav.Link href="/aircraft">Aircraft</Nav.Link>
+            <Nav.Link href="/organization">Organizations</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </>

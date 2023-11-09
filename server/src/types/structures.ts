@@ -150,21 +150,19 @@ export interface Location {
     "lid": string, // Location ID
     "oid": string, // Organization ID
     "display_name": string, // Display name
+    "city": string, // City the location is in
+    "state": string, // State the location is in
+    "type":string, // Location type (hospital, airport, lz)
     "lat": number, // Location latitude
     "lon": number, // Location longitude
-    "zone": { // Optional but if included an aircraft will be marked as landed if within this zone
+    "zone": null|{ // Optional but if included an aircraft will be marked as landed if within this zone
         "radius": number, // Radius of zone from lat/long
         "ceiling": number, // Height limit for zone
     },
-    "faa": { // FAA Location data
+    "faa": null|{ // FAA Location data
         "no": string, // Location number
         "type": string, // Airport type
         "name": string, // Airport name
-        "state": string, // State
-        "county": string, // County
-        "lat": number, // Latitude
-        "lon": number, // Longitude
-        "elevation": number // Elevation
     }
 }
 
