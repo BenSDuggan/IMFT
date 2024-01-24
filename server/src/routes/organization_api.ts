@@ -3,6 +3,7 @@
 import { Response, Request } from "express";
 
 import { logger } from '../utils/logger'
+import { get_organization } from '../database/organizations'
 import { database } from '../database'
 import { type Organization } from '../types/structures';
 

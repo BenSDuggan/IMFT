@@ -1,5 +1,9 @@
 // Data structures
 
+// Point
+
+export type Point = [number,number]
+
 // ADS-B information at a given time point
 export interface State {
     "icao24":string, // ADS-B ICAO24

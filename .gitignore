@@ -2,6 +2,7 @@
 opensky-api
 test-file.json
 *.log
+build
 
 # Node
 node_modules

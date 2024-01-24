@@ -80,8 +80,12 @@ Determine if an aircraft is on the ground or airborne
 
 Ideally a location is set under ideal conditions. For a departure that occurs when going from grounded to airborn and for an arrival that is going from airborn to grounded. However, aircraft may enter from outside the bounding box or have a signal lost near their landing site. Actually, this doesn't matter
 
+## New ToDo
+[ ] Utilize config
+[ ] Verify input from API
+[ ] Safe input from API
 
-## ToDo
+## Old ToDo
 
 * Add dynamic pull rates to ADS-B logic
     * If the ADS-B controller knows the quota for a 24 hour period, then pull less at night (when helicopters are not flying) and pull more often during the day (when helicopters are flying)
@@ -111,5 +115,4 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
     * Add faa `display_name`
 * Admin page to edit all this information
 * Remove aircraft that are not medical helicopters
-[ ] Verify input from API
-[ ] Safe input from API
+

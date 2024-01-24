@@ -1,6 +1,6 @@
-import { logger } from '../src/utils/logger'
-import { Flight, Organization, StateShort } from '../src/types/structures'
-import { database } from '../src/database'
+import { logger } from '../utils/logger'
+import { Flight, Organization, StateShort } from '../types/structures'
+import { database } from '../database'
 
 let ss:StateShort = {
     "time":1, // Time position was sent
