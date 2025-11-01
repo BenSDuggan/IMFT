@@ -18,6 +18,19 @@ interface config_type {
     env: string,
     port: string,
     db: database_config_type
+    grid: {
+        lat_min: Number,
+        lat_max: Number,
+        lon_min: Number,
+        lon_max: Number
+    },
+    "adsb": {
+        "opensky": {
+            client_id: string,
+            client_secret: string,
+            quota: Number
+        }
+    }
 }
 
 export let config:config_type = {
@@ -29,6 +42,19 @@ export let config:config_type = {
         "user":"",
         "pass":"",
         "name":"mft"
+    },
+    "grid": {
+        "lat_min": 36.558830,
+        "lat_max": 39.148272,
+        "lon_min": -89.570680,
+        "lon_max": -81.965085
+    },
+    "adsb": {
+        "opensky": {
+            "client_id": "",
+            "client_secret": "",
+            "quota": 4000
+        }
     }
 }
 
@@ -52,6 +78,33 @@ let load_config_from_file = () => {
         }
         if(config_file.db.pass) {
             config.db.pass = config_file.db.pass;
+        }
+    }
+
+    if(config_file.grid) {
+        if(config_file.grid.name) {
+            config.grid.lat_min = config_file.grid.lat_min;
+        }
+        if(config_file.grid.host) {
+            config.grid.lat_max = config_file.grid.lat_max;
+        }
+        if(config_file.grid.lon_min) {
+            config.grid.lon_min = config_file.grid.lon_min;
+        }
+        if(config_file.grid.pass) {
+            config.grid.lon_max = config_file.grid.lon_max;
+        }
+    }
+
+    if(config_file.adsb && config_file.adsb.opensky) {
+        if(config_file.adsb.opensky.client_id) {
+            config.adsb.opensky.client_id = config_file.adsb.opensky.client_id;
+        }
+        if(config_file.adsb.opensky.client_secret) {
+            config.adsb.opensky.client_secret = config_file.adsb.opensky.client_secret;
+        }
+        if(config_file.adsb.opensky.quota) {
+            config.adsb.opensky.quota = config_file.adsb.opensky.quota;
         }
     }
 }

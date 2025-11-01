@@ -5,18 +5,29 @@ import { config } from './common/config'
 import * as db from './database'
 import { initialize_db_contents } from './database/initialize'
 
+import { get_opensky_data } from './adsb/opensky'
+import { ADSB_State } from './types/structures'
+
 //import { Flight, Organization, StateShort } from './types/structures'
 //import './web'
 
 // Connect to Mongo
 db.connect()
 .then((result) => {
-    initialize_db_contents();
+    //initialize_db_contents();
 })
 .catch((error) => {
     console.log("opps")
     console.log(error)
 }) 
+
+get_opensky_data()
+.then((result:ADSB_State) => {
+    console.log(result.time);
+    console.log(result.source);
+    console.log(result.states.length);
+    console.log(result.states[0])
+})
 
 // Initialize: ToDo
     // Initialize DB

@@ -4,22 +4,30 @@
 
 export type Point = [number,number]
 
+// ADSB generic state
+export interface ADSB_State {
+    "time": number, // When the state was recieved as epoch
+    "states": Aircraft_State[], // List of aircraft states
+    "source": string // name of service that data was from
+}
+
 // ADS-B information at a given time point
-export interface State {
+export interface Aircraft_State {
     "icao24":string, // ADS-B ICAO24
-    "callsign":string, // Callsign
-    "squawk":number, // Squawk
-    "time":number, // Time position was sent
-    "last_contact":number,// Time since transponder was last scene
-    "lon":number, // Longitude
-    "lat":number, // Latitude
-    "baro_altitude":number, // Barometric altitude
-    "geo_altitude":number, // Altitude
-    "heading":number, // Heading, 0 is north
-    "velocity":number, // Velocity in MPH
-    "vertical_rate":number, // Vertical rate in FPS
-    "on_ground":boolean, // On ground or not
-    "category":number // Aircraft type
+    "callsign":string|null, // Callsign
+    "squawk":string|null, // Squawk
+    "emergency":number|null, // Emergency
+    "spi": boolean|null, // SPI (special purpose indicator)
+    "time":number|null, // Time position was sent
+    "lon":number|null, // Longitude
+    "lat":number|null, // Latitude
+    "alt":number|null, // Altitude (geometric preferred but may be baro)
+    "heading":number|null, // Heading, 0 is north
+    "roll":number|null, // Roll amount
+    "velocity":number|null, // Velocity in MPH (ground > true > indicator)
+    "vertical_rate":number|null, // Vertical rate in FPS
+    "on_ground":boolean|null, // On ground or not
+    "category":number|undefined // Aircraft type
 }
 
 // ADS-B information at a given time point but without redundant information
@@ -83,9 +91,9 @@ export interface Aircraft {
 // Stores information about current positions of aircraft and their status
 export interface Flight {
     "aircraft":Aircraft, // aircraft data
-    "last": State, // Data from the last update interval
-    "stl": State, // Data from the second to last interval (copied from last when the next update interval occurs)
-    "latest": State, // Latest data received, not necessarily up to date
+    "last": Aircraft_State, // Data from the last update interval
+    "stl": Aircraft_State, // Data from the second to last interval (copied from last when the next update interval occurs)
+    "latest": Aircraft_State, // Latest data received, not necessarily up to date
     "time": number, // Time that the last flight data was received
     "tics": number, // How many tics has it been without data
     "tracking": { // Tracking information
