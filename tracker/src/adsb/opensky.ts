@@ -7,6 +7,7 @@ import { config } from '../common/config'
 import { logger } from "../common/logger";
 import { epoch_s } from "../common/utils";
 import { adsb_put, adsb_raw_put } from '../database/adsb'
+import { io } from "../web";
 
 import { ADSB_State, Aircraft_State, Category } from "../types/structures";
 
@@ -336,6 +337,9 @@ export const get_opensky_data = async ():Promise<ADSB_State> => {
         // Save to DB
         await adsb_raw_put({"time":state.time, "source":state.source, "states": response.states});
         await adsb_put(state);
+        io.emit("adsb-new", state);
+
+        logger.info(`opensky: Retrieved and saved ${state.states.length} ADS-B records.`);
     } catch (err) {
         logger.error("get_opensky_data: Error fetching data:", err);
     }

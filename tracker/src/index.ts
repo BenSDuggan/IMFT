@@ -9,9 +9,9 @@ import { get_opensky_data } from './adsb/opensky'
 import { ADSB_State } from './types/structures'
 import { set_query_interval } from './adsb/recorder'
 import { get_adsb_exchange_data } from './adsb/adsb-exchange'
+import { create_historic_data } from './adsb/historic'
 
-//import { Flight, Organization, StateShort } from './types/structures'
-
+import './web'
 
 const init_fa = async () => {
     try {
@@ -29,6 +29,7 @@ const init_fa = async () => {
 
 const loop_fa = async() => {
     //get_adsb_exchange_data();
+    create_historic_data("adsb-exchange", 3, 30);
 }
 
 // Initialize and run FA

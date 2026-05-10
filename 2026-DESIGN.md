@@ -34,6 +34,8 @@
     * `locations`: Stores each of the hospitals. These are different from the FAA LIDs, but often overlap. Hospitals include additional information and must be added manually. However, they are should be used over FAA LIDs. Hospitals can be linked to multiple LIDs.
     * `faaNNumber`: Copy of the FAA N-Number aircraft registry. Should be updated periodically.
     * `faaLID`: Copy of the FAA LID airport registry. Should be updated periodically. Used to search for the location of aircraft.
+    * `adsb`: Data from ADSB services but extracted down into the standard `ADSB State` type. 
+    * `adsb-raw`: The raw output from all ADSB service requests. Used for debugging. Will want to delete this data at regular intervals.
 
 ### FAA Helicopter Registration (`faaNNumber`)
 
@@ -91,5 +93,7 @@ FAA aircraft registration, but only rotor craft. Taken from <https://registry.fa
 
 ## Test Data
 
-Test data is important for the overall development process.  Test data is stored in teh [test-dat](data/test-data/) directory.  The tracker runs normally, however, instead of saving data to the database normally, it will save data to a JSON file and the database.
+Test data is important for the overall development process.  Test data is stored in the [test-data](data/test-data/) directory.  The tracker runs normally, however, instead of saving data to the database normally, it will save data to a JSON file and the database.
+
+The [historic.ts](tracker/src//adsb/historic.ts) script contains all the code to create, load, and use historic testing data.  Historic testing data can be created by running `create_historic_data("adsb-exchange", 3, 30);` in the main loop after initialization.  The first argument is which logger to use (currently `adsb-exchange` or `opensky`).  The second argument is how many records should be obtained.  The third argument is the interval (in seconds) to query the data.  This will save the data to the [test-data](data/test-data/) directory.  The config file must have the proper credentials and center point or grid based off the ADSB source.  
 

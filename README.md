@@ -1,17 +1,17 @@
 # Medical Flight Tracking (MFT)
 
-Project to track medical helicopters in Indiana. Tweeting locations at <https://twitter.com/IN_MFT>. Website coming soon!
+Project to track medical flights.  This project is still under heavy development.  Originally the scope was tracking flights in Indiana (IMFT).  The project is now being built to be more location agnostic.
 
 ![IMFT Logo](logo.png)
 
 ## Version
 
-* `0.5.0` -> `0.6.0`
+* `1.0.0`
 
 ## Install
 
-1. Install Python, MongoDB, and Node on your respective system. On Linux:
-    1. `sudo apt install git python3-pip zip`
+1. Install  MongoDB, and Node on your respective system. On Linux:
+    1. `sudo apt install git zip`
     2. Install node
         1. `curl -fsSL https://deb.nodesource.com/setup_19.x | sudo -E bash - `
         2. `sudo apt-get install -y nodejs`
@@ -22,16 +22,9 @@ Project to track medical helicopters in Indiana. Tweeting locations at <https://
             4. `sudo apt install mongodb-org`
             5. `sudo systemctl start mongod`
             6. `sudo systemctl enable mongod`
+2. Install [tracker](/tracker) directory. Inside the [tracker](/tracker) folder run: `npm install`
 2. Install [server](/server) directory. Inside the [server](/server) folder run: `npm install`
 3. Install [client](/client) directory. Inside the [client](/client) folder run: `npm install`
-4. Install OpenSky
-    1. `git clone https://github.com/openskynetwork/opensky-api`
-    2. `pip install -e opensky-api/python`
-5. Initialize database. From within the [database](/database) directory run the following commands.
-    1. `npm install`
-    2. `node src/make-hospitals.js`
-    3. `node src/make-faa.js`
-    4. `node src/make-faa-lid.js`
 
 
 ## Challenges
@@ -53,10 +46,10 @@ Project to track medical helicopters in Indiana. Tweeting locations at <https://
         * Doesn't have good coverage of Northern Indiana
     * ADS-B Exchange $10 / mo
         * 10,000 / mo (~1 poll / 4.32 min)
-        * Best coverage in Indianapolis
+        * Better coverage
     * Flight Aware 
         * $20 / mo
-* Aircraft can come into the airspace (from outside Indiana) and already be in flight
+* Aircraft can come into the airspace (from outside state) and already be in flight
 * Helicopters can hover, so if vertical speed and horizontal speed are 0, you don't know if it's hovering or not
 * It is difficult to determine air/ground and location status
 
@@ -89,20 +82,6 @@ Ideally a location is set under ideal conditions. For a departure that occurs wh
 * In the final build, could theoretically make the logger part of the server (or two different node apps) and allow for different instances of logger
 
 
-## New ToDo
-[ ] tracker
-    [ ] FAA data
-        [ ] Get new N name data from FAA
-        [ ] Upload data into database
-        [ ] 
-    [ ] Get Flight data
-    [ ] Init script
-        [ ] Load old flight data
-        [ ] Reconcile old data
-    [ ] Logger loop
-[ ] Utilize config
-[ ] Verify input from API
-[ ] Safe input from API
 
 ## Old ToDo
 
