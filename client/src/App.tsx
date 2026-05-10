@@ -1,20 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { io } from 'socket.io-client';
+
 //import Aircraft from "./Aircraft";
 //import Hospitals from "./components/Hospitals";
 //import Organizations from "./components/Organizations";
-//import Live from "./components/Live";
+import Live from "./components/Live";
 import Menu from './components/Menu'
 //import Trip from './components/Trip.js';
 //import Trips from './components/Trips';
 
-//import io from 'socket.io-client';
+import { ADSB_State, Aircraft_State } from "./types/ADSB_Type";
 
 import './App.css';
 
+
 function App() {
 
+  const [adsb, setAdsb] = useState<Aircraft_State[]>([
+        {
+          "icao24": "ad59d2",
+          "callsign": "N96AE",
+          "squawk": "0251",
+          "emergency": "none",
+          "spi": 0,
+          "time": 1778381031886,
+          "lon": -84.680588,
+          "lat": 38.082523,
+          "alt": 2150,
+          "heading": 109.22,
+          "roll": null,
+          "velocity": 115.4,
+          "vertical_rate": -128,
+          "on_ground": null,
+          "category": "Rotorcraft"
+        }]);
   const [hospitals, setHospitals] = useState([]);
   const [flights, setFlights] = useState([]);
   const [trips, setTrips] = useState([]);
@@ -30,12 +51,10 @@ function App() {
       else
           setSelectedSidebar({"tab":"selected-flight", "id":d});
   }
-
-  /*
   
   useEffect(() => {
     const s = io();
-    setSocket(s);
+    //setSocket(s);
 
     s.on("connect", () => {
       console.log("connected")
@@ -46,6 +65,14 @@ function App() {
       console.log("disconnected")
       setConnected(false)
     });
+
+    // Responders
+    s.on('adsb-new', (data) => {
+      console.log(data);
+      setAdsb(data.states);
+    })
+
+    /*
 
     // Getters
     s.emit("get_hospitals", {});
@@ -73,15 +100,14 @@ function App() {
     s.on('db_trips', (data) => {
       console.log(data)
     })
+    */
 
-    return () => s.disconnect();
   }, []);
-  */
 
   return( 
     <>
       <Menu connected={connected}></Menu>
-      
+      <Live adsb={adsb}></Live>
     </>
   )
 }

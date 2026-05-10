@@ -1,15 +1,89 @@
 import React from "react";
 
-import L from 'leaflet';
+import L, { LatLngBoundsExpression }  from 'leaflet';
 import { LayersControl, LayerGroup, Polyline, MapContainer, Marker, TileLayer } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
 
+import { ADSB_State, Aircraft_State } from "../types/ADSB_Type";
 
 
 const limeOptions = { color: '#ee4035' }
-const bbox = [[37, -88.028], [41.762, -84.809]];
+const bbox:LatLngBoundsExpression = [[36.558830, -89.570680], [39.148272, -81.965085]];
 
-function HospitalMarker(props) {
+
+let category_to_marker = (category:string):string => {
+    switch(category){
+        case "Light":
+            return "fa-plane";
+        case "Small":
+            return "fa-plane";
+        case "Large":
+            return "fa-plane";
+        case "High Vortex Large":
+            return "fa-plane";
+        case "Heavy":
+            return "fa-plane";
+        case "Unmanned Aerial Vehicle":
+            return "fa-person-circle-xmark";
+        case "Glider, sailplane":
+            return "Lighter-than-air";
+            case "Glider, sailplane":
+            return "fa-sailboat";
+        case "Parachutist / Skydiver":
+            return "fa-parachute-box";
+        case "Ultralight, hang-glider, paraglider":
+            return "fa-paper-plane";
+        case "Space, Trans-atmospheric vehicle":
+            return "fa-rocket";
+
+        case "High Performance":
+            return "fa-jet-fighter";
+        case "Rotorcraft":
+            return "fa-helicopter";
+        case "Surface Vehicle - Emergency Vehicle":
+            return "fa-car-side";
+        case "Surface Vehicle - Service Vehicle":
+            return "fa-car-side";
+        case "Point Obstacle":
+            return "fa-road-barrier";
+        case "Cluster Obstacle":
+            return "fa-road-barrier";
+        case "Line Obstacle":
+            return "fa-road-barrier";
+        default:
+            return "fa-plane-slash";
+    }
+
+    return "fa-plane-slash";
+}
+
+let ADSB_Marker = (props:any) => {
+    let heading = (props.state.heading + 270) % 360;
+    let heading_p = heading;
+    heading_p = heading>90&&heading<=180?180-heading:heading_p;;
+    heading_p = heading>180&&heading<270?180-heading:heading_p;
+
+    let marker = category_to_marker(props.state.category);
+
+    let color = "#034f84";
+
+    const hospitalIcon = L.divIcon({
+        html: '<span ' + (heading>90&&heading<270?'class="fa-flip-horizontal"':'') + ' style="display: inline-block;">'+
+                    '<i class="fa-solid ' + marker + ' fa-2x fa-rotate-by" style="--fa-rotate-angle: ' + heading_p +
+                     'deg; color:'+color+';"></i></span>',
+        className: 'mapIcon',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10] // centers the icon
+    });
+
+    return(
+        <Marker position={[props.state.lat, props.state.lon]} opacity={0.9} icon={hospitalIcon}>
+        </Marker>
+    )
+}
+
+/*
+function HospitalMarker(props:any) {
     const hospitalIcon = new L.divIcon({
         html: '<i class="fa-solid fa-hospital fa-2x" style="color:#0392cf;"></i>',
         iconSize: [20, 20],
@@ -22,7 +96,7 @@ function HospitalMarker(props) {
     )
 }
 
-function AircraftMarker(props) {
+function AircraftMarker(props:any) {
     
     const flightIcon = (flight) => {
         let heading = (flight.track + 270) % 360;
@@ -58,7 +132,7 @@ function AircraftMarker(props) {
     )
 }
 
-function FlightsMarker(props) {
+function FlightsMarker(props:any) {
     
     const flightIcon = (flight) => {
         let heading = (flight.latest.track + 270) % 360;
@@ -101,7 +175,7 @@ function FlightsMarker(props) {
     )
 }
 
-function DeselectFlight(props) {
+function DeselectFlight(props:any) {
     useMapEvents({
       click: () => {
         props.setSelectedSidebar('flights')
@@ -109,13 +183,14 @@ function DeselectFlight(props) {
     })
     return null
 }
+    */
 
-function MapPath(props) {
+function MapPath(props:any) {
     return ( <Polyline pathOptions={limeOptions} positions={props.trip.path} /> )
 }
 
-function Map(props) {
-    let box = props.bbox ?? bbox;
+let Map = (props:any) => {
+    let adsb:Aircraft_State[] = props.adsb ? props.adsb : [];
     let hospitals = props.hospitals ?? [];
     let flights = props.flights ?? [];
     let trips = props.trips ?? [];
@@ -125,14 +200,32 @@ function Map(props) {
 
     return(
         <MapContainer  id="map"
-                      bounds={box} 
+                      bounds={bbox} 
                       scrollWheelZoom={true}>
             <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
 
-            <DeselectFlight setSelectedSidebar={setSelectedSidebar} />
+            <LayersControl position="topright">
+                <LayersControl.Overlay checked name="ADSB">
+                    <LayerGroup>
+                        {adsb.map(a => 
+                            <ADSB_Marker key={"map-hospital-" + a.icao24} state={a}></ADSB_Marker>
+                        )};
+                    </LayerGroup>
+                </LayersControl.Overlay>
+            </LayersControl>
+
+            
+        </MapContainer>
+    )
+}
+
+export default Map;
+
+/*
+<DeselectFlight setSelectedSidebar={setSelectedSidebar} />
 
             {selectedSidebar.id !== null ? 
                 <MapPath 
@@ -176,8 +269,4 @@ function Map(props) {
                     </LayerGroup>
                 </LayersControl.Overlay>
             </LayersControl>
-        </MapContainer>
-    )
-}
-
-export default Map;
+*/

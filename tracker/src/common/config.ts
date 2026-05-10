@@ -17,7 +17,10 @@ interface database_config_type {
 interface config_type {
     env: string,
     port: string,
-    db: database_config_type
+    db: database_config_type,
+    web: {
+        port: number
+    },
     grid: {
         lat_min: number,
         lat_max: number,
@@ -54,6 +57,9 @@ export let config:config_type = {
         "pass":"",
         "name":"mft"
     },
+    "web": {
+        "port": 4010
+    },
     "grid": {
         "lat_min": 36.558830,
         "lat_max": 39.148272,
@@ -88,6 +94,12 @@ let load_config_from_file = () => {
         }
         if(config_file.db.pass) {
             config.db.pass = config_file.db.pass;
+        }
+    }
+
+    if(config_file.web) {
+        if(config_file.web.port) {
+            config.web.port = config_file.web.port;
         }
     }
 

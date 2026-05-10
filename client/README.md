@@ -6,7 +6,7 @@
 
 Relies on `leaflet`, `react-leaflet`, `socket.io`, `uuid`
 
-1. `npm install --save typescript react react-dom`
+1. `npm install`
 
 ### Run
 

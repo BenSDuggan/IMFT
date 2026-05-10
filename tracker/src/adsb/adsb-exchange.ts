@@ -150,7 +150,7 @@ let map_generic_state = (state: ADSB_Exchange_StateVector): Aircraft_State => {
  */
 export let fetch_adsb_exchange_data = async ():Promise<ADSB_Exchange_Response> => {
     // Add coordinate constraints
-    let url = `/v2/lat/${config.center_point.lat}/lon/${config.center_point.lon}/dist/10`;
+    let url = `/v2/lat/${config.center_point.lat}/lon/${config.center_point.lon}/dist/250`;
     
     const options: https.RequestOptions = {
         method: "GET",

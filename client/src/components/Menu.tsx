@@ -3,13 +3,13 @@ import React from "react";
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
-function Menu(props) {
+const Menu = (props:any) => {
 
   return( 
     <>
-      <Navbar expand="md" bg={props.connected ? "dark" : "danger"} variant="dark" className="main_nav">
+      <Navbar expand="md" bg={props.connected ? "secondary" : "danger"} className="main_nav">
         <>
-        <Navbar.Brand href="/" >Indiana Medical Flight Tracking</Navbar.Brand>
+        <Navbar.Brand href="/" >Medical Flight Tracking</Navbar.Brand>
         <Navbar.Toggle aria-controls="menu-navbar-nav" />
         <Navbar.Collapse id="menu-navbar-nav">
           <Nav className="me-auto">

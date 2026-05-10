@@ -8,14 +8,31 @@ import Col from 'react-bootstrap/Col';
 import Map from './Map';
 import Sidebar from './Sidebar';
 
-function Live(props) {    
+let Live = (props:any) => {    
 
     return (
         <>
         <Container className="d-md-block d-none" id="main_live" fluid="true">
             <Row className="fill_grid">
             <Col  className="fill_grid" id="sidebar" >
-            <Sidebar 
+            Sidebar
+            </Col>
+            <Col sm={8} className="fill_grid">
+                <Container fluid="true" id="map">
+                <Map 
+                    adsb={props.adsb}>    
+                </Map>
+            </Container>
+            </Col>
+            </Row>
+        </Container>
+        
+        </>
+    )
+}
+
+/*
+<Sidebar 
                 flights={props.flights} 
                 trips={props.trips} 
                 metadata={props.metadata} 
@@ -23,22 +40,13 @@ function Live(props) {
                 selectedSidebar={props.selectedSidebar} 
                 setSelectedSidebar={props.setSelectedSidebar}>    
             </Sidebar>
-            </Col>
-            <Col sm={7} className="fill_grid">
-            <Container fluid="true" id="map">
-                <Map 
-                    hospitals={props.hospitals} 
-                    flights={props.flights} 
-                    trips={props.trips} 
-                    nfd={props.nfd}
-                    selectedSidebar={props.selectedSidebar} 
-                    setSelectedSidebar={props.setSelectedSidebar}>    
-                </Map>
-            </Container>
-            </Col>
-            </Row>
-        </Container>
-        <Container className="d-md-none d-block fill_grid" id="main_live" fluid>
+            */
+
+
+export default Live;
+
+/*
+<Container className="d-md-none d-block fill_grid" id="main_live" fluid>
             <Row>
             <Container fluid="true" style={{height:"50vh"}}>
                 <Map 
@@ -61,8 +69,4 @@ function Live(props) {
                 </Sidebar>
             </Row>
         </Container>
-        </>
-    )
-}
-
-export default Live;
+        */

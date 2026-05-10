@@ -29,7 +29,7 @@ const init_fa = async () => {
 
 const loop_fa = async() => {
     //get_adsb_exchange_data();
-    create_historic_data("adsb-exchange", 3, 30);
+    //create_historic_data("adsb-exchange", 3, 30);
 }
 
 // Initialize and run FA
