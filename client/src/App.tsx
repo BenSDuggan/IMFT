@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Aircraft from "./Aircraft";
-import Hospitals from "./components/Hospitals";
-import Organizations from "./components/Organizations";
-import Live from "./components/Live";
+//import Aircraft from "./Aircraft";
+//import Hospitals from "./components/Hospitals";
+//import Organizations from "./components/Organizations";
+//import Live from "./components/Live";
 import Menu from './components/Menu'
-import Trip from './components/Trip.js';
-import Trips from './components/Trips';
+//import Trip from './components/Trip.js';
+//import Trips from './components/Trips';
 
 //import io from 'socket.io-client';
 
@@ -81,7 +81,16 @@ function App() {
   return( 
     <>
       <Menu connected={connected}></Menu>
-      <BrowserRouter>
+      
+    </>
+  )
+}
+
+export default App;
+//<SocketContext.Provider value={socket} >
+
+/*
+<BrowserRouter>
         <Routes>
           <Route path="/" element={
             <Live
@@ -103,9 +112,4 @@ function App() {
           <Route path="/trip/:tid" element={<Trip></Trip>} />
         </Routes>
       </BrowserRouter>
-    </>
-  )
-}
-
-export default App;
-//<SocketContext.Provider value={socket} >
+      */

@@ -199,6 +199,7 @@ export let create_ffa_nnumber_collection = async () => {
     }
 }
 
+// TODO: get updated url for LID
 export let create_ffa_lid_collection = async () => {
     try {
         const filePath:string = path.join(lid_dataSavePath, "faaLID.zip");

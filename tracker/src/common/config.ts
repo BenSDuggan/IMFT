@@ -19,16 +19,27 @@ interface config_type {
     port: string,
     db: database_config_type
     grid: {
-        lat_min: Number,
-        lat_max: Number,
-        lon_min: Number,
-        lon_max: Number
+        lat_min: number,
+        lat_max: number,
+        lon_min: number,
+        lon_max: number
     },
-    "adsb": {
-        "opensky": {
+    center_point: {
+        lat: number,
+        lon: number
+    }
+    adsb: {
+        opensky?: {
             client_id: string,
             client_secret: string,
-            quota: Number
+            quota: number
+        },
+        adsb_exchange?: {
+            aki_key: string,
+            quota: number
+        }, 
+        historic?: {
+            path: string
         }
     }
 }
@@ -49,12 +60,11 @@ export let config:config_type = {
         "lon_min": -89.570680,
         "lon_max": -81.965085
     },
+    "center_point": {
+        "lat": 0,
+        "lon": 0
+    },
     "adsb": {
-        "opensky": {
-            "client_id": "",
-            "client_secret": "",
-            "quota": 4000
-        }
     }
 }
 
@@ -82,10 +92,10 @@ let load_config_from_file = () => {
     }
 
     if(config_file.grid) {
-        if(config_file.grid.name) {
+        if(config_file.grid.lat_min) {
             config.grid.lat_min = config_file.grid.lat_min;
         }
-        if(config_file.grid.host) {
+        if(config_file.grid.lat_max) {
             config.grid.lat_max = config_file.grid.lat_max;
         }
         if(config_file.grid.lon_min) {
@@ -96,7 +106,22 @@ let load_config_from_file = () => {
         }
     }
 
+    if(config_file.center_point) {
+        if(config_file.center_point.lat) {
+            config.center_point.lat = config_file.center_point.lat;
+        }
+        if(config_file.center_point.lon) {
+            config.center_point.lon = config_file.center_point.lon;
+        }
+    }
+
     if(config_file.adsb && config_file.adsb.opensky) {
+        config.adsb["opensky"] = {
+            "client_id": "",
+            "client_secret": "",
+            "quota": 4000
+        };
+
         if(config_file.adsb.opensky.client_id) {
             config.adsb.opensky.client_id = config_file.adsb.opensky.client_id;
         }
@@ -106,6 +131,24 @@ let load_config_from_file = () => {
         if(config_file.adsb.opensky.quota) {
             config.adsb.opensky.quota = config_file.adsb.opensky.quota;
         }
+    }
+
+    if(config_file.adsb && config_file.adsb.adsb_exchange) {
+        config.adsb["adsb_exchange"] = {
+            "aki_key": "",
+            "quota": 0
+        };
+
+        if(config_file.adsb.adsb_exchange.aki_key) {
+            config.adsb.adsb_exchange.aki_key = config_file.adsb.adsb_exchange.aki_key;
+        }
+        if(config_file.adsb.adsb_exchange.quota) {
+            config.adsb.adsb_exchange.quota = config_file.adsb.adsb_exchange.quota;;
+        }
+    }
+
+    if (config_file.adsb?.historic?.path) {
+        config.adsb["historic"] = {"path":config_file.adsb.historic.path}
     }
 }
 

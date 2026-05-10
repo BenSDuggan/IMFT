@@ -10,6 +10,8 @@ import { logger } from '../common/logger'
 import {type Point} from '../types/structures'
 
 
+// Get the current time from epoch in ms
+export const epoch = () => Math.floor(Date.now())
 // Get the current time from epoch in seconds
 export const epoch_s = () => Math.floor(Date.now()/1000)
 

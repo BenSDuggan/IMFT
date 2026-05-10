@@ -4,9 +4,13 @@
 
 export type Point = [number,number]
 
+export type Category = null | "No ADS-B Emitter Category Information" | "Light" | "Small" | "Large" | "High Vortex Large" | "Heavy" | "High Performance" | "Rotorcraft" | "Glider, sailplane" | "Lighter-than-air" | "Parachutist / Skydiver" | "Ultralight, hang-glider, paraglider" | "Reserved" | "Unmanned Aerial Vehicle" | "Space, Trans-atmospheric vehicle" | "Surface Vehicle - Emergency Vehicle" | "Surface Vehicle - Service Vehicle" | "Point Obstacle" | "Cluster Obstacle" | "Line Obstacle"
+
+
+
 // ADSB generic state
 export interface ADSB_State {
-    "time": number, // When the state was recieved as epoch
+    "time": number, // When the state was recieved as epoch in milliseconds
     "states": Aircraft_State[], // List of aircraft states
     "source": string // name of service that data was from
 }
@@ -16,8 +20,8 @@ export interface Aircraft_State {
     "icao24":string, // ADS-B ICAO24
     "callsign":string|null, // Callsign
     "squawk":string|null, // Squawk
-    "emergency":number|null, // Emergency
-    "spi": boolean|null, // SPI (special purpose indicator)
+    "emergency":string|null, // Emergency
+    "spi": number|null, // SPI (special purpose indicator)
     "time":number|null, // Time position was sent
     "lon":number|null, // Longitude
     "lat":number|null, // Latitude
@@ -27,17 +31,19 @@ export interface Aircraft_State {
     "velocity":number|null, // Velocity in MPH (ground > true > indicator)
     "vertical_rate":number|null, // Vertical rate in FPS
     "on_ground":boolean|null, // On ground or not
-    "category":number|undefined // Aircraft type
+    "category":Category // Aircraft type
 }
 
 // ADS-B information at a given time point but without redundant information
-export interface StateShort {
+export interface Aircraft_StateShort {
+    "squawk":string|null, // Squawk
+    "emergency":number|null, // Emergency
     "time":number, // Time position was sent
     "lon":number, // Longitude
     "lat":number, // Latitude
-    "baro_altitude":number, // Barometric altitude
-    "geo_altitude":number, // Altitude
+    "alt":number|null, // Altitude (geometric preferred but may be baro)
     "heading":number, // Heading, 0 is north
+    "roll":number|null, // Roll amount
     "velocity":number, // Velocity in MPH
     "vertical_rate":number, // Vertical rate in FPS
     "on_ground":boolean, // On ground or not
@@ -126,8 +132,8 @@ export interface Flight {
 
 // Stores information about the trip an aircraft is taking
 export interface Trip {
-    "tid":string, // Trip ID
-    "status":string, // `grounded` `airborn` `los`
+    "fid":string, // Trip ID
+    "status":'grounded'|'airborn'|'los'|null, // `grounded` `airborn` `los` 
     "aircraft": { // Aircraft information
       "aid":string, // Aircraft ID
       "N-NUMBER": string, // Aircraft N-Number
@@ -135,16 +141,17 @@ export interface Trip {
     },
     "departure": { // Departure information
         "lid": string, // Location ID
-        "type": string, // Was the location determined using `hospital`, `faaID`, or `geo`
+        "type": string, // Was the location determined using `hospital`, `faaID`, `geo`, `midflight`
         "display_name": string, // Name to display
         "time": number, // Time the status was changed
         "lat": number, // Lat of the location
         "lon": number, // Lon of the location
+        "altitude": number, // Altitude of location
         "reason": string // Reason status was changed to this
     },
     "arrival": { // Arrival information in 
         "lid": string, // Location ID
-        "type": string, // Was the location determined using `hospital`, `faaID`, or `geo`
+        "type": string, // Was the location determined using `hospital`, `faaID`, `geo`, `midflight`
         "display_name": string, // Name to display
         "time": number, // Time the status was changed
         "lat": number, // Lat of the location
@@ -155,7 +162,8 @@ export interface Trip {
         "time": number, // Trip travel time in minutes
         "distance": number, // Trip travel distance in miles
     },
-    "path":StateShort[ ]// Aircraft travel path
+    "path":Aircraft_StateShort[ ]// Aircraft travel path
+    
 }
 
 export interface Location {

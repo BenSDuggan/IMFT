@@ -1,4 +1,4 @@
-# Indiana Medical Flight Tracking (IMFT)
+# Medical Flight Tracking (MFT)
 
 Project to track medical helicopters in Indiana. Tweeting locations at <https://twitter.com/IN_MFT>. Website coming soon!
 
@@ -80,7 +80,26 @@ Determine if an aircraft is on the ground or airborne
 
 Ideally a location is set under ideal conditions. For a departure that occurs when going from grounded to airborn and for an arrival that is going from airborn to grounded. However, aircraft may enter from outside the bounding box or have a signal lost near their landing site. Actually, this doesn't matter
 
+## Structure
+
+* Components:
+    * Server: API endpoint to get content and service it (mainly connect to the DB)
+    * Client: View the server data
+    * Tracker: get the data (from various sources), make the flights, store it in the database
+* In the final build, could theoretically make the logger part of the server (or two different node apps) and allow for different instances of logger
+
+
 ## New ToDo
+[ ] tracker
+    [ ] FAA data
+        [ ] Get new N name data from FAA
+        [ ] Upload data into database
+        [ ] 
+    [ ] Get Flight data
+    [ ] Init script
+        [ ] Load old flight data
+        [ ] Reconcile old data
+    [ ] Logger loop
 [ ] Utilize config
 [ ] Verify input from API
 [ ] Safe input from API

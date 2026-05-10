@@ -8,6 +8,10 @@ Relies on `leaflet`, `react-leaflet`, `socket.io`, `uuid`
 
 1. `npm install --save typescript react react-dom`
 
+### Run
+
+* Dev: `npm run start`
+
 ### Notes
 
 * Must include style, but can't include script in `index.html`

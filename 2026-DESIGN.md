@@ -1,10 +1,10 @@
-# New Design Late 2025
+# New Design 2026
 
 * Tracker: This is the main service which pulls ADS-B data and keeps track of flights
     * Config: It's best to use the [config.json](./data/config.json) file for setttings.  Environment variables can be used but have limited support.
 
 * General flow:
-    * Initialize: ToDo
+    * Initialize: TODO
     * Get updated ADS-B data at every interval
         * For each tag, identify if new aircraft of already exists in currently tracked flights
             * If new aircraft
@@ -82,7 +82,6 @@ FAA aircraft registration, but only rotor craft. Taken from <https://registry.fa
 
 ## FAA Location Identification (Airport Location)
 
-
 * FAA database of all airports. Main FAA page with all data (https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/).
 * Only interested in FFA LID, `ARPT_NAME` (location name), `SITE_TYPE_CODE` latitude, longitude, city, and state. 
 * Old data is found from this page <https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription_2022-12-29/>. Zip available from <https://nfdc.faa.gov/webContent/28DaySub/extra/29_Dec_2022_APT_CSV.zip>. 
@@ -90,7 +89,7 @@ FAA aircraft registration, but only rotor craft. Taken from <https://registry.fa
 * They unfortunately do not have a most up to date link or easy way to pull up to date data like for N Number. 
 * Data is stored in the `APT_BASE.csv` file.
 
-## ToDo
-[ ] Database
-    [ ] LID airports: if first of the month and want to get new data, test all dates with link
-    [ ] N Number: if updating, then update aircraft collection with data if its different
+## Test Data
+
+Test data is important for the overall development process.  Test data is stored in teh [test-dat](data/test-data/) directory.  The tracker runs normally, however, instead of saving data to the database normally, it will save data to a JSON file and the database.
+

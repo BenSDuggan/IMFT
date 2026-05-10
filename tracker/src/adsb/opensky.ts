@@ -6,7 +6,9 @@ import querystring from "querystring";
 import { config } from '../common/config'
 import { logger } from "../common/logger";
 import { epoch_s } from "../common/utils";
-import { ADSB_State, Aircraft_State } from "../types/structures";
+import { adsb_put, adsb_raw_put } from '../database/adsb'
+
+import { ADSB_State, Aircraft_State, Category } from "../types/structures";
 
 const update_access_time:number = 25 * 60; // Get new access token every 25 minutes
 
@@ -127,6 +129,58 @@ let map_state_vector = (state: OpenSky_Response["states"][number]): OpenSky_Stat
 }
 
 /*
+ * Converts OpenSky State category to Generic ADSB category
+ */
+let map_generic_category = (category: number|undefined): Category => {
+    switch (category) {
+      case 0:
+        return null;
+      case 1:
+        return "No ADS-B Emitter Category Information";
+      case 2:
+        return "Light";
+      case 3:
+        return "Small";
+      case 4:
+        return "Large";
+      case 5:
+        return "High Vortex Large";
+      case 6:
+        return "Heavy";
+      case 7:
+        return "High Performance";
+      case 8:
+        return "Rotorcraft"
+      case 9:
+        return "Glider, sailplane";
+      case 10:
+        return "Lighter-than-air"
+      case 11:
+        return "Parachutist / Skydiver";
+      case 12:
+        return "Ultralight, hang-glider, paraglider";
+      case 13:
+        return  "Reserved";
+      case 14:
+        return "Unmanned Aerial Vehicle";
+      case 15:
+        return "Space, Trans-atmospheric vehicle";
+      case 16:
+        return "Surface Vehicle - Emergency Vehicle";
+      case 17:
+        return "Surface Vehicle - Service Vehicle";
+      case 18:
+        return "Point Obstacle";
+      case 19:
+        return "Cluster Obstacle";
+      case 20:
+        return "Line Obstacle";
+      default:
+        return null
+    }
+}
+
+/*
  * Converts OpenSky State to Generic ADSB State
  */
 let map_generic_state = (state: OpenSky_StateVector): Aircraft_State => {
@@ -135,8 +189,8 @@ let map_generic_state = (state: OpenSky_StateVector): Aircraft_State => {
         "callsign":state.callsign, // Callsign
         "squawk":state.squawk, // Squawk
         "emergency":null, // Emergency
-        "spi": state.spi, // SPI (special purpose indicator)
-        "time":state.time_position, // Time position was sent
+        "spi": Number(state.spi), // SPI (special purpose indicator)
+        "time":state.time_position == null ? null : state.time_position * 1000, // Time position was sent
         "lon":state.longitude, // Longitude
         "lat":state.latitude, // Latitude
         "alt":state.geo_altitude ?? state.baro_altitude, // Altitude (geometric preferred but may be baro)
@@ -145,7 +199,7 @@ let map_generic_state = (state: OpenSky_StateVector): Aircraft_State => {
         "velocity":state.velocity, // Velocity in MPH (ground > true > indicator)
         "vertical_rate":state.vertical_rate, // Vertical rate in FPS
         "on_ground":state.on_ground, // On ground or not
-        "category":state.category // Aircraft type
+        "category":map_generic_category(state.category) // Aircraft type
     }
 }
 
@@ -154,6 +208,19 @@ let map_generic_state = (state: OpenSky_StateVector): Aircraft_State => {
  * Fetch OpenSky auth token using built-in HTTPS.
  */
 let fetch_opensky_auth_token =  async (): Promise<boolean> => {
+  if(config.adsb.opensky) {
+    if(!config.adsb.opensky.client_id || !config.adsb.opensky.client_secret) {
+      logger.error("opensky.fetch_opensky_auth_token: opensky does not have client ID or secret in the config file.")
+      new Error("opensky.fetch_opensky_auth_token: opensky does not have client ID or secret in the config file.")
+      return false
+    }
+  }
+  else {
+    logger.error("opensky.fetch_opensky_auth_token: opensky did not load in the config")
+    new Error("opensky.fetch_opensky_auth_token: opensky did not load in the config")
+    return false
+  }
+
   const postData = querystring.stringify({
     grant_type: "client_credentials",
     client_id: config.adsb.opensky.client_id,
@@ -263,8 +330,12 @@ export const get_opensky_data = async ():Promise<ADSB_State> => {
         // Convert to structured objects
         const mapped = response.states.map(map_state_vector);
 
-        state.time = response.time;
+        state.time = response.time * 1000;
         state.states = mapped.map(map_generic_state);
+
+        // Save to DB
+        await adsb_raw_put({"time":state.time, "source":state.source, "states": response.states});
+        await adsb_put(state);
     } catch (err) {
         logger.error("get_opensky_data: Error fetching data:", err);
     }

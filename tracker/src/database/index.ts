@@ -43,16 +43,14 @@ export const connect = () => {
 }
 
 // Disconnect from the DB
-export const disconnect = () => {
-    client.close()
-    .then((value) => {
-        logger.info("database.disconnect: Mongo DB disconnected")
-        return true
-    })
-    .catch((error) => {
-        logger.error("database.disconnect: Mongo DB could not disconnect " + error)
-        return error;
-    })
+export const disconnect = async () => {
+    try {
+        await client.close();
+        logger.info("database.disconnect: Mongo DB disconnected");
+    }
+    catch(err) {
+        logger.error("database.disconnect: Mongo DB could not disconnect " + err)
+    }
 }
 
 

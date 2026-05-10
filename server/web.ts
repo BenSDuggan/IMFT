@@ -2,7 +2,7 @@
 import bodyParser from 'body-parser'
 import express, { Application, Request, Response } from 'express';
 
-import { logger } from './common/logger'
+import { logger } from '../tracker/src/common/logger'
 
 import * as organizationAPI from './routes/organization_api'
 import * as locationAPI from './routes/location_api'
